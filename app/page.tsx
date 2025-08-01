@@ -17,7 +17,7 @@ export default function Home() {
           SPACEWOLF JOURNEY
         </h1>
         <p className="text-lg sm:text-xl text-center sm:text-left">
-          Hi, I'm SpaceWolf, a French human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I'm learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
+          Hi, I&apos;m SpaceWolf, a French human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I&apos;m learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
         </p>
         <Image
           className=""
