@@ -4,12 +4,28 @@ import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+type EthereumRequestArgs = {
+  method: string;
+  params?: unknown[];
+};
+
+type EthereumProvider = {
+  isMetaMask?: boolean;
+  request: <T = unknown>(args: EthereumRequestArgs) => Promise<T>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+};
+
+type WindowWithEthereum = Window & { ethereum?: EthereumProvider };
+
 export default function Home() {
   const router = useRouter();
   const [account, setAccount] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [hasMetaMask, setHasMetaMask] = useState<boolean>(false);
+  const [balanceEth, setBalanceEth] = useState<string | null>(null);
+  const [chainId, setChainId] = useState<string | null>(null);
 
   function redirect() {
     router.push("https://github.com/pierreuntas");
@@ -21,41 +37,165 @@ export default function Home() {
         setError('MetaMask not detected. Please install the extension.');
         return;
       }
-      const ethereum = (window as any).ethereum;
-      const accounts: string[] = await ethereum.request({ method: 'eth_requestAccounts' });
+      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
+      const accounts = await ethereum.request<string[]>({ method: 'eth_requestAccounts' });
       setAccount(accounts?.[0] ?? null);
       setError(null);
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to connect wallet');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to connect wallet';
+      setError(message);
     }
   }
 
   useEffect(() => {
     setMounted(true);
-    const ethereum = (window as any)?.ethereum;
+    const ethereum = (window as WindowWithEthereum)?.ethereum;
     const detected = !!ethereum?.isMetaMask;
     setHasMetaMask(detected);
 
     if (!detected) return;
 
-    const handleAccountsChanged = (accounts: string[]) => {
-      setAccount(accounts?.[0] ?? null);
+    const fetchBalanceFor = async (address: string | null) => {
+      if (!address) {
+        setBalanceEth(null);
+        return;
+      }
+      try {
+        const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [address, 'latest'] });
+        setBalanceEth(formatWeiToEth4dp(weiHex));
+      } catch (e: unknown) {
+        setBalanceEth(null);
+      }
+    };
+
+    const handleAccountsChanged = (...args: unknown[]) => {
+      const accounts = (Array.isArray(args) ? (args[0] as string[] | undefined) : undefined) ?? [];
+      const next = accounts?.[0] ?? null;
+      setAccount(next);
+      fetchBalanceFor(next);
+    };
+    const handleChainChanged = (...args: unknown[]) => {
+      const newChainId = (Array.isArray(args) ? (args[0] as string | undefined) : undefined) ?? null;
+      if (newChainId) setChainId(newChainId);
+      ethereum.request<string[]>({ method: 'eth_accounts' })
+        .then((accounts) => {
+          const next = accounts?.[0] ?? null;
+          setAccount(next);
+          fetchBalanceFor(next);
+        })
+        .catch(() => {});
+    };
+    const handleConnect = () => {
+      // On provider connect, refresh accounts and balance
+      ethereum.request<string[]>({ method: 'eth_accounts' })
+        .then((accounts) => {
+          const next = accounts?.[0] ?? null;
+          setAccount(next);
+          fetchBalanceFor(next);
+        })
+        .catch(() => {});
+    };
+    const handleDisconnect = () => {
+      setAccount(null);
+      setBalanceEth(null);
     };
 
     // Get already authorized accounts on load
     ethereum
-      .request({ method: 'eth_accounts' })
-      .then((accounts: string[]) => setAccount(accounts?.[0] ?? null))
+      .request<string[]>({ method: 'eth_accounts' })
+      .then((accounts) => {
+        const next = accounts?.[0] ?? null;
+        setAccount(next);
+        fetchBalanceFor(next);
+      })
+      .catch(() => {});
+    ethereum
+      .request<string>({ method: 'eth_chainId' })
+      .then((id) => setChainId(id))
       .catch(() => {});
 
     ethereum.on?.('accountsChanged', handleAccountsChanged);
+    ethereum.on?.('chainChanged', handleChainChanged);
+    ethereum.on?.('connect', handleConnect);
+    ethereum.on?.('disconnect', handleDisconnect);
     return () => {
       ethereum.removeListener?.('accountsChanged', handleAccountsChanged);
+      ethereum.removeListener?.('chainChanged', handleChainChanged);
+      ethereum.removeListener?.('connect', handleConnect);
+      ethereum.removeListener?.('disconnect', handleDisconnect);
     };
   }, []);
 
+  // Format wei hex string to ETH with 4 decimals without floating precision loss
+  function formatWeiToEth4dp(weiHex: string): string {
+    try {
+      const wei = BigInt(weiHex);
+      const WEI_IN_ETH = BigInt("1000000000000000000"); // 1e18
+      const ether = wei / WEI_IN_ETH;
+      const remainder = wei % WEI_IN_ETH;
+      const frac = remainder.toString().padStart(18, '0').slice(0, 4);
+      const trimmedFrac = frac.replace(/0+$/, '');
+      return trimmedFrac ? `${ether.toString()}.${trimmedFrac}` : ether.toString();
+    } catch {
+      return '0';
+    }
+  }
+
+  // Backup: poll balance periodically and on deps change
+  useEffect(() => {
+    if (!mounted || !hasMetaMask || !account) {
+      setBalanceEth(null);
+      return;
+    }
+    const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
+    let cancelled = false;
+
+    const fetchBalance = async () => {
+      try {
+        const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [account, 'latest'] });
+        if (!cancelled) setBalanceEth(formatWeiToEth4dp(weiHex));
+      } catch (e: unknown) {
+        if (!cancelled) setBalanceEth(null);
+      }
+    };
+
+    fetchBalance();
+    const intervalId = setInterval(fetchBalance, 15000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [mounted, hasMetaMask, account, chainId]);
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+      {mounted && (
+        <div className="fixed top-4 right-4 z-50">
+          <div
+            onClick={!account ? connectWallet : undefined}
+            role={!account ? 'button' : undefined}
+            className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 backdrop-blur px-3 py-2 shadow-sm text-xs sm:text-sm ${!account ? 'cursor-pointer hover:bg-white' : 'cursor-default'}`}
+            aria-label={!account ? 'Connect wallet' : 'Wallet balance'}
+          >
+            {/* ETH logo */}
+            <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" className="opacity-90">
+              <path fill="#343434" d="M127.9 0L125.2 9.3v274.6l2.7 2.7 127.9-75.5z"/>
+              <path fill="#8C8C8C" d="M127.9 0L0 211.1l127.9 75.5V154.2z"/>
+              <path fill="#3C3C3B" d="M127.9 312.6l-1.5 1.8v100.6l1.5 2.9 128-180.3z"/>
+              <path fill="#8C8C8C" d="M127.9 418v-105.4L0 237.6z"/>
+              <path fill="#141414" d="M127.9 286.6l127.9-75.5-127.9-57.8z"/>
+              <path fill="#393939" d="M0 211.1l127.9 75.5v-133.3z"/>
+            </svg>
+            <div className="flex items-center gap-2">
+              {account ? (
+                <span className="text-gray-900 font-semibold">Ξ {balanceEth ?? '...'}</span>
+              ) : (
+                <span className="text-gray-500">Connect wallet</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-center sm:text-left">
           SPACEWOLF JOURNEY
@@ -71,7 +211,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <button
                 onClick={connectWallet}
-                className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition"
+                className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
               >
                 {account ? `Connected: ${account.slice(0, 6)}...${account.slice(-4)}` : 'Connect MetaMask'}
               </button>
