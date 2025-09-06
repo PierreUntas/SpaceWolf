@@ -213,7 +213,7 @@ export default function Home() {
     }
     
     if (securityConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your security understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your security understanding');
       return;
     }
     
@@ -243,7 +243,7 @@ export default function Home() {
     }
     
     if (defiConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your DeFi understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your DeFi understanding');
       return;
     }
     
@@ -275,7 +275,7 @@ export default function Home() {
     }
     
     if (l2Confirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your L2 understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your L2 understanding');
       return;
     }
     
@@ -307,7 +307,7 @@ export default function Home() {
     }
     
     if (nftMarketplaceConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your NFT marketplace understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your NFT marketplace understanding');
       return;
     }
     
@@ -339,7 +339,7 @@ export default function Home() {
     }
     
     if (daoGovernanceConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your DAO governance understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your DAO governance understanding');
       return;
     }
     
@@ -371,7 +371,7 @@ export default function Home() {
     }
     
     if (web3SocialConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your Web3 social understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your Web3 social understanding');
       return;
     }
     
@@ -403,7 +403,7 @@ export default function Home() {
     }
     
     if (web3DevConfirmation.toLowerCase() !== 'i understand') {
-      setError('Please type "I understand" exactly to confirm your Web3 development understanding');
+      setError('Please type &quot;I understand&quot; exactly to confirm your Web3 development understanding');
       return;
     }
     
@@ -933,32 +933,6 @@ export default function Home() {
       // Common ERC721 contract on Sepolia testnet (OpenZeppelin standard)
       // This is a commonly deployed contract for testing purposes
       const contractAddress = '0x1234567890123456789012345678901234567890'; // Replace with actual deployed contract
-      const contractABI = [
-        {
-          "inputs": [
-            {"internalType": "address", "name": "to", "type": "address"},
-            {"internalType": "string", "name": "uri", "type": "string"}
-          ],
-          "name": "safeMint",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "name",
-          "outputs": [{"internalType": "string", "name": "", "type": "string"}],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "symbol",
-          "outputs": [{"internalType": "string", "name": "", "type": "string"}],
-          "stateMutability": "view",
-          "type": "function"
-        }
-      ];
 
       // Create IPFS URI for the metadata
       const ipfsUri = `ipfs://${metadataIpfsCid}`;
@@ -1648,7 +1622,7 @@ export default function Home() {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-2">
-                        A local IPFS node is required to upload metadata. Click "Start IPFS Node" to initialize.
+                        A local IPFS node is required to upload metadata. Click &quot;Start IPFS Node&quot; to initialize.
                       </p>
                       <button
                         onClick={startIpfsNode}
