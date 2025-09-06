@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { createHelia } from 'helia';
+import { useEffect, useState, useCallback } from 'react';
+import { createHelia, Helia } from 'helia';
 import { unixfs } from '@helia/unixfs';
 import { ethers } from 'ethers';
 
@@ -39,7 +39,7 @@ export default function Home() {
   const [isUploadingToIpfs, setIsUploadingToIpfs] = useState<boolean>(false);
   const [isSimulatingTransaction, setIsSimulatingTransaction] = useState<boolean>(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
-  const [helia, setHelia] = useState<any>(null);
+  const [helia, setHelia] = useState<Helia | null>(null);
   const [isIpfsNodeRunning, setIsIpfsNodeRunning] = useState<boolean>(false);
   
   // Profile picture states
@@ -52,7 +52,7 @@ export default function Home() {
   const [isSimulatingTransfer, setIsSimulatingTransfer] = useState<boolean>(false);
   const [transferTransactionHash, setTransferTransactionHash] = useState<string | null>(null);
   const [isRealTransfer, setIsRealTransfer] = useState<boolean>(false);
-  const [transactionReceipt, setTransactionReceipt] = useState<any>(null);
+  const [transactionReceipt, setTransactionReceipt] = useState<ethers.TransactionReceipt | null>(null);
   const [hasUserSentEth, setHasUserSentEth] = useState<boolean>(false);
   
   // Step 6 Web3 username states
@@ -77,7 +77,6 @@ export default function Home() {
   }
 
   // Helper functions to check step completion
-  const isStep1Completed = () => !!account;
   const isStep2Completed = () => chainId === '0xaa36a7';
   const isStep3Completed = () => {
     if (!balanceEth) return false;
@@ -97,13 +96,10 @@ export default function Home() {
   const isStep6Completed = () => !!usernameTransactionHash && !!registeredUsername;
 
   // Check if user has sent ETH to any address
-  const checkUserTransactionHistory = async () => {
+  const checkUserTransactionHistory = useCallback(async () => {
     if (!account || !chainId) return;
     
     try {
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-      const provider = new ethers.BrowserProvider(ethereum);
-      
       // Get recent transactions for the user's address
       // Using Sepolia Etherscan API to check transaction history
       const response = await fetch(`https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${account}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=YourApiKeyToken`);
@@ -113,7 +109,7 @@ export default function Home() {
         
         if (data.status === '1' && data.result) {
           // Check if any transaction is an outgoing ETH transfer
-          const hasOutgoingTransfer = data.result.some((tx: any) => {
+          const hasOutgoingTransfer = data.result.some((tx: { from: string; to: string; value: string }) => {
             return tx.from.toLowerCase() === account.toLowerCase() && 
                    tx.to.toLowerCase() !== account.toLowerCase() && 
                    parseFloat(ethers.formatEther(tx.value)) > 0;
@@ -138,12 +134,12 @@ export default function Home() {
             setHasUserSentEth(true);
             localStorage.setItem('spacewolf-has-sent-eth', 'true');
           }
-        } catch (err) {
+        } catch {
           console.log('Could not parse saved transfer data');
         }
       }
     }
-  };
+  }, [account, chainId]);
 
   async function connectWallet() {
     try {
@@ -373,18 +369,23 @@ export default function Home() {
       
       console.log('ENS-like domain registered:', usernameData);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to register ENS-like domain:', err);
       
       // Handle specific error cases
-      if (err.code === 'INSUFFICIENT_FUNDS') {
-        setError('Insufficient funds for domain registration. Please ensure you have enough ETH for gas fees and the 0.000001 ETH burn amount.');
-      } else if (err.code === 'USER_REJECTED') {
-        setError('Domain registration was rejected by user.');
-      } else if (err.message?.includes('gas')) {
-        setError('Gas estimation failed. Please try again.');
+      if (err && typeof err === 'object' && 'code' in err) {
+        const errorCode = (err as { code: string }).code;
+        if (errorCode === 'INSUFFICIENT_FUNDS') {
+          setError('Insufficient funds for domain registration. Please ensure you have enough ETH for gas fees and the 0.000001 ETH burn amount.');
+        } else if (errorCode === 'USER_REJECTED') {
+          setError('Domain registration was rejected by user.');
+        } else if (err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string' && (err as { message: string }).message.includes('gas')) {
+          setError('Gas estimation failed. Please try again.');
+        } else {
+          setError(`Domain registration failed: ${err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : 'Unknown error'}`);
+        }
       } else {
-        setError(`Domain registration failed: ${err.message || 'Unknown error'}`);
+        setError(`Domain registration failed: ${err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : 'Unknown error'}`);
       }
     } finally {
       setIsRegisteringUsername(false);
@@ -484,18 +485,23 @@ export default function Home() {
       
       console.log('Real ETH transfer completed:', transferData);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to send ETH transfer:', err);
       
       // Handle specific error cases
-      if (err.code === 'INSUFFICIENT_FUNDS') {
-        setError('Insufficient funds for gas fees. Please ensure you have enough ETH.');
-      } else if (err.code === 'USER_REJECTED') {
-        setError('Transaction was rejected by user.');
-      } else if (err.message?.includes('gas')) {
-        setError('Gas estimation failed. Please try again.');
+      if (err && typeof err === 'object' && 'code' in err) {
+        const errorCode = (err as { code: string }).code;
+        if (errorCode === 'INSUFFICIENT_FUNDS') {
+          setError('Insufficient funds for gas fees. Please ensure you have enough ETH.');
+        } else if (errorCode === 'USER_REJECTED') {
+          setError('Transaction was rejected by user.');
+        } else if (err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string' && (err as { message: string }).message.includes('gas')) {
+          setError('Gas estimation failed. Please try again.');
+        } else {
+          setError(`Transfer failed: ${err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : 'Unknown error'}`);
+        }
       } else {
-        setError(`Transfer failed: ${err.message || 'Unknown error'}`);
+        setError(`Transfer failed: ${err && typeof err === 'object' && 'message' in err ? (err as { message: string }).message : 'Unknown error'}`);
       }
     } finally {
       setIsSimulatingTransfer(false);
@@ -573,7 +579,7 @@ export default function Home() {
       console.log('Metadata uploaded to IPFS:', metadataCidString);
       console.log('Complete metadata:', metadata);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to upload to IPFS:', err);
       setError('Failed to upload image and metadata to IPFS');
     } finally {
@@ -592,37 +598,9 @@ export default function Home() {
     setError(null);
 
     try {
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-      
       // Common ERC721 contract on Sepolia testnet (OpenZeppelin standard)
       // This is a commonly deployed contract for testing purposes
       const contractAddress = '0x1234567890123456789012345678901234567890'; // Replace with actual deployed contract
-      const contractABI = [
-        {
-          "inputs": [
-            {"internalType": "address", "name": "to", "type": "address"},
-            {"internalType": "string", "name": "uri", "type": "string"}
-          ],
-          "name": "safeMint",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "name",
-          "outputs": [{"internalType": "string", "name": "", "type": "string"}],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "symbol",
-          "outputs": [{"internalType": "string", "name": "", "type": "string"}],
-          "stateMutability": "view",
-          "type": "function"
-        }
-      ];
 
       // Create IPFS URI for the metadata
       const ipfsUri = `ipfs://${metadataIpfsCid}`;
@@ -653,7 +631,7 @@ export default function Home() {
       console.log('Simulated transaction:', transactionData);
       console.log('Metadata URI:', ipfsUri);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to simulate transaction:', err);
       setError('Failed to simulate minting transaction');
     } finally {
@@ -711,7 +689,7 @@ export default function Home() {
     if (account && chainId === '0xaa36a7') {
       checkUserTransactionHistory();
     }
-  }, [account, chainId]);
+  }, [account, chainId, checkUserTransactionHistory]);
 
   useEffect(() => {
     setMounted(true);
@@ -729,7 +707,7 @@ export default function Home() {
       try {
         const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [address, 'latest'] });
         setBalanceEth(formatWeiToEth4dp(weiHex));
-      } catch (e: unknown) {
+      } catch {
         setBalanceEth(null);
       }
     };
@@ -820,7 +798,7 @@ export default function Home() {
       try {
         const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [account, 'latest'] });
         if (!cancelled) setBalanceEth(formatWeiToEth4dp(weiHex));
-      } catch (e: unknown) {
+      } catch {
         if (!cancelled) setBalanceEth(null);
       }
     };
@@ -856,9 +834,11 @@ export default function Home() {
               {account ? (
                 <>
                   {profilePicture && (
-                    <img
+                    <Image
                       src={profilePicture}
                       alt="Profile"
+                      width={24}
+                      height={24}
                       className="w-6 h-6 rounded-full border border-gray-300 object-cover"
                     />
                   )}
@@ -964,7 +944,7 @@ export default function Home() {
               </p>
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 5</span>
-                <span className="align-middle">Send ETH to a friend's address.</span>
+                <span className="align-middle">Send ETH to a friend&apos;s address.</span>
                 {isStep5Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-sent">
                     ✓
@@ -1016,7 +996,7 @@ export default function Home() {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-2">
-                        A local IPFS node is required to upload metadata. Click "Start IPFS Node" to initialize.
+                        A local IPFS node is required to upload metadata. Click &quot;Start IPFS Node&quot; to initialize.
                       </p>
                       <button
                         onClick={startIpfsNode}
@@ -1046,9 +1026,11 @@ export default function Home() {
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
                           <div className="border border-gray-200 rounded-md p-2 bg-white">
-                            <img
+                            <Image
                               src={imagePreview}
                               alt="NFT Preview"
+                              width={400}
+                              height={192}
                               className="max-w-full max-h-48 mx-auto rounded-md"
                             />
                             {selectedImage && (
@@ -1062,9 +1044,11 @@ export default function Home() {
                           <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                             <div className="flex items-center gap-3">
                               <div className="flex items-center gap-2">
-                                <img
+                                <Image
                                   src={imagePreview}
                                   alt="Profile Preview"
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded-full border border-gray-300 object-cover"
                                 />
                                 <span className="text-sm font-medium text-blue-800">
@@ -1191,9 +1175,11 @@ export default function Home() {
                     {isUsingNftAsProfile && (
                       <div className="p-3 bg-white border border-green-200 rounded-md">
                         <div className="flex items-center gap-3">
-                          <img
+                          <Image
                             src={profilePicture || ''}
                             alt="Profile Picture"
+                            width={40}
+                            height={40}
                             className="w-10 h-10 rounded-full border border-gray-300 object-cover"
                           />
                           <div>
@@ -1228,7 +1214,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-yellow-800">Real Transaction Warning</p>
                         <p className="text-xs text-yellow-700 mt-1">
-                          This will send real ETH on Sepolia testnet. Make sure you're on the correct network and have sufficient balance for gas fees.
+                          This will send real ETH on Sepolia testnet. Make sure you&apos;re on the correct network and have sufficient balance for gas fees.
                         </p>
                       </div>
                     </div>
@@ -1237,7 +1223,7 @@ export default function Home() {
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="friend-address" className="block text-sm font-medium text-gray-700 mb-2">
-                        Friend's Ethereum Address
+                        Friend&apos;s Ethereum Address
                       </label>
                       <input
                         type="text"
@@ -1248,7 +1234,7 @@ export default function Home() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Enter your friend's Ethereum wallet address
+                        Enter your friend&apos;s Ethereum wallet address
                       </p>
                     </div>
                     
@@ -1335,7 +1321,7 @@ export default function Home() {
                     </div>
                     
                     <p className="text-xs text-orange-600 mt-2">
-                      Great! You've completed Step 5. Now move on to Step 6 to create your Web3 username and complete the full journey!
+                      Great! You&apos;ve completed Step 5. Now move on to Step 6 to create your Web3 username and complete the full journey!
                     </p>
                   </div>
                 </div>
@@ -1467,8 +1453,8 @@ export default function Home() {
                     </div>
                     
                     <p className="text-xs text-purple-600 mt-2">
-                      🎊 Congratulations! You've completed the FULL SpaceWolf Web3 journey! 
-                      You've connected a wallet, switched networks, gotten test ETH, minted an NFT, sent ETH to a friend, and created your own Web3 identity!
+                      🎊 Congratulations! You&apos;ve completed the FULL SpaceWolf Web3 journey! 
+                      You&apos;ve connected a wallet, switched networks, gotten test ETH, minted an NFT, sent ETH to a friend, and created your own Web3 identity!
                     </p>
                   </div>
                 </div>
