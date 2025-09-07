@@ -134,6 +134,26 @@ export default function Home() {
   const [hasBuiltDApp, setHasBuiltDApp] = useState<boolean>(false);
   const [web3DevConfirmation, setWeb3DevConfirmation] = useState<string>('');
   const [web3DevNotes, setWeb3DevNotes] = useState<string>('');
+  
+  // Step 15 Advanced Trading & Analytics states
+  const [hasCompletedTradingAnalytics, setHasCompletedTradingAnalytics] = useState<boolean>(false);
+  const [selectedTradingPlatform, setSelectedTradingPlatform] = useState<string>('');
+  const [tradingAnalyticsActivity, setTradingAnalyticsActivity] = useState<string>('');
+  const [hasExecutedAdvancedTrade, setHasExecutedAdvancedTrade] = useState<boolean>(false);
+  const [hasUsedAnalyticsTools, setHasUsedAnalyticsTools] = useState<boolean>(false);
+  const [hasOptimizedYield, setHasOptimizedYield] = useState<boolean>(false);
+  const [tradingAnalyticsConfirmation, setTradingAnalyticsConfirmation] = useState<string>('');
+  const [tradingAnalyticsNotes, setTradingAnalyticsNotes] = useState<string>('');
+  
+  // Step 16 Web3 Gaming & Metaverse states
+  const [hasCompletedGamingMetaverse, setHasCompletedGamingMetaverse] = useState<boolean>(false);
+  const [selectedGamingPlatform, setSelectedGamingPlatform] = useState<string>('');
+  const [gamingMetaverseActivity, setGamingMetaverseActivity] = useState<string>('');
+  const [hasPlayedToEarn, setHasPlayedToEarn] = useState<boolean>(false);
+  const [hasOwnedMetaverseLand, setHasOwnedMetaverseLand] = useState<boolean>(false);
+  const [hasParticipatedInVirtualWorld, setHasParticipatedInVirtualWorld] = useState<boolean>(false);
+  const [gamingMetaverseConfirmation, setGamingMetaverseConfirmation] = useState<string>('');
+  const [gamingMetaverseNotes, setGamingMetaverseNotes] = useState<string>('');
 
   function redirect() {
     router.push("https://github.com/pierreuntas");
@@ -176,6 +196,8 @@ export default function Home() {
   const isStep12Completed = () => hasCompletedDAOGovernance;
   const isStep13Completed = () => hasCompletedWeb3Social;
   const isStep14Completed = () => hasCompletedWeb3Development;
+  const isStep15Completed = () => hasCompletedTradingAnalytics;
+  const isStep16Completed = () => hasCompletedGamingMetaverse;
 
   // Confirm ETH purchase completion
   const confirmEthPurchase = () => {
@@ -424,6 +446,70 @@ export default function Home() {
     localStorage.setItem('spacewolf-web3-development-data', JSON.stringify(web3DevData));
     
     console.log('Web3 development confirmed:', web3DevData);
+    setError(null);
+  };
+
+  // Confirm Advanced Trading & Analytics completion
+  const confirmTradingAnalytics = () => {
+    if (!selectedTradingPlatform.trim() || !tradingAnalyticsActivity.trim() || !tradingAnalyticsConfirmation.trim()) {
+      setError('Please fill in all required fields to confirm your trading analytics understanding');
+      return;
+    }
+    
+    if (tradingAnalyticsConfirmation.toLowerCase() !== 'i understand') {
+      setError('Please type &quot;I understand&quot; exactly to confirm your trading analytics understanding');
+      return;
+    }
+    
+    const tradingAnalyticsData = {
+      platform: selectedTradingPlatform,
+      activity: tradingAnalyticsActivity,
+      executedAdvancedTrade: hasExecutedAdvancedTrade,
+      usedAnalyticsTools: hasUsedAnalyticsTools,
+      optimizedYield: hasOptimizedYield,
+      notes: tradingAnalyticsNotes,
+      timestamp: new Date().toISOString(),
+      confirmed: true,
+      step: 15
+    };
+    
+    setHasCompletedTradingAnalytics(true);
+    localStorage.setItem('spacewolf-trading-analytics-completed', 'true');
+    localStorage.setItem('spacewolf-trading-analytics-data', JSON.stringify(tradingAnalyticsData));
+    
+    console.log('Trading analytics confirmed:', tradingAnalyticsData);
+    setError(null);
+  };
+
+  // Confirm Web3 Gaming & Metaverse completion
+  const confirmGamingMetaverse = () => {
+    if (!selectedGamingPlatform.trim() || !gamingMetaverseActivity.trim() || !gamingMetaverseConfirmation.trim()) {
+      setError('Please fill in all required fields to confirm your gaming metaverse understanding');
+      return;
+    }
+    
+    if (gamingMetaverseConfirmation.toLowerCase() !== 'i understand') {
+      setError('Please type &quot;I understand&quot; exactly to confirm your gaming metaverse understanding');
+      return;
+    }
+    
+    const gamingMetaverseData = {
+      platform: selectedGamingPlatform,
+      activity: gamingMetaverseActivity,
+      playedToEarn: hasPlayedToEarn,
+      ownedMetaverseLand: hasOwnedMetaverseLand,
+      participatedInVirtualWorld: hasParticipatedInVirtualWorld,
+      notes: gamingMetaverseNotes,
+      timestamp: new Date().toISOString(),
+      confirmed: true,
+      step: 16
+    };
+    
+    setHasCompletedGamingMetaverse(true);
+    localStorage.setItem('spacewolf-gaming-metaverse-completed', 'true');
+    localStorage.setItem('spacewolf-gaming-metaverse-data', JSON.stringify(gamingMetaverseData));
+    
+    console.log('Gaming metaverse confirmed:', gamingMetaverseData);
     setError(null);
   };
 
@@ -999,6 +1085,10 @@ export default function Home() {
     const savedWeb3SocialData = localStorage.getItem('spacewolf-web3-social-data');
     const savedWeb3DevelopmentCompleted = localStorage.getItem('spacewolf-web3-development-completed');
     const savedWeb3DevelopmentData = localStorage.getItem('spacewolf-web3-development-data');
+    const savedTradingAnalyticsCompleted = localStorage.getItem('spacewolf-trading-analytics-completed');
+    const savedTradingAnalyticsData = localStorage.getItem('spacewolf-trading-analytics-data');
+    const savedGamingMetaverseCompleted = localStorage.getItem('spacewolf-gaming-metaverse-completed');
+    const savedGamingMetaverseData = localStorage.getItem('spacewolf-gaming-metaverse-data');
     
     if (savedImageCid) setImageIpfsCid(savedImageCid);
     if (savedMetadataCid) setMetadataIpfsCid(savedMetadataCid);
@@ -1016,6 +1106,8 @@ export default function Home() {
     if (savedDAOGovernanceCompleted === 'true') setHasCompletedDAOGovernance(true);
     if (savedWeb3SocialCompleted === 'true') setHasCompletedWeb3Social(true);
     if (savedWeb3DevelopmentCompleted === 'true') setHasCompletedWeb3Development(true);
+    if (savedTradingAnalyticsCompleted === 'true') setHasCompletedTradingAnalytics(true);
+    if (savedGamingMetaverseCompleted === 'true') setHasCompletedGamingMetaverse(true);
     
     // Load transfer data to determine if it was a real transfer
     if (savedTransferData) {
@@ -1236,6 +1328,60 @@ export default function Home() {
         }
       } catch (err) {
         console.error('Failed to parse Web3 development data:', err);
+      }
+    }
+    
+    // Load Trading Analytics data
+    if (savedTradingAnalyticsData) {
+      try {
+        const tradingAnalyticsData = JSON.parse(savedTradingAnalyticsData);
+        if (tradingAnalyticsData.platform) {
+          setSelectedTradingPlatform(tradingAnalyticsData.platform);
+        }
+        if (tradingAnalyticsData.activity) {
+          setTradingAnalyticsActivity(tradingAnalyticsData.activity);
+        }
+        if (tradingAnalyticsData.executedAdvancedTrade) {
+          setHasExecutedAdvancedTrade(tradingAnalyticsData.executedAdvancedTrade);
+        }
+        if (tradingAnalyticsData.usedAnalyticsTools) {
+          setHasUsedAnalyticsTools(tradingAnalyticsData.usedAnalyticsTools);
+        }
+        if (tradingAnalyticsData.optimizedYield) {
+          setHasOptimizedYield(tradingAnalyticsData.optimizedYield);
+        }
+        if (tradingAnalyticsData.notes) {
+          setTradingAnalyticsNotes(tradingAnalyticsData.notes);
+        }
+      } catch (err) {
+        console.error('Failed to parse trading analytics data:', err);
+      }
+    }
+    
+    // Load Gaming Metaverse data
+    if (savedGamingMetaverseData) {
+      try {
+        const gamingMetaverseData = JSON.parse(savedGamingMetaverseData);
+        if (gamingMetaverseData.platform) {
+          setSelectedGamingPlatform(gamingMetaverseData.platform);
+        }
+        if (gamingMetaverseData.activity) {
+          setGamingMetaverseActivity(gamingMetaverseData.activity);
+        }
+        if (gamingMetaverseData.playedToEarn) {
+          setHasPlayedToEarn(gamingMetaverseData.playedToEarn);
+        }
+        if (gamingMetaverseData.ownedMetaverseLand) {
+          setHasOwnedMetaverseLand(gamingMetaverseData.ownedMetaverseLand);
+        }
+        if (gamingMetaverseData.participatedInVirtualWorld) {
+          setHasParticipatedInVirtualWorld(gamingMetaverseData.participatedInVirtualWorld);
+        }
+        if (gamingMetaverseData.notes) {
+          setGamingMetaverseNotes(gamingMetaverseData.notes);
+        }
+      } catch (err) {
+        console.error('Failed to parse gaming metaverse data:', err);
       }
     }
     
@@ -1582,6 +1728,24 @@ export default function Home() {
                 <span className="align-middle">Build Web3 dApps: write smart contracts and create decentralized applications.</span>
                 {isStep14Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-development">
+                    ✓
+                  </span>
+                )}
+              </p>
+              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 15</span>
+                <span className="align-middle">Master advanced trading: DEX strategies, analytics, and yield optimization.</span>
+                {isStep15Completed() && (
+                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="trading-analytics">
+                    ✓
+                  </span>
+                )}
+              </p>
+              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 16</span>
+                <span className="align-middle">Master Web3 gaming: play-to-earn, metaverse land, and virtual economies.</span>
+                {isStep16Completed() && (
+                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="gaming-metaverse">
                     ✓
                   </span>
                 )}
@@ -4078,7 +4242,653 @@ export default function Home() {
                     </div>
                     
                     <p className="text-xs text-orange-600 mt-2">
-                      💻🚀🎊 You are now an ULTIMATE Web3 builder! You can create, deploy, and build the future of decentralized applications! 🎊🚀💻
+                      💻🚀 Web3 development mastery complete! Now let&apos;s become professional traders and maximize DeFi returns! 📊💰
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Step 15 Advanced Trading & Analytics Section */}
+              {isStep14Completed() && !isStep15Completed() && (
+                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 15: Advanced Trading & Analytics</h3>
+                  
+                  {/* Trading Analytics Introduction */}
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md mb-4">
+                    <div className="flex items-start gap-2">
+                      <div className="text-emerald-600 mt-0.5">📊</div>
+                      <div>
+                        <p className="text-sm font-medium text-emerald-800">Become a Professional Trader</p>
+                        <p className="text-xs text-emerald-700 mt-1">
+                          You&apos;ve mastered Web3 development, now become a professional trader! 
+                          Learn advanced DEX strategies, analytics tools, and yield optimization to maximize your DeFi returns.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="trading-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                        Choose Trading Platform
+                      </label>
+                      <select
+                        id="trading-platform-select"
+                        value={selectedTradingPlatform}
+                        onChange={(e) => setSelectedTradingPlatform(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      >
+                        <option value="">Select a trading platform...</option>
+                        <option value="uniswap">Uniswap - Leading DEX</option>
+                        <option value="sushiswap">SushiSwap - Multi-chain DEX</option>
+                        <option value="curve">Curve - Stablecoin DEX</option>
+                        <option value="balancer">Balancer - Weighted Pools</option>
+                        <option value="1inch">1inch - DEX Aggregator</option>
+                        <option value="paraswap">ParaSwap - Multi-DEX</option>
+                        <option value="other">Other Trading Platform</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Choose a DEX platform to explore advanced trading
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="trading-analytics-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                        Trading Analytics Activity
+                      </label>
+                      <select
+                        id="trading-analytics-activity-select"
+                        value={tradingAnalyticsActivity}
+                        onChange={(e) => setTradingAnalyticsActivity(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      >
+                        <option value="">Select an activity...</option>
+                        <option value="advanced-trading">Advanced DEX Trading</option>
+                        <option value="arbitrage">Cross-DEX Arbitrage</option>
+                        <option value="yield-optimization">Yield Optimization</option>
+                        <option value="analytics-tools">Analytics & Research</option>
+                        <option value="portfolio-management">Portfolio Management</option>
+                        <option value="risk-management">Risk Management</option>
+                        <option value="other">Other Activity</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        What trading analytics activity interests you most?
+                      </p>
+                    </div>
+                    
+                    {/* Trading Analytics Checklist */}
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md">
+                      <p className="text-sm font-medium text-emerald-800 mb-2">Trading Analytics Mastery Checklist:</p>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasExecutedAdvancedTrade}
+                            onChange={(e) => setHasExecutedAdvancedTrade(e.target.checked)}
+                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span className="text-xs text-emerald-700">I have executed advanced DEX trades</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasUsedAnalyticsTools}
+                            onChange={(e) => setHasUsedAnalyticsTools(e.target.checked)}
+                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span className="text-xs text-emerald-700">I have used professional analytics tools</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasOptimizedYield}
+                            onChange={(e) => setHasOptimizedYield(e.target.checked)}
+                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span className="text-xs text-emerald-700">I have optimized my yield farming strategies</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="trading-analytics-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                        Trading Analytics Notes (Optional)
+                      </label>
+                      <textarea
+                        id="trading-analytics-notes"
+                        value={tradingAnalyticsNotes}
+                        onChange={(e) => setTradingAnalyticsNotes(e.target.value)}
+                        placeholder="Document your trading strategies, analytics insights, or yield optimization techniques..."
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Keep track of your trading strategies and analytics insights (this is stored locally)
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="trading-analytics-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                        Trading Analytics Understanding Confirmation
+                      </label>
+                      <input
+                        type="text"
+                        id="trading-analytics-confirmation"
+                        value={tradingAnalyticsConfirmation}
+                        onChange={(e) => setTradingAnalyticsConfirmation(e.target.value)}
+                        placeholder="Type 'I understand' to confirm your trading analytics understanding"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Type &quot;I understand&quot; to confirm you understand advanced trading principles
+                      </p>
+                    </div>
+                    
+                    {/* Trading Platform Links */}
+                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Trading Platforms:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <a
+                          href="https://app.uniswap.org/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition"
+                        >
+                          Uniswap
+                        </a>
+                        <a
+                          href="https://www.sushi.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                        >
+                          SushiSwap
+                        </a>
+                        <a
+                          href="https://curve.fi/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition"
+                        >
+                          Curve
+                        </a>
+                        <a
+                          href="https://balancer.fi/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                        >
+                          Balancer
+                        </a>
+                        <a
+                          href="https://app.1inch.io/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-pink-100 text-pink-800 rounded hover:bg-pink-200 transition"
+                        >
+                          1inch
+                        </a>
+                        <a
+                          href="https://paraswap.io/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200 transition"
+                        >
+                          ParaSwap
+                        </a>
+                      </div>
+                    </div>
+                    
+                    {/* Analytics Tools Links */}
+                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Analytics & Research Tools:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <a
+                          href="https://dune.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition"
+                        >
+                          Dune Analytics
+                        </a>
+                        <a
+                          href="https://defipulse.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                        >
+                          DeFiPulse
+                        </a>
+                        <a
+                          href="https://tokenterminal.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition"
+                        >
+                          Token Terminal
+                        </a>
+                        <a
+                          href="https://glassnode.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                        >
+                          Glassnode
+                        </a>
+                        <a
+                          href="https://coingecko.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-pink-100 text-pink-800 rounded hover:bg-pink-200 transition"
+                        >
+                          CoinGecko
+                        </a>
+                        <a
+                          href="https://coinmarketcap.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200 transition"
+                        >
+                          CoinMarketCap
+                        </a>
+                      </div>
+                    </div>
+                    
+                    {/* Trading Tips */}
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm font-medium text-yellow-800 mb-2">Advanced Trading Tips:</p>
+                      <ul className="text-xs text-yellow-700 space-y-1">
+                        <li>• Always research before trading - use analytics tools</li>
+                        <li>• Start with small amounts to test strategies</li>
+                        <li>• Understand slippage and gas costs</li>
+                        <li>• Diversify your portfolio across different assets</li>
+                        <li>• Use stop-losses and risk management</li>
+                        <li>• Keep detailed records of your trades</li>
+                      </ul>
+                    </div>
+                    
+                    <button
+                      onClick={confirmTradingAnalytics}
+                      disabled={!selectedTradingPlatform.trim() || !tradingAnalyticsActivity.trim() || !tradingAnalyticsConfirmation.trim()}
+                      className="w-full px-4 py-2 rounded-md bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                    >
+                      Confirm Trading Analytics Mastery
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Step 15 Completed Section */}
+              {isStep15Completed() && (
+                <div className="mt-6 p-4 border border-emerald-200 rounded-lg bg-emerald-50">
+                  <h3 className="text-lg font-semibold mb-3 text-emerald-900">🎉 Step 15 Complete!</h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-white border border-emerald-200 rounded-md">
+                      <p className="text-sm text-emerald-800">
+                        <strong>Platform:</strong> {selectedTradingPlatform}
+                      </p>
+                      <p className="text-sm text-emerald-800">
+                        <strong>Activity:</strong> {tradingAnalyticsActivity}
+                      </p>
+                      <p className="text-sm text-emerald-800">
+                        <strong>Executed Advanced Trade:</strong> {hasExecutedAdvancedTrade ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-sm text-emerald-800">
+                        <strong>Used Analytics Tools:</strong> {hasUsedAnalyticsTools ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-sm text-emerald-800">
+                        <strong>Optimized Yield:</strong> {hasOptimizedYield ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Trading analytics mastery confirmed and saved to localStorage
+                      </p>
+                    </div>
+                    
+                    {tradingAnalyticsNotes && (
+                      <div className="p-3 bg-white border border-emerald-200 rounded-md">
+                        <p className="text-sm text-emerald-800">
+                          <strong>Trading Analytics Notes:</strong>
+                        </p>
+                        <p className="text-xs text-emerald-700 mt-1 whitespace-pre-wrap">
+                          {tradingAnalyticsNotes}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="p-3 bg-white border border-emerald-200 rounded-md">
+                      <p className="text-sm text-emerald-800">
+                        <strong>Congratulations!</strong> You&apos;ve mastered advanced trading analytics!
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        You&apos;ve completed the PROFESSIONAL Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, and advanced trading analytics!
+                      </p>
+                    </div>
+                    
+                    <p className="text-xs text-emerald-600 mt-2">
+                      📊💰 Trading analytics mastery complete! Now let&apos;s enter the metaverse and master Web3 gaming! 🎮🌐
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Step 16 Web3 Gaming & Metaverse Section */}
+              {isStep15Completed() && !isStep16Completed() && (
+                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 16: Web3 Gaming & Metaverse</h3>
+                  
+                  {/* Gaming Metaverse Introduction */}
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-md mb-4">
+                    <div className="flex items-start gap-2">
+                      <div className="text-purple-600 mt-0.5">🎮</div>
+                      <div>
+                        <p className="text-sm font-medium text-purple-800">Enter the Metaverse</p>
+                        <p className="text-xs text-purple-700 mt-1">
+                          You&apos;ve mastered professional trading, now enter the virtual world! 
+                          Learn play-to-earn gaming, metaverse land ownership, and virtual economies.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="gaming-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                        Choose Gaming Platform
+                      </label>
+                      <select
+                        id="gaming-platform-select"
+                        value={selectedGamingPlatform}
+                        onChange={(e) => setSelectedGamingPlatform(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      >
+                        <option value="">Select a gaming platform...</option>
+                        <option value="axie-infinity">Axie Infinity - Play-to-Earn</option>
+                        <option value="sandbox">The Sandbox - Virtual World</option>
+                        <option value="decentraland">Decentraland - Metaverse</option>
+                        <option value="illuvium">Illuvium - RPG Gaming</option>
+                        <option value="gods-unchained">Gods Unchained - Trading Card Game</option>
+                        <option value="splinterlands">Splinterlands - Battle Card Game</option>
+                        <option value="other">Other Gaming Platform</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Choose a Web3 gaming platform to explore
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="gaming-metaverse-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                        Gaming Metaverse Activity
+                      </label>
+                      <select
+                        id="gaming-metaverse-activity-select"
+                        value={gamingMetaverseActivity}
+                        onChange={(e) => setGamingMetaverseActivity(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      >
+                        <option value="">Select an activity...</option>
+                        <option value="play-to-earn">Play-to-Earn Gaming</option>
+                        <option value="metaverse-land">Metaverse Land Ownership</option>
+                        <option value="virtual-worlds">Virtual World Exploration</option>
+                        <option value="nft-gaming">NFT Gaming Assets</option>
+                        <option value="virtual-economies">Virtual Economy Trading</option>
+                        <option value="gaming-guilds">Gaming Guilds & Communities</option>
+                        <option value="other">Other Activity</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        What gaming metaverse activity interests you most?
+                      </p>
+                    </div>
+                    
+                    {/* Gaming Metaverse Checklist */}
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
+                      <p className="text-sm font-medium text-purple-800 mb-2">Gaming Metaverse Mastery Checklist:</p>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasPlayedToEarn}
+                            onChange={(e) => setHasPlayedToEarn(e.target.checked)}
+                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="text-xs text-purple-700">I have played play-to-earn games</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasOwnedMetaverseLand}
+                            onChange={(e) => setHasOwnedMetaverseLand(e.target.checked)}
+                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="text-xs text-purple-700">I have owned metaverse land or virtual assets</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={hasParticipatedInVirtualWorld}
+                            onChange={(e) => setHasParticipatedInVirtualWorld(e.target.checked)}
+                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="text-xs text-purple-700">I have participated in virtual worlds</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="gaming-metaverse-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                        Gaming Metaverse Notes (Optional)
+                      </label>
+                      <textarea
+                        id="gaming-metaverse-notes"
+                        value={gamingMetaverseNotes}
+                        onChange={(e) => setGamingMetaverseNotes(e.target.value)}
+                        placeholder="Document your gaming strategies, metaverse experiences, or virtual economy insights..."
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Keep track of your gaming experiences and metaverse insights (this is stored locally)
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="gaming-metaverse-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                        Gaming Metaverse Understanding Confirmation
+                      </label>
+                      <input
+                        type="text"
+                        id="gaming-metaverse-confirmation"
+                        value={gamingMetaverseConfirmation}
+                        onChange={(e) => setGamingMetaverseConfirmation(e.target.value)}
+                        placeholder="Type 'I understand' to confirm your gaming metaverse understanding"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Type &quot;I understand&quot; to confirm you understand Web3 gaming and metaverse principles
+                      </p>
+                    </div>
+                    
+                    {/* Gaming Platform Links */}
+                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Gaming Platforms:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <a
+                          href="https://axieinfinity.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition"
+                        >
+                          Axie Infinity
+                        </a>
+                        <a
+                          href="https://www.sandbox.game/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                        >
+                          The Sandbox
+                        </a>
+                        <a
+                          href="https://decentraland.org/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition"
+                        >
+                          Decentraland
+                        </a>
+                        <a
+                          href="https://illuvium.io/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                        >
+                          Illuvium
+                        </a>
+                        <a
+                          href="https://godsunchained.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-pink-100 text-pink-800 rounded hover:bg-pink-200 transition"
+                        >
+                          Gods Unchained
+                        </a>
+                        <a
+                          href="https://splinterlands.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200 transition"
+                        >
+                          Splinterlands
+                        </a>
+                      </div>
+                    </div>
+                    
+                    {/* Metaverse Platforms Links */}
+                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Metaverse & Virtual Worlds:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <a
+                          href="https://www.sandbox.game/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition"
+                        >
+                          The Sandbox
+                        </a>
+                        <a
+                          href="https://decentraland.org/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                        >
+                          Decentraland
+                        </a>
+                        <a
+                          href="https://www.cryptovoxels.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition"
+                        >
+                          Cryptovoxels
+                        </a>
+                        <a
+                          href="https://somniumspace.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                        >
+                          Somnium Space
+                        </a>
+                        <a
+                          href="https://www.voxels.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-pink-100 text-pink-800 rounded hover:bg-pink-200 transition"
+                        >
+                          Voxels
+                        </a>
+                        <a
+                          href="https://www.spatial.io/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200 transition"
+                        >
+                          Spatial
+                        </a>
+                      </div>
+                    </div>
+                    
+                    {/* Gaming Tips */}
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm font-medium text-yellow-800 mb-2">Web3 Gaming Tips:</p>
+                      <ul className="text-xs text-yellow-700 space-y-1">
+                        <li>• Research games before investing - check tokenomics</li>
+                        <li>• Start with free-to-play games to learn mechanics</li>
+                        <li>• Understand gas costs for in-game transactions</li>
+                        <li>• Join gaming guilds for better opportunities</li>
+                        <li>• Diversify across different gaming platforms</li>
+                        <li>• Keep track of your gaming earnings and expenses</li>
+                      </ul>
+                    </div>
+                    
+                    <button
+                      onClick={confirmGamingMetaverse}
+                      disabled={!selectedGamingPlatform.trim() || !gamingMetaverseActivity.trim() || !gamingMetaverseConfirmation.trim()}
+                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                    >
+                      Confirm Gaming Metaverse Mastery
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Step 16 Completed Section */}
+              {isStep16Completed() && (
+                <div className="mt-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                  <h3 className="text-lg font-semibold mb-3 text-purple-900">🎉 Step 16 Complete!</h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-white border border-purple-200 rounded-md">
+                      <p className="text-sm text-purple-800">
+                        <strong>Platform:</strong> {selectedGamingPlatform}
+                      </p>
+                      <p className="text-sm text-purple-800">
+                        <strong>Activity:</strong> {gamingMetaverseActivity}
+                      </p>
+                      <p className="text-sm text-purple-800">
+                        <strong>Played to Earn:</strong> {hasPlayedToEarn ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-sm text-purple-800">
+                        <strong>Owned Metaverse Land:</strong> {hasOwnedMetaverseLand ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-sm text-purple-800">
+                        <strong>Participated in Virtual World:</strong> {hasParticipatedInVirtualWorld ? 'Yes' : 'No'}
+                      </p>
+                      <p className="text-xs text-purple-600 mt-1">
+                        Gaming metaverse mastery confirmed and saved to localStorage
+                      </p>
+                    </div>
+                    
+                    {gamingMetaverseNotes && (
+                      <div className="p-3 bg-white border border-purple-200 rounded-md">
+                        <p className="text-sm text-purple-800">
+                          <strong>Gaming Metaverse Notes:</strong>
+                        </p>
+                        <p className="text-xs text-purple-700 mt-1 whitespace-pre-wrap">
+                          {gamingMetaverseNotes}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="p-3 bg-white border border-purple-200 rounded-md">
+                      <p className="text-sm text-purple-800">
+                        <strong>Congratulations!</strong> You&apos;ve mastered Web3 gaming and metaverse!
+                      </p>
+                      <p className="text-xs text-purple-600 mt-1">
+                        You&apos;ve completed the METAVERSE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, advanced trading analytics, and Web3 gaming metaverse!
+                      </p>
+                    </div>
+                    
+                    <p className="text-xs text-purple-600 mt-2">
+                      🎮🌐🎊 You are now a METAVERSE Web3 master! You can navigate virtual worlds, earn through gaming, and build virtual economies! 🎊🌐🎮
                     </p>
                   </div>
                 </div>
