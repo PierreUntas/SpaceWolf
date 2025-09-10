@@ -7,31 +7,27 @@ import { createHelia, Helia } from 'helia';
 import { unixfs } from '@helia/unixfs';
 import { ethers } from 'ethers';
 
-type EthereumRequestArgs = {
-  method: string;
-  params?: unknown[];
-};
-
-type EthereumProvider = {
-  isMetaMask?: boolean;
-  request: <T = unknown>(args: EthereumRequestArgs) => Promise<T>;
-  on?: (event: string, handler: (...args: unknown[]) => void) => void;
-  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
-};
-
-type WindowWithEthereum = Window & { ethereum?: EthereumProvider };
-
 export default function Home() {
   const router = useRouter();
-  const [account, setAccount] = useState<string | null>(null);
+  
+  // États principaux du wallet
+  const [wallet, setWallet] = useState<any>(null);
+  const [privateKey, setPrivateKey] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
+  const [balance, setBalance] = useState<string>('0');
+  const [network, setNetwork] = useState<string>('sepolia');
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [hasMetaMask, setHasMetaMask] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
+  
+  // États pour l'interface
+  const [account, setAccount] = useState<string | null>(null);
   const [balanceEth, setBalanceEth] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<boolean>(false);
   
-  // Step 4 NFT minting states
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageIpfsCid, setImageIpfsCid] = useState<string | null>(null);
@@ -170,7 +166,223 @@ export default function Home() {
     }
   }
 
+  // Configuration des réseaux
+  const networks = {
+    mainnet: {
+      name: 'Réseau Principal Ethereum',
+      displayName: 'Réseau Principal',
+      description: 'Réseau principal avec de vrais ETH (coûteux)',
+      chainId: 1,
+      rpcUrls: [
+        'https://ethereum.publicnode.com',
+        'https://eth.llamarpc.com',
+        'https://rpc.flashbots.net'
+      ],
+      blockExplorer: 'https://etherscan.io'
+    },
+    sepolia: {
+      name: 'Réseau de Test Sepolia',
+      displayName: 'Réseau de Test',
+      description: 'Réseau de test avec des ETH gratuits',
+      chainId: 11155111,
+      rpcUrls: [
+        'https://ethereum-sepolia.publicnode.com',
+        'https://sepolia.publicnode.com',
+        'https://rpc.sepolia.org'
+      ],
+      blockExplorer: 'https://sepolia.etherscan.io'
+    }
+  };
+
+  // Créer un nouveau wallet
+  const createNewWallet = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Générer un nouveau wallet
+      const newWallet = ethers.Wallet.createRandom();
+      
+      setWallet(newWallet);
+      setAddress(newWallet.address);
+      setPrivateKey(newWallet.privateKey);
+      setIsConnected(true);
+      setAccount(newWallet.address);
+      setChainId('0xaa36a7'); // Sepolia
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('spacewolf_privateKey', newWallet.privateKey);
+      localStorage.setItem('spacewolf_address', newWallet.address);
+      localStorage.setItem('spacewolf_network', network);
+      
+      // Récupérer le solde
+      await getBalance(newWallet.address);
+      
+    } catch (err) {
+      setError('Erreur lors de la création du wallet: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Se connecter avec une clé privée
+  const connectWithPrivateKey = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      if (!privateKey.trim()) {
+        throw new Error('Veuillez entrer une clé privée');
+      }
+
+      // Créer le wallet à partir de la clé privée
+      const wallet = new ethers.Wallet(privateKey.trim());
+      
+      setWallet(wallet);
+      setAddress(wallet.address);
+      setIsConnected(true);
+      setAccount(wallet.address);
+      setChainId('0xaa36a7'); // Sepolia
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('spacewolf_privateKey', privateKey.trim());
+      localStorage.setItem('spacewolf_address', wallet.address);
+      localStorage.setItem('spacewolf_network', network);
+      
+      // Récupérer le solde
+      await getBalance(wallet.address);
+      
+    } catch (err) {
+      setError('Erreur de connexion: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonction pour essayer plusieurs fournisseurs RPC
+  const tryMultipleProviders = async (networkName: string, operation: (provider: ethers.JsonRpcProvider) => Promise<any>) => {
+    const rpcUrls = networks[networkName as keyof typeof networks].rpcUrls;
+    
+    for (let i = 0; i < rpcUrls.length; i++) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrls[i]);
+        return await operation(provider);
+      } catch (err) {
+        console.warn(`RPC ${i + 1} failed:`, rpcUrls[i], (err as Error).message);
+        if (i === rpcUrls.length - 1) {
+          throw new Error(`Tous les fournisseurs RPC ont échoué. Vérifiez votre connexion internet.`);
+        }
+      }
+    }
+  };
+
+  // Fonction pour obtenir un provider fiable
+  const getReliableProvider = async (networkName: string = network) => {
+    const rpcUrls = networks[networkName as keyof typeof networks].rpcUrls;
+    
+    for (let i = 0; i < rpcUrls.length; i++) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrls[i]);
+        // Test the provider with a simple call
+        await provider.getBlockNumber();
+        return provider;
+      } catch (err) {
+        console.warn(`RPC ${i + 1} failed:`, rpcUrls[i], (err as Error).message);
+        if (i === rpcUrls.length - 1) {
+          throw new Error(`Tous les fournisseurs RPC ont échoué. Vérifiez votre connexion internet.`);
+        }
+      }
+    }
+  };
+
+  // Récupérer le solde
+  const getBalance = async (walletAddress: string, networkName: string = network) => {
+    try {
+      const balance = await tryMultipleProviders(networkName, async (provider) => {
+        const balance = await provider.getBalance(walletAddress);
+        const balanceInEth = ethers.formatEther(balance);
+        return parseFloat(balanceInEth).toFixed(4);
+      });
+      setBalance(balance);
+      setBalanceEth(balance);
+    } catch (err) {
+      console.error('Erreur lors de la récupération du solde:', err);
+      setBalance('0');
+      setBalanceEth('0');
+      // Afficher un message d'erreur plus clair
+      if ((err as Error).message.includes('fournisseurs RPC')) {
+        setError('Impossible de récupérer le solde. Vérifiez votre connexion internet.');
+      }
+    }
+  };
+
+  // Changer de réseau
+  const switchNetwork = async (newNetwork: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      setNetwork(newNetwork);
+      
+      // Toujours sauvegarder le nouveau réseau dans localStorage
+      localStorage.setItem('spacewolf_network', newNetwork);
+      
+      if (wallet) {
+        // Attendre un peu pour que le state se mette à jour, puis récupérer le solde
+        setTimeout(async () => {
+          try {
+            await getBalance(wallet.address, newNetwork);
+          } catch (err) {
+            console.warn('Erreur lors de la mise à jour du solde:', (err as Error).message);
+          }
+        }, 200);
+      }
+      
+    } catch (err) {
+      setError('Erreur lors du changement de réseau: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Copier dans le presse-papiers
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2000);
+  };
+
+  // Déconnexion
+  const disconnect = () => {
+    setWallet(null);
+    setAddress('');
+    setPrivateKey('');
+    setBalance('0');
+    setBalanceEth('0');
+    setIsConnected(false);
+    setShowPrivateKey(false);
+    setAccount(null);
+    setError('');
+    
+    // Nettoyer le localStorage
+    localStorage.removeItem('spacewolf_privateKey');
+    localStorage.removeItem('spacewolf_address');
+    localStorage.removeItem('spacewolf_network');
+  };
+
+  // Rafraîchir le solde
+  const refreshBalance = async () => {
+    if (wallet) {
+      try {
+        await getBalance(wallet.address, network);
+      } catch (err) {
+        console.warn('Erreur lors du rafraîchissement:', (err as Error).message);
+      }
+    }
+  };
+
   // Helper functions to check step completion
+  const isStep1Completed = () => !!account && !!wallet;
   const isStep2Completed = () => chainId === '0xaa36a7';
   const isStep3Completed = () => {
     if (!balanceEth) return false;
@@ -560,66 +772,7 @@ export default function Home() {
   }, [account, chainId]);
 
   async function connectWallet() {
-    try {
-      if (!hasMetaMask) {
-        setError('MetaMask not detected. Please install the extension.');
-        return;
-      }
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-      const accounts = await ethereum.request<string[]>({ method: 'eth_requestAccounts' });
-      setAccount(accounts?.[0] ?? null);
-      
-      // Check transaction history after connecting wallet
-      if (accounts?.[0] && chainId === '0xaa36a7') {
-        setTimeout(() => checkUserTransactionHistory(), 1000); // Small delay to ensure state is updated
-      }
-      
-      setError(null);
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to connect wallet';
-      setError(message);
-    }
-  }
-
-  async function switchToSepolia() {
-    try {
-      if (!hasMetaMask) {
-        setError('MetaMask not detected. Please install the extension.');
-        return;
-      }
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-      // Try to switch first
-      await ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0xaa36a7' }], // Sepolia
-      });
-      setError(null);
-    } catch (e: unknown) {
-      // 4902 = Unrecognized chain, attempt to add
-      const message = e instanceof Error ? e.message : String(e);
-      if (message.includes('4902')) {
-        try {
-          const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-          await ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: '0xaa36a7',
-                chainName: 'Sepolia Test Network',
-                nativeCurrency: { name: 'Sepolia Ether', symbol: 'SEP', decimals: 18 },
-                rpcUrls: ['https://sepolia.optimism.io', 'https://rpc.sepolia.org'],
-                blockExplorerUrls: ['https://sepolia.etherscan.io/'],
-              },
-            ],
-          });
-          setError(null);
-        } catch (addErr: unknown) {
-          setError(addErr instanceof Error ? addErr.message : 'Failed to add Sepolia');
-        }
-      } else {
-        setError(message || 'Failed to switch network');
-      }
-    }
+    await createNewWallet();
   }
 
   // Initialize Helia IPFS node
@@ -738,11 +891,17 @@ export default function Home() {
     setError(null);
 
     try {
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
+      // Get a reliable provider for Sepolia testnet
+      const provider = await getReliableProvider('sepolia');
       
-      // Create ethers provider and signer
-      const provider = new ethers.BrowserProvider(ethereum);
-      const signer = await provider.getSigner();
+      // Use our wallet directly
+      if (!wallet) {
+        setError('Wallet non connecté');
+        return;
+      }
+      
+      // Connect wallet to provider
+      const connectedWallet = wallet.connect(provider);
       
       // For now, we'll simulate ENS registration with a real transaction
       // This creates a real transaction that demonstrates the concept
@@ -751,7 +910,7 @@ export default function Home() {
       // Create a simple transaction that writes to the blockchain
       // This simulates domain registration by creating a real transaction
       // We'll send a tiny amount to a burn address with the domain hash as data
-      const tx = await signer.sendTransaction({
+      const tx = await connectedWallet.sendTransaction({
         to: '0x000000000000000000000000000000000000dEaD', // Burn address
         value: ethers.parseEther('0.000001'), // Send 0.000001 ETH (tiny amount)
         data: ethers.keccak256(ethers.toUtf8Bytes(`${web3Username}.eth`)) // Hash the domain name
@@ -842,17 +1001,23 @@ export default function Home() {
     setError(null);
 
     try {
-      const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
+      // Get a reliable provider for Sepolia testnet
+      const provider = await getReliableProvider('sepolia');
       
-      // Create ethers provider and signer
-      const provider = new ethers.BrowserProvider(ethereum);
-      const signer = await provider.getSigner();
+      // Use our wallet directly
+      if (!wallet) {
+        setError('Wallet non connecté');
+        return;
+      }
+      
+      // Connect wallet to provider
+      const connectedWallet = wallet.connect(provider);
       
       // Convert ETH to Wei
       const amountWei = ethers.parseEther(ethAmount);
       
       // Estimate gas for the transaction
-      const gasEstimate = await provider.estimateGas({
+      const gasEstimate = await provider!.estimateGas({
         to: friendAddress,
         value: amountWei,
       });
@@ -867,7 +1032,7 @@ export default function Home() {
       };
       
       // Send transaction
-      const txResponse = await signer.sendTransaction(transaction);
+      const txResponse = await connectedWallet.sendTransaction(transaction);
       console.log('Transaction sent:', txResponse.hash);
       
       setTransferTransactionHash(txResponse.hash);
@@ -1391,84 +1556,61 @@ export default function Home() {
     }
   }, [account, chainId, checkUserTransactionHistory]);
 
+  // Charger les données depuis localStorage au démarrage
   useEffect(() => {
     setMounted(true);
-    const ethereum = (window as WindowWithEthereum)?.ethereum;
-    const detected = !!ethereum?.isMetaMask;
-    setHasMetaMask(detected);
-
-    if (!detected) return;
-
-    const fetchBalanceFor = async (address: string | null) => {
-      if (!address) {
-        setBalanceEth(null);
-        return;
-      }
-      try {
-        const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [address, 'latest'] });
-        setBalanceEth(formatWeiToEth4dp(weiHex));
-      } catch {
-        setBalanceEth(null);
-      }
-    };
-
-    const handleAccountsChanged = (...args: unknown[]) => {
-      const accounts = (Array.isArray(args) ? (args[0] as string[] | undefined) : undefined) ?? [];
-      const next = accounts?.[0] ?? null;
-      setAccount(next);
-      fetchBalanceFor(next);
-    };
-    const handleChainChanged = (...args: unknown[]) => {
-      const newChainId = (Array.isArray(args) ? (args[0] as string | undefined) : undefined) ?? null;
-      if (newChainId) setChainId(newChainId);
-      ethereum.request<string[]>({ method: 'eth_accounts' })
-        .then((accounts) => {
-          const next = accounts?.[0] ?? null;
-          setAccount(next);
-          fetchBalanceFor(next);
-        })
-        .catch(() => {});
-    };
-    const handleConnect = () => {
-      // On provider connect, refresh accounts and balance
-      ethereum.request<string[]>({ method: 'eth_accounts' })
-        .then((accounts) => {
-          const next = accounts?.[0] ?? null;
-          setAccount(next);
-          fetchBalanceFor(next);
-        })
-        .catch(() => {});
-    };
-    const handleDisconnect = () => {
-      setAccount(null);
-      setBalanceEth(null);
-    };
-
-    // Get already authorized accounts on load
-    ethereum
-      .request<string[]>({ method: 'eth_accounts' })
-      .then((accounts) => {
-        const next = accounts?.[0] ?? null;
-        setAccount(next);
-        fetchBalanceFor(next);
-      })
-      .catch(() => {});
-    ethereum
-      .request<string>({ method: 'eth_chainId' })
-      .then((id) => setChainId(id))
-      .catch(() => {});
-
-    ethereum.on?.('accountsChanged', handleAccountsChanged);
-    ethereum.on?.('chainChanged', handleChainChanged);
-    ethereum.on?.('connect', handleConnect);
-    ethereum.on?.('disconnect', handleDisconnect);
-    return () => {
-      ethereum.removeListener?.('accountsChanged', handleAccountsChanged);
-      ethereum.removeListener?.('chainChanged', handleChainChanged);
-      ethereum.removeListener?.('connect', handleConnect);
-      ethereum.removeListener?.('disconnect', handleDisconnect);
-    };
+    
+    const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
+    const savedAddress = localStorage.getItem('spacewolf_address');
+    const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
+    
+    // Toujours définir le réseau sauvegardé
+    setNetwork(savedNetwork);
+    
+    if (savedPrivateKey && savedAddress) {
+      setPrivateKey(savedPrivateKey);
+      setAddress(savedAddress);
+      // Reconnecter automatiquement
+      connectWithPrivateKeyFromStorage(savedPrivateKey);
+    }
   }, []);
+
+  // Se connecter avec une clé privée (depuis localStorage)
+  const connectWithPrivateKeyFromStorage = async (privateKeyValue: string) => {
+    try {
+      if (!privateKeyValue.trim()) return;
+
+      // Créer le wallet à partir de la clé privée
+      const wallet = new ethers.Wallet(privateKeyValue.trim());
+      
+      setWallet(wallet);
+      setAddress(wallet.address);
+      setIsConnected(true);
+      setAccount(wallet.address);
+      setChainId('0xaa36a7'); // Sepolia
+      
+      // Récupérer le solde avec le réseau sauvegardé
+      const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
+      await getBalance(wallet.address, savedNetwork);
+      
+    } catch (err) {
+      console.error('Erreur de connexion automatique:', err);
+      // Nettoyer le localStorage si la clé est invalide
+      localStorage.removeItem('spacewolf_privateKey');
+      localStorage.removeItem('spacewolf_address');
+    }
+  };
+
+  // Effacer les erreurs automatiquement
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000); // Effacer après 5 secondes
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   // Format wei hex string to ETH with 4 decimals without floating precision loss
   function formatWeiToEth4dp(weiHex: string): string {
@@ -1484,32 +1626,6 @@ export default function Home() {
       return '0';
     }
   }
-
-  // Backup: poll balance periodically and on deps change
-  useEffect(() => {
-    if (!mounted || !hasMetaMask || !account) {
-      setBalanceEth(null);
-      return;
-    }
-    const ethereum = (window as WindowWithEthereum).ethereum as EthereumProvider;
-    let cancelled = false;
-
-    const fetchBalance = async () => {
-      try {
-        const weiHex = await ethereum.request<string>({ method: 'eth_getBalance', params: [account, 'latest'] });
-        if (!cancelled) setBalanceEth(formatWeiToEth4dp(weiHex));
-      } catch {
-        if (!cancelled) setBalanceEth(null);
-      }
-    };
-
-    fetchBalance();
-    const intervalId = setInterval(fetchBalance, 15000);
-    return () => {
-      cancelled = true;
-      clearInterval(intervalId);
-    };
-  }, [mounted, hasMetaMask, account, chainId]);
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20">
@@ -1552,7 +1668,7 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <span className="text-gray-500">Connect wallet</span>
+                <span className="text-gray-500">Générer un wallet</span>
               )}
             </div>
           </div>
@@ -1581,49 +1697,139 @@ export default function Home() {
           {mounted && (
             <>
               <div className="flex items-center gap-4">
-                <button
-                  onClick={connectWallet}
-                  className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                >
-                  {account ? `Connected: ${account.slice(0, 6)}...${account.slice(-4)}` : 'Connect MetaMask'}
-                </button>
-                {chainId !== '0xaa36a7' && (
-                  <button
-                    onClick={switchToSepolia}
-                    className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer"
-                  >
-                    Switch to Sepolia
-                  </button>
-                )}
-                {!hasMetaMask && (
-                  <a
-                    href="https://metamask.io/download/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm underline text-gray-800 opacity-90 font-medium"
-                  >
-                    Get MetaMask
-                  </a>
+                {!isConnected ? (
+                  <>
+                    <button
+                      onClick={createNewWallet}
+                      disabled={loading}
+                      className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
+                    >
+                      {loading ? 'Création...' : 'Créer un nouveau wallet'}
+                    </button>
+                    
+                    <div className="form-group">
+                      <input
+                        type="password"
+                        className="px-3 py-2 border border-gray-300 rounded-md"
+                        placeholder="Ou entrez votre clé privée (0x...)"
+                        value={privateKey}
+                        onChange={(e) => setPrivateKey(e.target.value)}
+                      />
+                      <button 
+                        className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
+                        onClick={connectWithPrivateKey}
+                        disabled={loading || !privateKey.trim()}
+                      >
+                        {loading ? 'Connexion...' : 'Se connecter'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
+                      Connecté: {address.slice(0, 6)}...{address.slice(-4)}
+                    </div>
+                    <button
+                      onClick={disconnect}
+                      className="px-3 py-2 rounded-md bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition cursor-pointer"
+                    >
+                      Se déconnecter
+                    </button>
+                  </>
                 )}
               </div>
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 1</span>
-                <span className="align-middle">First connect a wallet, or create one on MetaMask.</span>
-                {account && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="connected">
+                <span className="align-middle">Générer un wallet Ethereum avec clé privée.</span>
+                {isStep1Completed() && (
+                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="wallet-generated">
                     ✓
                   </span>
                 )}
               </p>
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 2</span>
-                <span className="align-middle">Switch to Sepolia test network.</span>
+                <span className="align-middle">Réseau Sepolia configuré automatiquement.</span>
                 {isStep2Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="on-sepolia">
                     ✓
                   </span>
                 )}
               </p>
+              
+              {/* Informations du wallet */}
+              {isConnected && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="text-lg font-semibold mb-3">Informations du Wallet</h3>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Adresse:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-mono">{address}</span>
+                        <button 
+                          onClick={() => copyToClipboard(address, 'Adresse')}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          📋
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Clé privée:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-mono">
+                          {showPrivateKey ? privateKey : '••••••••••••••••••••••••••••••••'}
+                        </span>
+                        <button 
+                          onClick={() => setShowPrivateKey(!showPrivateKey)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {showPrivateKey ? '👁️‍🗨️' : '👁️'}
+                        </button>
+                        <button 
+                          onClick={() => copyToClipboard(privateKey, 'Clé privée')}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          📋
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Solde:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">{balance} ETH</span>
+                        <button 
+                          onClick={refreshBalance}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          🔄
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Réseau:</span>
+                      <div className="flex gap-2">
+                        <button 
+                          className={`px-2 py-1 rounded text-xs ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                          onClick={() => switchNetwork('mainnet')}
+                        >
+                          🏠 Mainnet
+                        </button>
+                        <button 
+                          className={`px-2 py-1 rounded text-xs ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                          onClick={() => switchNetwork('sepolia')}
+                        >
+                          🧪 Sepolia
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 3</span>
                 <span className="align-middle">Get Sepolia ETH for testing.</span>
@@ -4895,9 +5101,19 @@ export default function Home() {
               )}
               
               {error && (
-                <p className="text-sm text-red-600">
-                  {error}
-                </p>
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="text-red-600 text-sm font-medium">
+                      ⚠️ {error}
+                    </div>
+                    <button 
+                      onClick={() => setError(null)}
+                      className="ml-auto text-red-400 hover:text-red-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
               )}
             </>
           )}
