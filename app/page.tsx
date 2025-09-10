@@ -28,6 +28,24 @@ export default function Home() {
   const [chainId, setChainId] = useState<string | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<boolean>(false);
   
+  // États pour le système de jeu
+  const [playerLevel, setPlayerLevel] = useState<number>(1);
+  const [achievements, setAchievements] = useState<string[]>([]);
+  const [showLevelUp, setShowLevelUp] = useState<boolean>(false);
+  const [gameStats, setGameStats] = useState({
+    transactionsCompleted: 0,
+    nftsMinted: 0,
+    ethTransferred: 0,
+    networksSwitched: 0,
+    daysActive: 1
+  });
+  
+  // États pour le token SW (SpaceWolf)
+  const [swBalance, setSwBalance] = useState<number>(0);
+  const [swClaimed, setSwClaimed] = useState<number>(0);
+  const [showClaimAnimation, setShowClaimAnimation] = useState<boolean>(false);
+  const [swClaimedAmount, setSwClaimedAmount] = useState<number>(0);
+  
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageIpfsCid, setImageIpfsCid] = useState<string | null>(null);
@@ -222,6 +240,10 @@ export default function Home() {
       // Récupérer le solde
       await getBalance(newWallet.address);
       
+      // 🎮 GAMIFICATION: Level up et récompense SW
+      levelUp('Wallet Created');
+      setGameStats(prev => ({ ...prev, transactionsCompleted: prev.transactionsCompleted + 1 }));
+      
     } catch (err) {
       setError('Erreur lors de la création du wallet: ' + (err as Error).message);
     } finally {
@@ -340,6 +362,12 @@ export default function Home() {
       console.log(`✅ Solde mis à jour: ${balance} ETH`);
       setBalance(balance as string);
       setBalanceEth(balance as string);
+      
+      // 🎮 GAMIFICATION: Level up pour Balance Check (niveau 3)
+      if (playerLevel === 2) {
+        levelUp('Balance Check');
+      }
+      
     } catch (err) {
       console.error('❌ Erreur lors de la récupération du solde:', err);
       setBalance('0');
@@ -375,6 +403,16 @@ export default function Home() {
         }, 200);
       }
       
+      // 🎮 GAMIFICATION: Level up et récompense SW
+      levelUp('Network Switch');
+      setGameStats(prev => ({ ...prev, networksSwitched: prev.networksSwitched + 1 }));
+      
+      if (newNetwork === 'mainnet') {
+        addAchievement('Mainnet Explorer', 'network_mainnet');
+      } else if (newNetwork === 'sepolia') {
+        addAchievement('Testnet Master', 'network_sepolia');
+      }
+      
     } catch (err) {
       setError('Erreur lors du changement de réseau: ' + (err as Error).message);
     } finally {
@@ -400,6 +438,158 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // === SYSTÈME DE JEU SIMPLIFIÉ ===
+  
+  // Définir les étapes du parcours Web3
+  const journeySteps = [
+    { level: 1, name: "Wallet Creation", description: "Créer votre premier wallet", swReward: 100 },
+    { level: 2, name: "Network Switch", description: "Explorer les réseaux", swReward: 150 },
+    { level: 3, name: "Balance Check", description: "Obtenir des ETH de test", swReward: 200 },
+    { level: 4, name: "NFT Minting", description: "Créer votre premier NFT", swReward: 300 },
+    { level: 5, name: "ETH Transfer", description: "Envoyer des ETH", swReward: 250 },
+    { level: 6, name: "Web3 Identity", description: "Créer une identité Web3", swReward: 400 },
+    { level: 7, name: "Real ETH", description: "Acheter de vrais ETH", swReward: 500 },
+    { level: 8, name: "Advanced Security", description: "Maîtriser la sécurité", swReward: 600 },
+    { level: 9, name: "DeFi Explorer", description: "Explorer la DeFi", swReward: 750 },
+    { level: 10, name: "Web3 Master", description: "Maître du Web3", swReward: 1000 }
+  ];
+
+  // Obtenir les informations de l'étape actuelle
+  const getCurrentStep = () => {
+    return journeySteps.find(step => step.level === playerLevel) || journeySteps[0];
+  };
+
+  // Obtenir l'étape suivante
+  const getNextStep = () => {
+    return journeySteps.find(step => step.level === playerLevel + 1);
+  };
+
+  // Passer au niveau suivant (simple +1)
+  const levelUp = (action: string) => {
+    const newLevel = playerLevel + 1;
+    console.log(`🎉 LEVEL UP! ${action} → Niveau ${playerLevel} → ${newLevel}`);
+    
+    setPlayerLevel(newLevel);
+    setShowLevelUp(true);
+    
+    // Ajouter un achievement pour le level up
+    addAchievement(`Level ${newLevel} Reached!`, 'level_up');
+    
+    // Sauvegarder immédiatement avec le nouveau niveau
+    saveGameStats({ level: newLevel });
+    
+    // Masquer l'animation de level up après 3 secondes
+    setTimeout(() => setShowLevelUp(false), 3000);
+    
+    console.log(`🎉 Level up terminé! Nouveau niveau: ${newLevel}`);
+  };
+
+  // === SYSTÈME DE TOKEN SW (SPACEWOLF) ===
+  
+  // Claimer des tokens SW
+  const claimSW = (amount: number) => {
+    console.log(`🪙 Claiming ${amount} SW tokens!`);
+    console.log(`🪙 Avant claim - Balance: ${swBalance}, Claimed: ${swClaimed}`);
+    
+    const newBalance = swBalance + amount;
+    const newClaimed = swClaimed + amount;
+    
+    setSwBalance(newBalance);
+    setSwClaimed(newClaimed);
+    setSwClaimedAmount(amount);
+    setShowClaimAnimation(true);
+    
+    // Sauvegarder immédiatement avec les nouvelles valeurs
+    saveGameStats({ swBalance: newBalance, swClaimed: newClaimed });
+    
+    // Masquer l'animation après 2 secondes
+    setTimeout(() => setShowClaimAnimation(false), 2000);
+    
+    console.log(`🪙 +${amount} SW tokens claimés! Nouveau total: ${newBalance}, Total claimed: ${newClaimed}`);
+  };
+
+  // Calculer les SW disponibles à claimer
+  const getAvailableSW = () => {
+    let available = 0;
+    console.log(`🔍 Calcul SW - Niveau actuel: ${playerLevel}, SW déjà claimés: ${swClaimed}`);
+    
+    for (let i = 1; i <= playerLevel; i++) {
+      const step = journeySteps.find(s => s.level === i);
+      if (step) {
+        available += step.swReward;
+        console.log(`🔍 Niveau ${i}: +${step.swReward} SW (${step.name})`);
+      }
+    }
+    
+    const result = available - swClaimed;
+    console.log(`🔍 Total disponible: ${available}, Déjà claimés: ${swClaimed}, Résultat: ${result}`);
+    return result;
+  };
+
+  // Ajouter un achievement
+  const addAchievement = (title: string, type: string) => {
+    if (!achievements.includes(title)) {
+      setAchievements(prev => [...prev, title]);
+      console.log(`🏆 Achievement débloqué: ${title}`);
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('spacewolf_achievements', JSON.stringify([...achievements, title]));
+    }
+  };
+
+  // Sauvegarder les stats de jeu
+  const saveGameStats = (overrides?: Partial<{level: number, swBalance: number, swClaimed: number}>) => {
+    const stats = {
+      level: overrides?.level ?? playerLevel,
+      achievements: achievements,
+      gameStats: gameStats,
+      swBalance: overrides?.swBalance ?? swBalance,
+      swClaimed: overrides?.swClaimed ?? swClaimed
+    };
+    console.log('💾 Sauvegarde des stats:', stats);
+    localStorage.setItem('spacewolf_game_stats', JSON.stringify(stats));
+  };
+
+  // Charger les stats de jeu depuis localStorage
+  const loadGameStats = () => {
+    console.log('📂 Chargement des stats de jeu...');
+    
+    const savedStats = localStorage.getItem('spacewolf_game_stats');
+    if (savedStats) {
+      const stats = JSON.parse(savedStats);
+      console.log('📂 Stats chargées:', stats);
+      
+      setPlayerLevel(stats.level || 1);
+      setAchievements(stats.achievements || []);
+      setGameStats(stats.gameStats || gameStats);
+      setSwBalance(stats.swBalance || 0);
+      setSwClaimed(stats.swClaimed || 0);
+      
+      console.log(`📂 Niveau restauré: ${stats.level || 1}, SW Balance: ${stats.swBalance || 0}, SW Claimed: ${stats.swClaimed || 0}`);
+    } else {
+      console.log('📂 Aucune stats sauvegardées, utilisation des valeurs par défaut');
+    }
+    
+    const savedAchievements = localStorage.getItem('spacewolf_achievements');
+    if (savedAchievements) {
+      const achievements = JSON.parse(savedAchievements);
+      console.log('🏆 Achievements chargés:', achievements);
+      setAchievements(achievements);
+    }
+  };
+
+  // Fonction de debug pour diagnostiquer les problèmes
+  const debugGameState = () => {
+    console.log('🔍 === DEBUG GAME STATE ===');
+    console.log(`Niveau: ${playerLevel}`);
+    console.log(`SW Balance: ${swBalance}`);
+    console.log(`SW Claimed: ${swClaimed}`);
+    console.log(`SW Disponibles: ${getAvailableSW()}`);
+    console.log('Journey Steps:', journeySteps);
+    console.log('LocalStorage:', localStorage.getItem('spacewolf_game_stats'));
+    console.log('=========================');
   };
 
   // Copier dans le presse-papiers
@@ -1114,6 +1304,14 @@ export default function Home() {
       
       console.log('Real ETH transfer completed:', transferData);
       
+      // 🎮 GAMIFICATION: Level up et récompense SW
+      levelUp('ETH Transfer');
+      setGameStats(prev => ({ 
+        ...prev, 
+        transactionsCompleted: prev.transactionsCompleted + 1,
+        ethTransferred: prev.ethTransferred + parseFloat(ethAmount)
+      }));
+      
     } catch (err: unknown) {
       console.error('Failed to send ETH transfer:', err);
       
@@ -1259,6 +1457,10 @@ export default function Home() {
       
       console.log('Simulated transaction:', transactionData);
       console.log('Metadata URI:', ipfsUri);
+      
+      // 🎮 GAMIFICATION: Level up et récompense SW
+      levelUp('NFT Minted');
+      setGameStats(prev => ({ ...prev, nftsMinted: prev.nftsMinted + 1 }));
       
     } catch (err: unknown) {
       console.error('Failed to simulate transaction:', err);
@@ -1632,6 +1834,9 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     
+    // 🎮 Charger les stats de jeu
+    loadGameStats();
+    
     const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
     const savedAddress = localStorage.getItem('spacewolf_address');
     const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
@@ -1661,6 +1866,25 @@ export default function Home() {
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20">
+      {/* 🎮 ANIMATIONS DE JEU */}
+      {showLevelUp && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-lg shadow-2xl animate-bounce text-2xl font-bold">
+            🎉 LEVEL UP! 🎉
+            <div className="text-center text-lg mt-2">Niveau {playerLevel}!</div>
+            <div className="text-center text-sm mt-1 opacity-90">{getCurrentStep().name}</div>
+          </div>
+        </div>
+      )}
+      
+      {showClaimAnimation && (
+        <div className="fixed top-20 right-20 z-50 pointer-events-none">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+            +{swClaimedAmount} SW 🪙
+          </div>
+        </div>
+      )}
+      
       {mounted && (
         <div className="fixed top-4 right-4 z-50">
           <div
@@ -1707,6 +1931,17 @@ export default function Home() {
                         {registeredUsername}.eth
                       </span>
                     )}
+                    
+                    {/* 🎮 HUD DE JEU */}
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <div className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-1 rounded-full">
+                        <span className="font-bold">LVL {playerLevel}</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full">
+                        <span className="text-white">🪙</span>
+                        <span className="font-medium">{swBalance} SW</span>
+                      </div>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -1791,6 +2026,181 @@ export default function Home() {
                 )}
               </p>
                 
+                {/* 🎮 PANEL DE JEU */}
+                <div className="mt-4 p-6 border border-purple-200 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-purple-800 flex items-center gap-2">
+                      🎮 SpaceWolf Journey
+                      <span className="text-sm bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                        Level {playerLevel}
+                      </span>
+                    </h3>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">SW Tokens</div>
+                      <div className="text-lg font-bold text-yellow-600">{swBalance} 🪙</div>
+                    </div>
+                  </div>
+                  
+                  {/* Étape actuelle */}
+                  <div className="mb-4 p-3 bg-white/50 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Étape Actuelle</div>
+                    <div className="text-lg font-bold text-purple-700">{getCurrentStep().name}</div>
+                    <div className="text-sm text-gray-600">{getCurrentStep().description}</div>
+                  </div>
+                  
+                  {/* Étape suivante */}
+                  {getNextStep() && (
+                    <div className="mb-4 p-3 bg-white/50 rounded-lg border-2 border-dashed border-purple-300">
+                      <div className="text-sm text-gray-600 mb-1">Prochaine Étape</div>
+                      <div className="text-lg font-bold text-purple-700">{getNextStep().name}</div>
+                      <div className="text-sm text-gray-600">{getNextStep().description}</div>
+                      <div className="text-xs text-yellow-600 mt-1">
+                        🪙 Récompense: {getNextStep().swReward} SW tokens
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Système de Claim SW Tokens */}
+                  <div className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <div className="text-sm font-semibold text-yellow-800">SW Tokens Disponibles</div>
+                        <div className="text-xs text-gray-600">Gagnés en complétant les étapes</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-yellow-600">{getAvailableSW()} 🪙</div>
+                      </div>
+                    </div>
+                    {getAvailableSW() > 0 && (
+                      <button 
+                        onClick={() => claimSW(getAvailableSW())}
+                        className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all duration-200"
+                      >
+                        🪙 Claim {getAvailableSW()} SW Tokens
+                      </button>
+                    )}
+                    {getAvailableSW() === 0 && (
+                      <div className="text-center text-gray-500 text-sm">
+                        Complétez des étapes pour gagner plus de tokens SW !
+                      </div>
+                    )}
+                    
+                    {/* Correction pour le niveau 5 */}
+                    {playerLevel === 5 && swClaimed === 1000 && (
+                      <div className="mt-2 p-2 bg-yellow-100 rounded text-xs text-yellow-800">
+                        ⚠️ Vous avez déjà claimé tous les tokens SW disponibles pour les niveaux 1-5.
+                        <br />Progressez au niveau 6 pour débloquer de nouveaux tokens !
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Statistiques de jeu */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-white/50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Transactions</div>
+                      <div className="text-lg font-bold text-green-600">{gameStats.transactionsCompleted}</div>
+                    </div>
+                    <div className="bg-white/50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">NFTs Mintés</div>
+                      <div className="text-lg font-bold text-blue-600">{gameStats.nftsMinted}</div>
+                    </div>
+                    <div className="bg-white/50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Réseaux</div>
+                      <div className="text-lg font-bold text-orange-600">{gameStats.networksSwitched}</div>
+                    </div>
+                    <div className="bg-white/50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Achievements</div>
+                      <div className="text-lg font-bold text-yellow-600">{achievements.length}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Achievements récents */}
+                  {achievements.length > 0 && (
+                    <div className="bg-white/50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-2">🏆 Achievements Récents</div>
+                      <div className="flex flex-wrap gap-2">
+                        {achievements.slice(-3).map((achievement, index) => (
+                          <span key={index} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                            {achievement}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Actions de Progression */}
+                  {playerLevel >= 5 && (
+                    <div className="bg-white/50 p-3 rounded-lg border border-green-200">
+                      <div className="text-sm text-gray-600 mb-2">🚀 Actions de Progression</div>
+                      <div className="space-y-2">
+                        {playerLevel === 5 && (
+                          <button 
+                            onClick={() => levelUp('Web3 Identity')}
+                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                          >
+                            🆔 Créer Identité Web3 (Niveau 6)
+                          </button>
+                        )}
+                        {playerLevel === 6 && (
+                          <button 
+                            onClick={() => levelUp('Real ETH')}
+                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                          >
+                            💰 Acheter de Vrais ETH (Niveau 7)
+                          </button>
+                        )}
+                        {playerLevel === 7 && (
+                          <button 
+                            onClick={() => levelUp('Advanced Security')}
+                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                          >
+                            🔒 Maîtriser la Sécurité (Niveau 8)
+                          </button>
+                        )}
+                        {playerLevel === 8 && (
+                          <button 
+                            onClick={() => levelUp('DeFi Explorer')}
+                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                          >
+                            🏦 Explorer la DeFi (Niveau 9)
+                          </button>
+                        )}
+                        {playerLevel === 9 && (
+                          <button 
+                            onClick={() => levelUp('Web3 Master')}
+                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                          >
+                            👑 Devenir Maître Web3 (Niveau 10)
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Debug & Reset */}
+                  <div className="bg-white/50 p-3 rounded-lg border border-red-200">
+                    <div className="text-sm text-gray-600 mb-2">🛠️ Debug & Reset</div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={debugGameState}
+                        className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
+                      >
+                        Debug Console
+                      </button>
+                      <button 
+                        onClick={() => {
+                          localStorage.removeItem('spacewolf_game_stats');
+                          localStorage.removeItem('spacewolf_achievements');
+                          window.location.reload();
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                      >
+                        Reset Game
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Step 1: Wallet Generation */}
                 <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 1: Générer un Wallet Ethereum</h3>
