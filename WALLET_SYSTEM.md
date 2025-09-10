@@ -2,14 +2,14 @@
 
 ## Changements Apportés
 
-Le système a été complètement refactorisé pour être inspiré de l'approche CryptoLearn, avec une gestion d'état React simple et des RPC publics gratuits.
+Le système a été complètement refactorisé pour être inspiré de l'approche CryptoLearn, avec une gestion d'état React simple et des RPC publics gratuits. **Toutes les dépendances MetaMask ont été supprimées.**
 
 ### Nouvelles Fonctionnalités
 
 1. **Génération de Wallet Local**
    - Génération automatique d'adresses Ethereum et clés privées
    - Stockage simple dans le localStorage (sans chiffrement complexe)
-   - Pas besoin d'extension MetaMask
+   - **Aucune dépendance MetaMask ou WalletConnect**
 
 2. **Gestion des Réseaux**
    - Support pour mainnet et sepolia
