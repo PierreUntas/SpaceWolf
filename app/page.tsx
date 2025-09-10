@@ -11,7 +11,7 @@ export default function Home() {
   const router = useRouter();
   
   // États principaux du wallet
-  const [wallet, setWallet] = useState<any>(null);
+  const [wallet, setWallet] = useState<ethers.HDNodeWallet | ethers.Wallet | null>(null);
   const [privateKey, setPrivateKey] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [balance, setBalance] = useState<string>('0');
@@ -260,7 +260,7 @@ export default function Home() {
   };
 
   // Fonction pour essayer plusieurs fournisseurs RPC
-  const tryMultipleProviders = async (networkName: string, operation: (provider: ethers.JsonRpcProvider) => Promise<any>) => {
+  const tryMultipleProviders = useCallback(async (networkName: string, operation: (provider: ethers.JsonRpcProvider) => Promise<unknown>) => {
     const rpcUrls = networks[networkName as keyof typeof networks].rpcUrls;
     
     for (let i = 0; i < rpcUrls.length; i++) {
@@ -274,7 +274,7 @@ export default function Home() {
         }
       }
     }
-  };
+  }, [networks]);
 
   // Fonction pour obtenir un provider fiable
   const getReliableProvider = async (networkName: string = network) => {
@@ -296,15 +296,15 @@ export default function Home() {
   };
 
   // Récupérer le solde
-  const getBalance = async (walletAddress: string, networkName: string = network) => {
+  const getBalance = useCallback(async (walletAddress: string, networkName: string = network) => {
     try {
       const balance = await tryMultipleProviders(networkName, async (provider) => {
         const balance = await provider.getBalance(walletAddress);
         const balanceInEth = ethers.formatEther(balance);
         return parseFloat(balanceInEth).toFixed(4);
       });
-      setBalance(balance);
-      setBalanceEth(balance);
+      setBalance(balance as string);
+      setBalanceEth(balance as string);
     } catch (err) {
       console.error('Erreur lors de la récupération du solde:', err);
       setBalance('0');
@@ -314,7 +314,7 @@ export default function Home() {
         setError('Impossible de récupérer le solde. Vérifiez votre connexion internet.');
       }
     }
-  };
+  }, [network, tryMultipleProviders]);
 
   // Changer de réseau
   const switchNetwork = async (newNetwork: string) => {
@@ -346,7 +346,7 @@ export default function Home() {
   };
 
   // Copier dans le presse-papiers
-  const copyToClipboard = (text: string, label: string) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedAddress(true);
     setTimeout(() => setCopiedAddress(false), 2000);
@@ -901,7 +901,7 @@ export default function Home() {
       }
       
       // Connect wallet to provider
-      const connectedWallet = wallet.connect(provider);
+      const connectedWallet = wallet.connect(provider!);
       
       // For now, we'll simulate ENS registration with a real transaction
       // This creates a real transaction that demonstrates the concept
@@ -1011,7 +1011,7 @@ export default function Home() {
       }
       
       // Connect wallet to provider
-      const connectedWallet = wallet.connect(provider);
+      const connectedWallet = wallet.connect(provider!);
       
       // Convert ETH to Wei
       const amountWei = ethers.parseEther(ethAmount);
@@ -1556,27 +1556,8 @@ export default function Home() {
     }
   }, [account, chainId, checkUserTransactionHistory]);
 
-  // Charger les données depuis localStorage au démarrage
-  useEffect(() => {
-    setMounted(true);
-    
-    const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
-    const savedAddress = localStorage.getItem('spacewolf_address');
-    const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
-    
-    // Toujours définir le réseau sauvegardé
-    setNetwork(savedNetwork);
-    
-    if (savedPrivateKey && savedAddress) {
-      setPrivateKey(savedPrivateKey);
-      setAddress(savedAddress);
-      // Reconnecter automatiquement
-      connectWithPrivateKeyFromStorage(savedPrivateKey);
-    }
-  }, []);
-
   // Se connecter avec une clé privée (depuis localStorage)
-  const connectWithPrivateKeyFromStorage = async (privateKeyValue: string) => {
+  const connectWithPrivateKeyFromStorage = useCallback(async (privateKeyValue: string) => {
     try {
       if (!privateKeyValue.trim()) return;
 
@@ -1599,7 +1580,26 @@ export default function Home() {
       localStorage.removeItem('spacewolf_privateKey');
       localStorage.removeItem('spacewolf_address');
     }
-  };
+  }, [getBalance]);
+
+  // Charger les données depuis localStorage au démarrage
+  useEffect(() => {
+    setMounted(true);
+    
+    const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
+    const savedAddress = localStorage.getItem('spacewolf_address');
+    const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
+    
+    // Toujours définir le réseau sauvegardé
+    setNetwork(savedNetwork);
+    
+    if (savedPrivateKey && savedAddress) {
+      setPrivateKey(savedPrivateKey);
+      setAddress(savedAddress);
+      // Reconnecter automatiquement
+      connectWithPrivateKeyFromStorage(savedPrivateKey);
+    }
+  }, [connectWithPrivateKeyFromStorage]);
 
   // Effacer les erreurs automatiquement
   useEffect(() => {
@@ -1612,20 +1612,6 @@ export default function Home() {
     }
   }, [error]);
 
-  // Format wei hex string to ETH with 4 decimals without floating precision loss
-  function formatWeiToEth4dp(weiHex: string): string {
-    try {
-      const wei = BigInt(weiHex);
-      const WEI_IN_ETH = BigInt("1000000000000000000"); // 1e18
-      const ether = wei / WEI_IN_ETH;
-      const remainder = wei % WEI_IN_ETH;
-      const frac = remainder.toString().padStart(18, '0').slice(0, 4);
-      const trimmedFrac = frac.replace(/0+$/, '');
-      return trimmedFrac ? `${ether.toString()}.${trimmedFrac}` : ether.toString();
-    } catch {
-      return '0';
-    }
-  }
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20">
@@ -1689,7 +1675,7 @@ export default function Home() {
             </div>
           )}
           <p className="text-lg sm:text-xl text-center sm:text-left">
-            Hi, I&apos;m SpaceWolf, a human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I&apos;m learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
+            Hi, I'm SpaceWolf, a human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I'm learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
           </p>
           <p className="text-lg sm:text-2xl font-semibold text-center sm:text-left opacity-95 pt-2">
             Discover Web3 step by step!
@@ -1699,13 +1685,13 @@ export default function Home() {
               <div className="flex items-center gap-4">
                 {!isConnected ? (
                   <>
-                    <button
+                <button
                       onClick={createNewWallet}
                       disabled={loading}
-                      className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                    >
+                  className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
+                >
                       {loading ? 'Création...' : 'Créer un nouveau wallet'}
-                    </button>
+                </button>
                     
                     <div className="form-group">
                       <input
@@ -1715,13 +1701,13 @@ export default function Home() {
                         value={privateKey}
                         onChange={(e) => setPrivateKey(e.target.value)}
                       />
-                      <button 
+                  <button
                         className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
                         onClick={connectWithPrivateKey}
                         disabled={loading || !privateKey.trim()}
-                      >
+                  >
                         {loading ? 'Connexion...' : 'Se connecter'}
-                      </button>
+                  </button>
                     </div>
                   </>
                 ) : (
@@ -1738,24 +1724,98 @@ export default function Home() {
                   </>
                 )}
               </div>
+              <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 1</span>
-                <span className="align-middle">Générer un wallet Ethereum avec clé privée.</span>
-                {isStep1Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="wallet-generated">
+                  <span className="align-middle">Générer un wallet Ethereum avec clé privée.</span>
+                  {isStep1Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="wallet-generated">
                     ✓
                   </span>
                 )}
               </p>
+                
+                {/* Step 1: Wallet Generation */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 1: Générer un Wallet Ethereum</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      {!isConnected ? (
+                        <>
+                          <button
+                            onClick={createNewWallet}
+                            disabled={loading}
+                            className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
+                          >
+                            {loading ? 'Création...' : 'Créer un nouveau wallet'}
+                          </button>
+                          
+                          <div className="form-group">
+                            <input
+                              type="password"
+                              className="px-3 py-2 border border-gray-300 rounded-md"
+                              placeholder="Ou entrez votre clé privée (0x...)"
+                              value={privateKey}
+                              onChange={(e) => setPrivateKey(e.target.value)}
+                            />
+                            <button 
+                              className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
+                              onClick={connectWithPrivateKey}
+                              disabled={loading || !privateKey.trim()}
+                            >
+                              {loading ? 'Connexion...' : 'Se connecter'}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
+                          ✅ Wallet généré avec succès !
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 2</span>
-                <span className="align-middle">Réseau Sepolia configuré automatiquement.</span>
+                  <span className="align-middle">Réseau Sepolia configuré automatiquement.</span>
                 {isStep2Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="on-sepolia">
                     ✓
                   </span>
                 )}
               </p>
+                
+                {/* Step 2: Network Configuration */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 2: Configuration du Réseau</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Le réseau Sepolia est configuré automatiquement pour les tests. Vous pouvez basculer entre les réseaux :
+                      </p>
+                      <div className="flex gap-2">
+                        <button 
+                          className={`px-3 py-2 rounded text-sm ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                          onClick={() => switchNetwork('mainnet')}
+                        >
+                          🏠 Mainnet
+                        </button>
+                        <button 
+                          className={`px-3 py-2 rounded text-sm ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                          onClick={() => switchNetwork('sepolia')}
+                        >
+                          🧪 Sepolia (Recommandé)
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        ✅ Réseau Sepolia configuré automatiquement pour les tests
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               {/* Informations du wallet */}
               {isConnected && (
@@ -1768,7 +1828,7 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-mono">{address}</span>
                         <button 
-                          onClick={() => copyToClipboard(address, 'Adresse')}
+                          onClick={() => copyToClipboard(address)}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           📋
@@ -1789,7 +1849,7 @@ export default function Home() {
                           {showPrivateKey ? '👁️‍🗨️' : '👁️'}
                         </button>
                         <button 
-                          onClick={() => copyToClipboard(privateKey, 'Clé privée')}
+                          onClick={() => copyToClipboard(privateKey)}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           📋
@@ -1830,6 +1890,7 @@ export default function Home() {
                   </div>
                 </div>
               )}
+              <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 3</span>
                 <span className="align-middle">Get Sepolia ETH for testing.</span>
@@ -1839,125 +1900,16 @@ export default function Home() {
                   </span>
                 )}
               </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 4</span>
-                <span className="align-middle">Mint an NFT with IPFS metadata.</span>
-                {isStep4Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-minted">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 5</span>
-                <span className="align-middle">Send ETH to a friend&apos;s address.</span>
-                {isStep5Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-sent">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 6</span>
-                <span className="align-middle">Create a Web3 username (.eth domain).</span>
-                {isStep6Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="username-created">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 7</span>
-                <span className="align-middle">Buy real ETH from a cryptocurrency exchange.</span>
-                {isStep7Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-purchased">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 8</span>
-                <span className="align-middle">Set up advanced security with hardware wallets.</span>
-                {isStep8Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="security-setup">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 9</span>
-                <span className="align-middle">Explore DeFi: yield farming, staking, and lending.</span>
-                {isStep9Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="defi-exploration">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 10</span>
-                <span className="align-middle">Bridge to Layer 2: Polygon, Arbitrum, and low-fee DeFi.</span>
-                {isStep10Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="l2-exploration">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 11</span>
-                <span className="align-middle">Master NFT marketplaces: list, buy, and trade NFTs.</span>
-                {isStep11Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-marketplace">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 12</span>
-                <span className="align-middle">Join DAO governance: vote, propose, and shape Web3 communities.</span>
-                {isStep12Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="dao-governance">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 13</span>
-                <span className="align-middle">Build Web3 identity: aggregate profiles and join decentralized social.</span>
-                {isStep13Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-social">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 14</span>
-                <span className="align-middle">Build Web3 dApps: write smart contracts and create decentralized applications.</span>
-                {isStep14Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-development">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 15</span>
-                <span className="align-middle">Master advanced trading: DEX strategies, analytics, and yield optimization.</span>
-                {isStep15Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="trading-analytics">
-                    ✓
-                  </span>
-                )}
-              </p>
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 16</span>
-                <span className="align-middle">Master Web3 gaming: play-to-earn, metaverse land, and virtual economies.</span>
-                {isStep16Completed() && (
-                  <span className="ml-2 align-middle text-[#6e6289]" aria-label="gaming-metaverse">
-                    ✓
-                  </span>
-                )}
-              </p>
-              {account && !isStep3Completed() && (
-                <div className="flex items-center gap-4 mt-2">
+                
+                {/* Step 3: Get Sepolia ETH */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 3: Obtenir des ETH Sepolia</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Pour tester les transactions, vous avez besoin d'ETH Sepolia (gratuit) :
+                      </p>
+                      <div className="flex items-center gap-4">
                   <button
                     onClick={copyAddressToClipboard}
                     className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
@@ -1973,11 +1925,26 @@ export default function Home() {
                     Get Sepolia ETH
                   </a>
                 </div>
-              )}
-              
-              {/* Step 4 NFT Minting Section */}
-              {isStep3Completed() && !isStep4Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <p className="text-xs text-gray-500 mt-2">
+                        💡 Copiez votre adresse et utilisez le faucet pour obtenir des ETH de test gratuits
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 4</span>
+                  <span className="align-middle">Mint an NFT with IPFS metadata.</span>
+                  {isStep4Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-minted">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 4: NFT Minting */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 4: Mint Your NFT</h3>
                   
                   <div className="space-y-4">
@@ -2076,56 +2043,1086 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={uploadToIpfs}
-                        disabled={isUploadingToIpfs || !selectedImage || !isIpfsNodeRunning}
-                        className="px-4 py-2 rounded-md bg-blue-600 text-white border border-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                        disabled={!selectedImage || !isIpfsNodeRunning || isUploadingToIpfs}
+                        className="flex-1 px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                       >
-                        {isUploadingToIpfs ? 'Uploading to IPFS...' : 'Upload Image to IPFS'}
+                        {isUploadingToIpfs ? 'Uploading...' : 'Upload to IPFS'}
                       </button>
-                      
                       <button
                         onClick={simulateMintTransaction}
-                        disabled={isSimulatingTransaction || !metadataIpfsCid}
-                        className="px-4 py-2 rounded-md bg-green-600 text-white border border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                        disabled={!imageIpfsCid || isSimulatingTransaction}
+                        className="flex-1 px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                       >
-                        {isSimulatingTransaction ? 'Simulating...' : 'Simulate Mint Transaction'}
+                        {isSimulatingTransaction ? 'Minting...' : 'Mint NFT'}
                       </button>
                     </div>
                     
                     {imageIpfsCid && (
                       <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                        <p className="text-sm text-green-800">
-                          <strong>Image IPFS CID:</strong> {imageIpfsCid}
-                        </p>
-                        <p className="text-xs text-green-600 mt-1">
-                          Image uploaded successfully to IPFS!
-                        </p>
-                      </div>
-                    )}
-                    
-                    {metadataIpfsCid && (
-                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <p className="text-sm text-blue-800">
-                          <strong>Metadata IPFS CID:</strong> {metadataIpfsCid}
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                          NFT metadata uploaded successfully! CID saved to localStorage.
-                        </p>
+                        <p className="text-sm font-medium text-green-800 mb-1">✅ Image uploaded to IPFS!</p>
+                        <p className="text-xs text-green-600">CID: {imageIpfsCid}</p>
                       </div>
                     )}
                     
                     {transactionHash && (
-                      <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
-                        <p className="text-sm text-purple-800">
-                          <strong>Transaction Hash:</strong> {transactionHash}
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-sm font-medium text-blue-800 mb-1">🎉 NFT Minted Successfully!</p>
+                        <p className="text-xs text-blue-600">Transaction Hash: {transactionHash}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 5</span>
+                  <span className="align-middle">Send ETH to a friend's address.</span>
+                  {isStep5Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-sent">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 5: ETH Transfer */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 5: Envoyer des ETH à un Ami</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Testez l'envoi d'ETH à une adresse amie (vous pouvez utiliser votre propre adresse pour tester) :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="friend-address" className="block text-sm font-medium text-gray-700 mb-1">
+                            Adresse de destination
+                          </label>
+                          <input
+                            type="text"
+                            id="friend-address"
+                            placeholder="0x..."
+                            value={friendAddress}
+                            onChange={(e) => setFriendAddress(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="eth-amount" className="block text-sm font-medium text-gray-700 mb-1">
+                            Montant en ETH
+                          </label>
+                          <input
+                            type="number"
+                            id="eth-amount"
+                            step="0.001"
+                            placeholder="0.001"
+                            value={ethAmount}
+                            onChange={(e) => setEthAmount(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            onClick={sendEthTransfer}
+                            disabled={!friendAddress || !ethAmount || isSimulatingTransfer}
+                            className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          >
+                            {isSimulatingTransfer ? 'Envoi...' : 'Envoyer ETH'}
+                          </button>
+                          <button
+                            onClick={() => setFriendAddress(address || '')}
+                            className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
+                          >
+                            Utiliser mon adresse
+                          </button>
+                        </div>
+                        {transferTransactionHash && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ ETH envoyés avec succès !</p>
+                            <p className="text-xs text-green-600">Transaction Hash: {transferTransactionHash}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 6</span>
+                  <span className="align-middle">Create a Web3 username (.eth domain).</span>
+                  {isStep6Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="username-created">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 6: Web3 Username */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 6: Créer un Nom Web3</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Créez votre identité Web3 avec un nom de domaine .eth :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="web3-username" className="block text-sm font-medium text-gray-700 mb-1">
+                            Nom d'utilisateur Web3
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              id="web3-username"
+                              placeholder="monnom"
+                              value={web3Username}
+                              onChange={(e) => setWeb3Username(e.target.value)}
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            />
+                            <span className="text-gray-500">.eth</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={registerWeb3Username}
+                          disabled={!web3Username || isRegisteringUsername}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          {isRegisteringUsername ? 'Enregistrement...' : 'Enregistrer le nom'}
+                        </button>
+                        {usernameTransactionHash && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Nom Web3 enregistré !</p>
+                            <p className="text-xs text-green-600">Transaction Hash: {usernameTransactionHash}</p>
+                            {registeredUsername && (
+                        <p className="text-xs text-green-600 mt-1">
+                                Votre nom: <strong>{registeredUsername}.eth</strong>
                         </p>
-                        <p className="text-xs text-purple-600 mt-1">
-                          Minting transaction simulated successfully! Hash saved to localStorage.
+                            )}
+                      </div>
+                    )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 7</span>
+                  <span className="align-middle">Buy real ETH from a cryptocurrency exchange.</span>
+                  {isStep7Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-purchased">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 7: Buy Real ETH */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 7: Acheter des ETH Réels</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Achetez des ETH réels sur une plateforme d'échange :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="exchange-select" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme d'échange
+                          </label>
+                          <select
+                            id="exchange-select"
+                            value={selectedExchange}
+                            onChange={(e) => setSelectedExchange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="coinbase">Coinbase</option>
+                            <option value="binance">Binance</option>
+                            <option value="kraken">Kraken</option>
+                            <option value="kucoin">KuCoin</option>
+                            <option value="bybit">Bybit</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="eth-amount-purchase" className="block text-sm font-medium text-gray-700 mb-1">
+                            Montant à acheter (ETH)
+                          </label>
+                          <input
+                            type="number"
+                            id="eth-amount-purchase"
+                            step="0.01"
+                            placeholder="0.1"
+                            value={ethPurchaseAmount}
+                            onChange={(e) => setEthPurchaseAmount(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setHasBoughtRealEth(true)}
+                          disabled={!selectedExchange || !ethPurchaseAmount}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Simulation...
+                        </button>
+                        {hasBoughtRealEth && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Achat d'ETH simulé !</p>
+                            <p className="text-xs text-green-600">
+                              {ethPurchaseAmount} ETH sur {selectedExchange}
+                        </p>
+                      </div>
+                    )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 8</span>
+                  <span className="align-middle">Set up advanced security with hardware wallets.</span>
+                  {isStep8Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="security-setup">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 8: Advanced Security */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 8: Sécurité Avancée</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Configurez une sécurité avancée pour protéger vos actifs :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="hardware-wallet" className="block text-sm font-medium text-gray-700 mb-1">
+                            Portefeuille matériel
+                          </label>
+                          <select
+                            id="hardware-wallet"
+                            value={selectedHardwareWallet}
+                            onChange={(e) => setSelectedHardwareWallet(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez un portefeuille</option>
+                            <option value="ledger">Ledger Nano S/X</option>
+                            <option value="trezor">Trezor Model T</option>
+                            <option value="keepkey">KeepKey</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasBackedUpSeedPhrase}
+                              onChange={(e) => setHasBackedUpSeedPhrase(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai sauvegardé ma phrase de récupération</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasSetUpMultisig}
+                              onChange={(e) => setHasSetUpMultisig(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai configuré un multisig</span>
+                          </label>
+                        </div>
+                        <div>
+                          <label htmlFor="security-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                            Notes de sécurité
+                          </label>
+                          <textarea
+                            id="security-notes"
+                            placeholder="Notes sur votre configuration de sécurité..."
+                            value={securityNotes}
+                            onChange={(e) => setSecurityNotes(e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedSecurity(true)}
+                          disabled={!selectedHardwareWallet}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter la sécurité
+                        </button>
+                        {hasCompletedSecurity && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Sécurité configurée !</p>
+                            <p className="text-xs text-green-600">
+                              Portefeuille: {selectedHardwareWallet}
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
-              )}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 9</span>
+                  <span className="align-middle">Explore DeFi: yield farming, staking, and lending.</span>
+                  {isStep9Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="defi-exploration">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 9: DeFi Exploration */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 9: Explorer DeFi</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Explorez les protocoles DeFi : yield farming, staking et lending :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="defi-protocol" className="block text-sm font-medium text-gray-700 mb-1">
+                            Protocole DeFi
+                          </label>
+                          <select
+                            id="defi-protocol"
+                            value={selectedDeFiProtocol}
+                            onChange={(e) => setSelectedDeFiProtocol(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez un protocole</option>
+                            <option value="uniswap">Uniswap</option>
+                            <option value="compound">Compound</option>
+                            <option value="aave">Aave</option>
+                            <option value="yearn">Yearn Finance</option>
+                            <option value="curve">Curve Finance</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="defi-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                            Activité DeFi
+                          </label>
+                          <select
+                            id="defi-activity"
+                            value={defiActivity}
+                            onChange={(e) => setDefiActivity(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une activité</option>
+                            <option value="liquidity">Fournir de la liquidité</option>
+                            <option value="swap">Échanger des tokens</option>
+                            <option value="lend">Prêter des actifs</option>
+                            <option value="borrow">Emprunter des actifs</option>
+                            <option value="stake">Staker des tokens</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasExploredYieldFarming}
+                              onChange={(e) => setHasExploredYieldFarming(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai exploré le yield farming</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasExploredStaking}
+                              onChange={(e) => setHasExploredStaking(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai exploré le staking</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasExploredLending}
+                              onChange={(e) => setHasExploredLending(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai exploré le lending</span>
+                          </label>
+                        </div>
+                        <div>
+                          <label htmlFor="defi-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                            Notes DeFi
+                          </label>
+                          <textarea
+                            id="defi-notes"
+                            placeholder="Notes sur votre exploration DeFi..."
+                            value={defiNotes}
+                            onChange={(e) => setDefiNotes(e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedDeFi(true)}
+                          disabled={!selectedDeFiProtocol || !defiActivity}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter l'exploration DeFi
+                        </button>
+                        {hasCompletedDeFi && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ DeFi exploré !</p>
+                            <p className="text-xs text-green-600">
+                              Protocole: {selectedDeFiProtocol} - Activité: {defiActivity}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 10</span>
+                  <span className="align-middle">Bridge to Layer 2: Polygon, Arbitrum, and low-fee DeFi.</span>
+                  {isStep10Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="l2-exploration">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 10: Layer 2 Exploration */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 10: Explorer Layer 2</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Explorez les réseaux Layer 2 pour des frais réduits :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="l2-network" className="block text-sm font-medium text-gray-700 mb-1">
+                            Réseau Layer 2
+                          </label>
+                          <select
+                            id="l2-network"
+                            value={selectedL2Network}
+                            onChange={(e) => setSelectedL2Network(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez un réseau L2</option>
+                            <option value="polygon">Polygon</option>
+                            <option value="arbitrum">Arbitrum</option>
+                            <option value="optimism">Optimism</option>
+                            <option value="base">Base</option>
+                            <option value="zksync">zkSync Era</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="l2-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                            Activité L2
+                          </label>
+                          <select
+                            id="l2-activity"
+                            value={l2Activity}
+                            onChange={(e) => setL2Activity(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une activité</option>
+                            <option value="bridge">Bridger des actifs</option>
+                            <option value="defi">Utiliser DeFi L2</option>
+                            <option value="nft">Minter des NFTs</option>
+                            <option value="swap">Échanger des tokens</option>
+                            <option value="stake">Staker sur L2</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasBridgedAssets}
+                              onChange={(e) => setHasBridgedAssets(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai bridgé des actifs</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasExploredL2DeFi}
+                              onChange={(e) => setHasExploredL2DeFi(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai exploré DeFi L2</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasComparedGasFees}
+                              onChange={(e) => setHasComparedGasFees(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai comparé les frais de gas</span>
+                          </label>
+                        </div>
+                        <div>
+                          <label htmlFor="l2-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                            Notes L2
+                          </label>
+                          <textarea
+                            id="l2-notes"
+                            placeholder="Notes sur votre exploration L2..."
+                            value={l2Notes}
+                            onChange={(e) => setL2Notes(e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedL2(true)}
+                          disabled={!selectedL2Network || !l2Activity}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter l'exploration L2
+                        </button>
+                        {hasCompletedL2 && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ L2 exploré !</p>
+                            <p className="text-xs text-green-600">
+                              Réseau: {selectedL2Network} - Activité: {l2Activity}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 11</span>
+                  <span className="align-middle">Master NFT marketplaces: list, buy, and trade NFTs.</span>
+                  {isStep11Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-marketplace">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 11: NFT Marketplace */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 11: Marketplaces NFT</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Maîtrisez les marketplaces NFT : listez, achetez et échangez :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="nft-marketplace" className="block text-sm font-medium text-gray-700 mb-1">
+                            Marketplace NFT
+                          </label>
+                          <select
+                            id="nft-marketplace"
+                            value={selectedNFTMarketplace}
+                            onChange={(e) => setSelectedNFTMarketplace(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une marketplace</option>
+                            <option value="opensea">OpenSea</option>
+                            <option value="blur">Blur</option>
+                            <option value="looksrare">LooksRare</option>
+                            <option value="x2y2">X2Y2</option>
+                            <option value="magiceden">Magic Eden</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="nft-marketplace-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                            Activité Marketplace
+                          </label>
+                          <select
+                            id="nft-marketplace-activity"
+                            value={nftMarketplaceActivity}
+                            onChange={(e) => setNftMarketplaceActivity(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une activité</option>
+                            <option value="list">Lister un NFT</option>
+                            <option value="buy">Acheter un NFT</option>
+                            <option value="sell">Vendre un NFT</option>
+                            <option value="bid">Faire une offre</option>
+                            <option value="trade">Échanger des NFTs</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasListedNFT}
+                              onChange={(e) => setHasListedNFT(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai listé un NFT</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasBoughtNFT}
+                              onChange={(e) => setHasBoughtNFT(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai acheté un NFT</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => {}}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai vendu un NFT</span>
+                          </label>
+                        </div>
+                        <div>
+                          <label htmlFor="nft-marketplace-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                            Notes Marketplace
+                          </label>
+                          <textarea
+                            id="nft-marketplace-notes"
+                            placeholder="Notes sur votre expérience marketplace..."
+                            value={nftMarketplaceNotes}
+                            onChange={(e) => setNftMarketplaceNotes(e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedNFTMarketplace(true)}
+                          disabled={!selectedNFTMarketplace || !nftMarketplaceActivity}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter l'exploration Marketplace
+                        </button>
+                        {hasCompletedNFTMarketplace && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Marketplace maîtrisée !</p>
+                            <p className="text-xs text-green-600">
+                              Marketplace: {selectedNFTMarketplace} - Activité: {nftMarketplaceActivity}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 12</span>
+                  <span className="align-middle">Join DAO governance: vote, propose, and shape Web3 communities.</span>
+                  {isStep12Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="dao-governance">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 12: DAO Governance */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 12: Gouvernance DAO</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Rejoignez la gouvernance DAO : votez, proposez et façonnez les communautés Web3 :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="dao-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme DAO
+                          </label>
+                          <select
+                            id="dao-platform"
+                            value={selectedDAOPlatform}
+                            onChange={(e) => setSelectedDAOPlatform(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="snapshot">Snapshot</option>
+                            <option value="aragon">Aragon</option>
+                            <option value="colony">Colony</option>
+                            <option value="moloch">Moloch DAO</option>
+                            <option value="compound">Compound Governance</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => {}}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai voté dans une DAO</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => {}}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai proposé une proposition</span>
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedDAOGovernance(true)}
+                          disabled={!selectedDAOPlatform}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter la gouvernance DAO
+                        </button>
+                        {hasCompletedDAOGovernance && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Gouvernance DAO complétée !</p>
+                            <p className="text-xs text-green-600">Plateforme: {selectedDAOPlatform}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 13</span>
+                  <span className="align-middle">Build Web3 identity: aggregate profiles and join decentralized social.</span>
+                  {isStep13Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-social">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 13: Web3 Social */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 13: Identité Web3 Sociale</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Construisez votre identité Web3 : agrégation de profils et réseaux sociaux décentralisés :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="web3-social-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme Web3 Sociale
+                          </label>
+                          <select
+                            id="web3-social-platform"
+                            value={selectedWeb3SocialPlatform}
+                            onChange={(e) => setSelectedWeb3SocialPlatform(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="lens">Lens Protocol</option>
+                            <option value="farcaster">Farcaster</option>
+                            <option value="mirror">Mirror</option>
+                            <option value="gitcoin">Gitcoin Passport</option>
+                            <option value="ceramic">Ceramic Network</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasCreatedWeb3Profile}
+                              onChange={(e) => setHasCreatedWeb3Profile(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai créé un profil Web3</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => {}}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai rejoint un réseau social décentralisé</span>
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedWeb3Social(true)}
+                          disabled={!selectedWeb3SocialPlatform}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter l'identité Web3
+                        </button>
+                        {hasCompletedWeb3Social && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Identité Web3 construite !</p>
+                            <p className="text-xs text-green-600">Plateforme: {selectedWeb3SocialPlatform}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 14</span>
+                  <span className="align-middle">Build Web3 dApps: write smart contracts and create decentralized applications.</span>
+                  {isStep14Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-development">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 14: Web3 Development */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 14: Développement Web3</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Développez des dApps Web3 : écrivez des smart contracts et créez des applications décentralisées :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="web3-dev-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme de Développement
+                          </label>
+                          <select
+                            id="web3-dev-platform"
+                            value={selectedDevPlatform}
+                            onChange={(e) => setSelectedDevPlatform(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="remix">Remix IDE</option>
+                            <option value="hardhat">Hardhat</option>
+                            <option value="truffle">Truffle</option>
+                            <option value="foundry">Foundry</option>
+                            <option value="brownie">Brownie</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasWrittenSmartContract}
+                              onChange={(e) => setHasWrittenSmartContract(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai écrit un smart contract</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => {}}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai déployé une dApp</span>
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedWeb3Development(true)}
+                          disabled={!selectedDevPlatform}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter le développement Web3
+                        </button>
+                        {hasCompletedWeb3Development && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Développement Web3 complété !</p>
+                            <p className="text-xs text-green-600">Plateforme: {selectedDevPlatform}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 15</span>
+                  <span className="align-middle">Master advanced trading: DEX strategies, analytics, and yield optimization.</span>
+                  {isStep15Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="trading-analytics">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 15: Trading Analytics */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 15: Trading Avancé</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Maîtrisez le trading avancé : stratégies DEX, analytics et optimisation de rendement :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="trading-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme de Trading
+                          </label>
+                          <select
+                            id="trading-platform"
+                            value={selectedTradingPlatform}
+                            onChange={(e) => setSelectedTradingPlatform(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="uniswap">Uniswap V3</option>
+                            <option value="sushiswap">SushiSwap</option>
+                            <option value="curve">Curve Finance</option>
+                            <option value="balancer">Balancer</option>
+                            <option value="1inch">1inch</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasExecutedAdvancedTrade}
+                              onChange={(e) => setHasExecutedAdvancedTrade(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai exécuté un trade avancé</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasUsedAnalyticsTools}
+                              onChange={(e) => setHasUsedAnalyticsTools(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai utilisé des outils d'analytics</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasOptimizedYield}
+                              onChange={(e) => setHasOptimizedYield(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai optimisé le rendement</span>
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedTradingAnalytics(true)}
+                          disabled={!selectedTradingPlatform}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter le trading avancé
+                        </button>
+                        {hasCompletedTradingAnalytics && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Trading avancé maîtrisé !</p>
+                            <p className="text-xs text-green-600">Plateforme: {selectedTradingPlatform}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 16</span>
+                  <span className="align-middle">Master Web3 gaming: play-to-earn, metaverse land, and virtual economies.</span>
+                  {isStep16Completed() && (
+                    <span className="ml-2 align-middle text-[#6e6289]" aria-label="gaming-metaverse">
+                      ✓
+                    </span>
+                  )}
+                </p>
+                
+                {/* Step 16: Gaming Metaverse */}
+                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 16: Gaming Web3</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Maîtrisez le gaming Web3 : play-to-earn, terrains metaverse et économies virtuelles :
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="gaming-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                            Plateforme Gaming
+                          </label>
+                          <select
+                            id="gaming-platform"
+                            value={selectedGamingPlatform}
+                            onChange={(e) => setSelectedGamingPlatform(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                          >
+                            <option value="">Sélectionnez une plateforme</option>
+                            <option value="axie">Axie Infinity</option>
+                            <option value="sandbox">The Sandbox</option>
+                            <option value="decentraland">Decentraland</option>
+                            <option value="cryptokitties">CryptoKitties</option>
+                            <option value="stepn">STEPN</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasPlayedToEarn}
+                              onChange={(e) => setHasPlayedToEarn(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai joué en play-to-earn</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasOwnedMetaverseLand}
+                              onChange={(e) => setHasOwnedMetaverseLand(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai possédé un terrain metaverse</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={hasParticipatedInVirtualWorld}
+                              onChange={(e) => setHasParticipatedInVirtualWorld(e.target.checked)}
+                              className="rounded border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700">J'ai participé à un monde virtuel</span>
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setHasCompletedGamingMetaverse(true)}
+                          disabled={!selectedGamingPlatform}
+                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          Compléter le gaming Web3
+                        </button>
+                        {hasCompletedGamingMetaverse && (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ Gaming Web3 maîtrisé !</p>
+                            <p className="text-xs text-green-600">Plateforme: {selectedGamingPlatform}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               
               {/* Step 4 Completed Section */}
               {isStep4Completed() && (
@@ -2198,8 +3195,8 @@ export default function Home() {
                 </div>
               )}
               
-              {/* Step 5 ETH Transfer Section */}
-              {isStep4Completed() && !isStep5Completed() && (
+              {/* Step 5 ETH Transfer Section - REMOVED (now integrated above) */}
+              {false && (
                 <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 5: Send ETH to a Friend</h3>
                   
@@ -2210,7 +3207,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-yellow-800">Real Transaction Warning</p>
                         <p className="text-xs text-yellow-700 mt-1">
-                          This will send real ETH on Sepolia testnet. Make sure you&apos;re on the correct network and have sufficient balance for gas fees.
+                          This will send real ETH on Sepolia testnet. Make sure you're on the correct network and have sufficient balance for gas fees.
                         </p>
                       </div>
                     </div>
@@ -2219,7 +3216,7 @@ export default function Home() {
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="friend-address" className="block text-sm font-medium text-gray-700 mb-2">
-                        Friend&apos;s Ethereum Address
+                        Friend's Ethereum Address
                       </label>
                       <input
                         type="text"
@@ -2230,7 +3227,7 @@ export default function Home() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Enter your friend&apos;s Ethereum wallet address
+                        Enter your friend's Ethereum wallet address
                       </p>
                     </div>
                     
@@ -2317,7 +3314,7 @@ export default function Home() {
                     </div>
                     
                     <p className="text-xs text-orange-600 mt-2">
-                      Great! You&apos;ve completed Step 5. Now move on to Step 6 to create your Web3 username and complete the full journey!
+                      Great! You've completed Step 5. Now move on to Step 6 to create your Web3 username and complete the full journey!
                     </p>
                   </div>
                 </div>
@@ -2449,7 +3446,7 @@ export default function Home() {
                     </div>
                     
                     <p className="text-xs text-purple-600 mt-2">
-                      🎊 Congratulations! You&apos;ve completed Step 6! Now move on to Step 7 to buy real ETH and complete the ultimate Web3 journey!
+                      🎊 Congratulations! You've completed Step 6! Now move on to Step 7 to buy real ETH and complete the ultimate Web3 journey!
                     </p>
                   </div>
                 </div>
@@ -2467,7 +3464,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-blue-800">Real ETH Purchase</p>
                         <p className="text-xs text-blue-700 mt-1">
-                          Now it&apos;s time to buy real ETH! Choose a reputable exchange and purchase ETH to complete your Web3 journey.
+                          Now it's time to buy real ETH! Choose a reputable exchange and purchase ETH to complete your Web3 journey.
                         </p>
                       </div>
                     </div>
@@ -2623,10 +3620,10 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-green-200 rounded-md">
                       <p className="text-sm text-green-800">
-                        <strong>Congratulations!</strong> You&apos;ve completed the ultimate Web3 journey!
+                        <strong>Congratulations!</strong> You've completed the ultimate Web3 journey!
                       </p>
                       <p className="text-xs text-green-600 mt-1">
-                        You&apos;ve successfully: connected a wallet, switched networks, gotten test ETH, minted an NFT, sent ETH to a friend, created a Web3 identity, and bought real ETH!
+                        You've successfully: connected a wallet, switched networks, gotten test ETH, minted an NFT, sent ETH to a friend, created a Web3 identity, and bought real ETH!
                       </p>
                     </div>
                     
@@ -2834,15 +3831,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-red-200 rounded-md">
                       <p className="text-sm text-red-800">
-                        <strong>Congratulations!</strong> You&apos;ve secured your Web3 assets!
+                        <strong>Congratulations!</strong> You've secured your Web3 assets!
                       </p>
                       <p className="text-xs text-red-600 mt-1">
-                        You&apos;ve now completed: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, and advanced security!
+                        You've now completed: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, and advanced security!
                       </p>
                     </div>
                     
                     <p className="text-xs text-red-600 mt-2">
-                      🔐🛡️ Security setup complete! Now let&apos;s explore DeFi to make your crypto work for you! 🚀💰
+                      🔐🛡️ Security setup complete! Now let's explore DeFi to make your crypto work for you! 🚀💰
                     </p>
                   </div>
                 </div>
@@ -3101,15 +4098,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-green-200 rounded-md">
                       <p className="text-sm text-green-800">
-                        <strong>Congratulations!</strong> You&apos;re now a DeFi explorer!
+                        <strong>Congratulations!</strong> You're now a DeFi explorer!
                       </p>
                       <p className="text-xs text-green-600 mt-1">
-                        You&apos;ve completed the FULL Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, and DeFi exploration!
+                        You've completed the FULL Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, and DeFi exploration!
                       </p>
                     </div>
                     
                     <p className="text-xs text-green-600 mt-2">
-                      🚀💰 DeFi exploration complete! Now let&apos;s explore Layer 2 solutions for ultra-low fees! ⚡🌐
+                      🚀💰 DeFi exploration complete! Now let's explore Layer 2 solutions for ultra-low fees! ⚡🌐
                     </p>
                   </div>
                 </div>
@@ -3367,15 +4364,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-purple-200 rounded-md">
                       <p className="text-sm text-purple-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered Layer 2 scaling!
+                        <strong>Congratulations!</strong> You've mastered Layer 2 scaling!
                       </p>
                       <p className="text-xs text-purple-600 mt-1">
-                        You&apos;ve completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, and Layer 2 scaling!
+                        You've completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, and Layer 2 scaling!
                       </p>
                     </div>
                     
                     <p className="text-xs text-purple-600 mt-2">
-                      🎊⚡ Layer 2 mastery complete! Now let&apos;s master NFT marketplaces and monetize your digital art! 🎨💰
+                      🎊⚡ Layer 2 mastery complete! Now let's master NFT marketplaces and monetize your digital art! 🎨💰
                     </p>
                   </div>
                 </div>
@@ -3393,7 +4390,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-pink-800">Monetize Your Digital Art</p>
                         <p className="text-xs text-pink-700 mt-1">
-                          You&apos;ve minted NFTs, now learn to trade them! Master NFT marketplaces to list your creations, 
+                          You've minted NFTs, now learn to trade them! Master NFT marketplaces to list your creations, 
                           buy from other artists, and understand the NFT economy.
                         </p>
                       </div>
@@ -3635,15 +4632,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-pink-200 rounded-md">
                       <p className="text-sm text-pink-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered NFT marketplaces!
+                        <strong>Congratulations!</strong> You've mastered NFT marketplaces!
                       </p>
                       <p className="text-xs text-pink-600 mt-1">
-                        You&apos;ve completed the LEGENDARY Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, and NFT marketplace mastery!
+                        You've completed the LEGENDARY Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, and NFT marketplace mastery!
                       </p>
                     </div>
                     
                     <p className="text-xs text-pink-600 mt-2">
-                      🎨💰 NFT marketplace mastery complete! Now let&apos;s join DAO governance and shape Web3 communities! 🗳️✨
+                      🎨💰 NFT marketplace mastery complete! Now let's join DAO governance and shape Web3 communities! 🗳️✨
                     </p>
                   </div>
                 </div>
@@ -3661,7 +4658,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-indigo-800">Shape Web3 Communities</p>
                         <p className="text-xs text-indigo-700 mt-1">
-                          You&apos;ve mastered Web3 tools, now participate in governance! Join DAOs, vote on proposals, 
+                          You've mastered Web3 tools, now participate in governance! Join DAOs, vote on proposals, 
                           and help shape the future of decentralized communities.
                         </p>
                       </div>
@@ -3904,15 +4901,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-indigo-200 rounded-md">
                       <p className="text-sm text-indigo-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered DAO governance!
+                        <strong>Congratulations!</strong> You've mastered DAO governance!
                       </p>
                       <p className="text-xs text-indigo-600 mt-1">
-                        You&apos;ve completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, and DAO governance!
+                        You've completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, and DAO governance!
                       </p>
                     </div>
                     
                     <p className="text-xs text-indigo-600 mt-2">
-                      🗳️✨ DAO governance mastery complete! Now let&apos;s build comprehensive Web3 identities and join decentralized social networks! 👥🌟
+                      🗳️✨ DAO governance mastery complete! Now let's build comprehensive Web3 identities and join decentralized social networks! 👥🌟
                     </p>
                   </div>
                 </div>
@@ -3930,7 +4927,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-teal-800">Build Your Web3 Identity</p>
                         <p className="text-xs text-teal-700 mt-1">
-                          You&apos;ve mastered Web3 tools and governance, now build your comprehensive identity! 
+                          You've mastered Web3 tools and governance, now build your comprehensive identity! 
                           Aggregate all your Web3 activities into unified profiles and join decentralized social networks.
                         </p>
                       </div>
@@ -4172,15 +5169,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-teal-200 rounded-md">
                       <p className="text-sm text-teal-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered Web3 social identity!
+                        <strong>Congratulations!</strong> You've mastered Web3 social identity!
                       </p>
                       <p className="text-xs text-teal-600 mt-1">
-                        You&apos;ve completed the LEGENDARY Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, and Web3 social identity aggregation!
+                        You've completed the LEGENDARY Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, and Web3 social identity aggregation!
                       </p>
                     </div>
                     
                     <p className="text-xs text-teal-600 mt-2">
-                      👥🌟 Web3 social mastery complete! Now let&apos;s become Web3 builders and create our own decentralized applications! 💻🚀
+                      👥🌟 Web3 social mastery complete! Now let's become Web3 builders and create our own decentralized applications! 💻🚀
                     </p>
                   </div>
                 </div>
@@ -4198,7 +5195,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-orange-800">Become a Web3 Builder</p>
                         <p className="text-xs text-orange-700 mt-1">
-                          You&apos;ve mastered Web3 tools and social networks, now become a builder! 
+                          You've mastered Web3 tools and social networks, now become a builder! 
                           Learn to write smart contracts, deploy dApps, and create the future of decentralized applications.
                         </p>
                       </div>
@@ -4440,15 +5437,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-orange-200 rounded-md">
                       <p className="text-sm text-orange-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered Web3 development!
+                        <strong>Congratulations!</strong> You've mastered Web3 development!
                       </p>
                       <p className="text-xs text-orange-600 mt-1">
-                        You&apos;ve completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, and Web3 development!
+                        You've completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, and Web3 development!
                       </p>
                     </div>
                     
                     <p className="text-xs text-orange-600 mt-2">
-                      💻🚀 Web3 development mastery complete! Now let&apos;s become professional traders and maximize DeFi returns! 📊💰
+                      💻🚀 Web3 development mastery complete! Now let's become professional traders and maximize DeFi returns! 📊💰
                     </p>
                   </div>
                 </div>
@@ -4466,7 +5463,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-emerald-800">Become a Professional Trader</p>
                         <p className="text-xs text-emerald-700 mt-1">
-                          You&apos;ve mastered Web3 development, now become a professional trader! 
+                          You've mastered Web3 development, now become a professional trader! 
                           Learn advanced DEX strategies, analytics tools, and yield optimization to maximize your DeFi returns.
                         </p>
                       </div>
@@ -4763,15 +5760,15 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-emerald-200 rounded-md">
                       <p className="text-sm text-emerald-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered advanced trading analytics!
+                        <strong>Congratulations!</strong> You've mastered advanced trading analytics!
                       </p>
                       <p className="text-xs text-emerald-600 mt-1">
-                        You&apos;ve completed the PROFESSIONAL Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, and advanced trading analytics!
+                        You've completed the PROFESSIONAL Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, and advanced trading analytics!
                       </p>
                     </div>
                     
                     <p className="text-xs text-emerald-600 mt-2">
-                      📊💰 Trading analytics mastery complete! Now let&apos;s enter the metaverse and master Web3 gaming! 🎮🌐
+                      📊💰 Trading analytics mastery complete! Now let's enter the metaverse and master Web3 gaming! 🎮🌐
                     </p>
                   </div>
                 </div>
@@ -4789,7 +5786,7 @@ export default function Home() {
                       <div>
                         <p className="text-sm font-medium text-purple-800">Enter the Metaverse</p>
                         <p className="text-xs text-purple-700 mt-1">
-                          You&apos;ve mastered professional trading, now enter the virtual world! 
+                          You've mastered professional trading, now enter the virtual world! 
                           Learn play-to-earn gaming, metaverse land ownership, and virtual economies.
                         </p>
                       </div>
@@ -5086,10 +6083,10 @@ export default function Home() {
                     
                     <div className="p-3 bg-white border border-purple-200 rounded-md">
                       <p className="text-sm text-purple-800">
-                        <strong>Congratulations!</strong> You&apos;ve mastered Web3 gaming and metaverse!
+                        <strong>Congratulations!</strong> You've mastered Web3 gaming and metaverse!
                       </p>
                       <p className="text-xs text-purple-600 mt-1">
-                        You&apos;ve completed the METAVERSE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, advanced trading analytics, and Web3 gaming metaverse!
+                        You've completed the METAVERSE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, advanced trading analytics, and Web3 gaming metaverse!
                       </p>
                     </div>
                     
@@ -5144,3 +6141,5 @@ export default function Home() {
     </div>
   );
 }
+
+
