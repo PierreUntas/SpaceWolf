@@ -186,9 +186,13 @@ export default function Home() {
       description: 'Réseau de test avec des ETH gratuits',
       chainId: 11155111,
       rpcUrls: [
+        'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+        'https://sepolia.drpc.org',
+        'https://rpc.sepolia.org',
+        'https://sepolia.gateway.tenderly.co',
         'https://ethereum-sepolia.publicnode.com',
         'https://sepolia.publicnode.com',
-        'https://rpc.sepolia.org'
+        'https://sepolia-rpc.publicnode.com'
       ],
       blockExplorer: 'https://sepolia.etherscan.io'
     }
@@ -262,15 +266,34 @@ export default function Home() {
   // Fonction pour essayer plusieurs fournisseurs RPC
   const tryMultipleProviders = useCallback(async (networkName: string, operation: (provider: ethers.JsonRpcProvider) => Promise<unknown>) => {
     const rpcUrls = networks[networkName as keyof typeof networks].rpcUrls;
+    console.log(`🔄 Tentative avec ${rpcUrls.length} fournisseurs RPC pour ${networkName}`);
     
     for (let i = 0; i < rpcUrls.length; i++) {
       try {
-        const provider = new ethers.JsonRpcProvider(rpcUrls[i]);
-        return await operation(provider);
+        console.log(`🔗 Test du RPC ${i + 1}/${rpcUrls.length}: ${rpcUrls[i]}`);
+        
+        // Créer le provider avec un timeout plus long
+        const provider = new ethers.JsonRpcProvider(rpcUrls[i], undefined, {
+          polling: false,
+          staticNetwork: true
+        });
+        
+        // Test de connectivité avec timeout
+        const blockNumberPromise = provider.getBlockNumber();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 10000)
+        );
+        
+        await Promise.race([blockNumberPromise, timeoutPromise]);
+        console.log(`✅ RPC ${i + 1} fonctionne, exécution de l'opération...`);
+        
+        const result = await operation(provider);
+        console.log(`🎉 Opération réussie avec RPC ${i + 1}`);
+        return result;
       } catch (err) {
-        console.warn(`RPC ${i + 1} failed:`, rpcUrls[i], (err as Error).message);
+        console.warn(`❌ RPC ${i + 1} failed:`, rpcUrls[i], (err as Error).message);
         if (i === rpcUrls.length - 1) {
-          throw new Error(`Tous les fournisseurs RPC ont échoué. Vérifiez votre connexion internet.`);
+          throw new Error(`Tous les fournisseurs RPC ont échoué pour ${networkName}. Vérifiez votre connexion internet.`);
         }
       }
     }
@@ -298,20 +321,34 @@ export default function Home() {
   // Récupérer le solde
   const getBalance = useCallback(async (walletAddress: string, networkName: string = network) => {
     try {
+      console.log(`🔍 Récupération du solde pour ${walletAddress} sur ${networkName}`);
+      
+      // S'assurer qu'on utilise bien le réseau spécifié
+      if (!networks[networkName as keyof typeof networks]) {
+        throw new Error(`Réseau ${networkName} non supporté`);
+      }
+      
       const balance = await tryMultipleProviders(networkName, async (provider) => {
+        console.log(`📡 Test du provider pour ${walletAddress}`);
         const balance = await provider.getBalance(walletAddress);
         const balanceInEth = ethers.formatEther(balance);
-        return parseFloat(balanceInEth).toFixed(4);
+        const formattedBalance = parseFloat(balanceInEth).toFixed(4);
+        console.log(`💰 Solde trouvé: ${formattedBalance} ETH`);
+        return formattedBalance;
       });
+      
+      console.log(`✅ Solde mis à jour: ${balance} ETH`);
       setBalance(balance as string);
       setBalanceEth(balance as string);
     } catch (err) {
-      console.error('Erreur lors de la récupération du solde:', err);
+      console.error('❌ Erreur lors de la récupération du solde:', err);
       setBalance('0');
       setBalanceEth('0');
       // Afficher un message d'erreur plus clair
       if ((err as Error).message.includes('fournisseurs RPC')) {
-        setError('Impossible de récupérer le solde. Vérifiez votre connexion internet.');
+        setError(`Impossible de récupérer le solde sur ${networkName}. Vérifiez votre connexion internet.`);
+      } else {
+        setError(`Erreur de récupération du solde: ${(err as Error).message}`);
       }
     }
   }, [network, tryMultipleProviders]);
@@ -345,6 +382,26 @@ export default function Home() {
     }
   };
 
+  // Rafraîchir le solde manuellement
+  const refreshBalance = async () => {
+    if (!wallet || !address) {
+      setError('Aucun wallet connecté');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      console.log('🔄 Rafraîchissement manuel du solde...');
+      await getBalance(address, network);
+    } catch (err) {
+      console.error('Erreur lors du rafraîchissement:', err);
+      setError('Erreur lors du rafraîchissement du solde');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Copier dans le presse-papiers
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -368,17 +425,6 @@ export default function Home() {
     localStorage.removeItem('spacewolf_privateKey');
     localStorage.removeItem('spacewolf_address');
     localStorage.removeItem('spacewolf_network');
-  };
-
-  // Rafraîchir le solde
-  const refreshBalance = async () => {
-    if (wallet) {
-      try {
-        await getBalance(wallet.address, network);
-      } catch (err) {
-        console.warn('Erreur lors du rafraîchissement:', (err as Error).message);
-      }
-    }
   };
 
   // Helper functions to check step completion
@@ -1599,7 +1645,7 @@ export default function Home() {
       // Reconnecter automatiquement
       connectWithPrivateKeyFromStorage(savedPrivateKey);
     }
-  }, [connectWithPrivateKeyFromStorage]);
+  }, []); // Empty dependency array - run only once on mount
 
   // Effacer les erreurs automatiquement
   useEffect(() => {
@@ -1645,7 +1691,17 @@ export default function Home() {
                     />
                   )}
                   <div className="flex flex-col items-end">
-                    <span className="text-gray-900 font-semibold">Ξ {balanceEth ?? '...'}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-900 font-semibold">Ξ {balanceEth ?? '...'}</span>
+                      <button 
+                        onClick={refreshBalance}
+                        disabled={loading}
+                        className="text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Rafraîchir le solde"
+                      >
+                        {loading ? '⏳' : '🔄'}
+                      </button>
+                    </div>
                     {registeredUsername && (
                       <span className="text-xs text-purple-600 font-medium">
                         {registeredUsername}.eth
@@ -1863,9 +1919,11 @@ export default function Home() {
                         <span className="text-sm font-semibold">{balance} ETH</span>
                         <button 
                           onClick={refreshBalance}
-                          className="text-blue-600 hover:text-blue-800"
+                          disabled={loading}
+                          className="text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="Rafraîchir le solde"
                         >
-                          🔄
+                          {loading ? '⏳' : '🔄'}
                         </button>
                       </div>
                     </div>
