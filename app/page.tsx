@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createHelia, Helia } from 'helia';
 import { unixfs } from '@helia/unixfs';
 import { ethers } from 'ethers';
@@ -185,7 +185,7 @@ export default function Home() {
   }
 
   // Configuration des réseaux
-  const networks = {
+  const networks = useMemo(() => ({
     mainnet: {
       name: 'Réseau Principal Ethereum',
       displayName: 'Réseau Principal',
@@ -214,7 +214,7 @@ export default function Home() {
       ],
       blockExplorer: 'https://sepolia.etherscan.io'
     }
-  };
+  }), []);
 
   // Créer un nouveau wallet
   const createNewWallet = async () => {
@@ -408,9 +408,9 @@ export default function Home() {
       setGameStats(prev => ({ ...prev, networksSwitched: prev.networksSwitched + 1 }));
       
       if (newNetwork === 'mainnet') {
-        addAchievement('Mainnet Explorer', 'network_mainnet');
+        addAchievement('Mainnet Explorer');
       } else if (newNetwork === 'sepolia') {
-        addAchievement('Testnet Master', 'network_sepolia');
+        addAchievement('Testnet Master');
       }
       
     } catch (err) {
@@ -475,7 +475,7 @@ export default function Home() {
     setShowLevelUp(true);
     
     // Ajouter un achievement pour le level up
-    addAchievement(`Level ${newLevel} Reached!`, 'level_up');
+    addAchievement(`Level ${newLevel} Reached!`);
     
     // Sauvegarder immédiatement avec le nouveau niveau
     saveGameStats({ level: newLevel });
@@ -529,7 +529,7 @@ export default function Home() {
   };
 
   // Ajouter un achievement
-  const addAchievement = (title: string, type: string) => {
+  const addAchievement = (title: string) => {
     if (!achievements.includes(title)) {
       setAchievements(prev => [...prev, title]);
       console.log(`🏆 Achievement débloqué: ${title}`);
@@ -1850,7 +1850,7 @@ export default function Home() {
       // Reconnecter automatiquement
       connectWithPrivateKeyFromStorage(savedPrivateKey);
     }
-  }, []); // Empty dependency array - run only once on mount
+  }, [connectWithPrivateKeyFromStorage, loadGameStats]); // Include dependencies
 
   // Effacer les erreurs automatiquement
   useEffect(() => {
@@ -2052,10 +2052,10 @@ export default function Home() {
                   {getNextStep() && (
                     <div className="mb-4 p-3 bg-white/50 rounded-lg border-2 border-dashed border-purple-300">
                       <div className="text-sm text-gray-600 mb-1">Prochaine Étape</div>
-                      <div className="text-lg font-bold text-purple-700">{getNextStep().name}</div>
-                      <div className="text-sm text-gray-600">{getNextStep().description}</div>
+                      <div className="text-lg font-bold text-purple-700">{getNextStep()?.name}</div>
+                      <div className="text-sm text-gray-600">{getNextStep()?.description}</div>
                       <div className="text-xs text-yellow-600 mt-1">
-                        🪙 Récompense: {getNextStep().swReward} SW tokens
+                        🪙 Récompense: {getNextStep()?.swReward} SW tokens
                       </div>
                     </div>
                   )}
