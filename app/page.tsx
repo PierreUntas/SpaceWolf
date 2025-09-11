@@ -204,11 +204,11 @@ export default function Home() {
       description: 'Réseau de test avec des ETH gratuits',
       chainId: 11155111,
       rpcUrls: [
-        'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-        'https://sepolia.drpc.org',
+        'https://ethereum-sepolia.publicnode.com',
         'https://rpc.sepolia.org',
         'https://sepolia.gateway.tenderly.co',
-        'https://ethereum-sepolia.publicnode.com',
+        'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+        'https://sepolia.drpc.org',
         'https://sepolia.publicnode.com',
         'https://sepolia-rpc.publicnode.com'
       ],
@@ -317,6 +317,8 @@ export default function Home() {
         if (i === rpcUrls.length - 1) {
           throw new Error(`Tous les fournisseurs RPC ont échoué pour ${networkName}. Vérifiez votre connexion internet.`);
         }
+        // Délai de 1 seconde entre les tentatives pour éviter de surcharger les RPC gratuits
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   }, [networks]);
@@ -363,10 +365,7 @@ export default function Home() {
       setBalance(balance as string);
       setBalanceEth(balance as string);
       
-      // 🎮 GAMIFICATION: Level up pour Balance Check (niveau 3)
-      if (playerLevel === 2) {
-        levelUp('Balance Check');
-      }
+      // La progression sera vérifiée automatiquement par checkAdvancedStepConditions
       
     } catch (err) {
       console.error('❌ Erreur lors de la récupération du solde:', err);
@@ -379,7 +378,7 @@ export default function Home() {
         setError(`Erreur de récupération du solde: ${(err as Error).message}`);
       }
     }
-  }, [network, tryMultipleProviders]);
+  }, [network, tryMultipleProviders, playerLevel]);
 
   // Changer de réseau
   const switchNetwork = async (newNetwork: string) => {
@@ -397,16 +396,28 @@ export default function Home() {
         setTimeout(async () => {
           try {
             await getBalance(wallet.address, newNetwork);
+            
+            // Vérifier la progression après le changement de réseau
+            setTimeout(() => {
+              console.log('🔍 Vérification progression après changement de réseau');
+              checkAdvancedStepConditions();
+            }, 300);
+            
           } catch (err) {
             console.warn('Erreur lors de la mise à jour du solde:', (err as Error).message);
           }
         }, 200);
       }
       
-      // 🎮 GAMIFICATION: Level up et récompense SW
-      levelUp('Network Switch');
+      // 🎮 GAMIFICATION: Level up et récompense SW (seulement si pas déjà fait)
+      if (!hasActionBeenCompleted('Network Switch')) {
+        levelUp('Network Switch');
+      }
+      
+      // Toujours incrémenter le compteur de réseaux explorés
       setGameStats(prev => ({ ...prev, networksSwitched: prev.networksSwitched + 1 }));
       
+      // Ajouter des achievements spécifiques au réseau (sans level up)
       if (newNetwork === 'mainnet') {
         addAchievement('Mainnet Explorer');
       } else if (newNetwork === 'sepolia') {
@@ -432,6 +443,13 @@ export default function Home() {
       setError('');
       console.log('🔄 Rafraîchissement manuel du solde...');
       await getBalance(address, network);
+      
+      // Forcer la vérification de progression après le rafraîchissement
+      setTimeout(() => {
+        console.log('🔍 Vérification forcée de progression après rafraîchissement');
+        checkAdvancedStepConditions();
+      }, 500);
+      
     } catch (err) {
       console.error('Erreur lors du rafraîchissement:', err);
       setError('Erreur lors du rafraîchissement du solde');
@@ -466,13 +484,42 @@ export default function Home() {
     return journeySteps.find(step => step.level === playerLevel + 1);
   };
 
-  // Passer au niveau suivant (simple +1)
+  // Vérifier si une action a déjà été accomplie pour éviter les level ups multiples
+  const hasActionBeenCompleted = (action: string): boolean => {
+    const completedActions = localStorage.getItem('spacewolf-completed-actions');
+    if (!completedActions) return false;
+    
+    const actions = JSON.parse(completedActions);
+    return actions.includes(action);
+  };
+
+  // Marquer une action comme accomplie
+  const markActionAsCompleted = (action: string) => {
+    const completedActions = localStorage.getItem('spacewolf-completed-actions');
+    const actions = completedActions ? JSON.parse(completedActions) : [];
+    
+    if (!actions.includes(action)) {
+      actions.push(action);
+      localStorage.setItem('spacewolf-completed-actions', JSON.stringify(actions));
+    }
+  };
+
+  // Passer au niveau suivant (simple +1) avec vérification des actions déjà accomplies
   const levelUp = (action: string) => {
+    // Vérifier si cette action a déjà été accomplie
+    if (hasActionBeenCompleted(action)) {
+      console.log(`⚠️ Action "${action}" déjà accomplie, pas de level up`);
+      return;
+    }
+
     const newLevel = playerLevel + 1;
     console.log(`🎉 LEVEL UP! ${action} → Niveau ${playerLevel} → ${newLevel}`);
     
     setPlayerLevel(newLevel);
     setShowLevelUp(true);
+    
+    // Marquer l'action comme accomplie
+    markActionAsCompleted(action);
     
     // Ajouter un achievement pour le level up
     addAchievement(`Level ${newLevel} Reached!`);
@@ -484,6 +531,90 @@ export default function Home() {
     setTimeout(() => setShowLevelUp(false), 3000);
     
     console.log(`🎉 Level up terminé! Nouveau niveau: ${newLevel}`);
+  };
+
+  // Vérifier automatiquement les conditions de progression pour les étapes avancées
+  const checkAdvancedStepConditions = useCallback(() => {
+    const balanceInEth = parseFloat(balanceEth || '0');
+    
+    // Étape 3: Balance Check - Vérifier si l'utilisateur a des ETH ET est au niveau 2
+    if (playerLevel === 2 && balanceInEth > 0) {
+      console.log(`🎉 Balance détectée: ${balanceInEth} ETH - Passage au niveau 3!`);
+      levelUp('Balance Check');
+      return;
+    }
+    
+    // Étape 6: Web3 Identity - Vérifier si l'utilisateur a créé plusieurs transactions
+    if (playerLevel === 5 && gameStats.transactionsCompleted >= 2) {
+      console.log(`🎉 Web3 Identity détectée - Passage au niveau 6!`);
+      levelUp('Web3 Identity');
+      return;
+    }
+    
+    // Étape 7: Real ETH - Vérifier si l'utilisateur utilise le mainnet
+    if (playerLevel === 6 && network === 'mainnet') {
+      console.log(`🎉 Real ETH détecté (mainnet) - Passage au niveau 7!`);
+      levelUp('Real ETH');
+      return;
+    }
+    
+    // Étape 8: Advanced Security - Vérifier si l'utilisateur a une balance importante
+    if (playerLevel === 7 && balanceInEth >= 0.1) {
+      console.log(`🎉 Advanced Security détectée (balance élevée) - Passage au niveau 8!`);
+      levelUp('Advanced Security');
+      return;
+    }
+    
+    // Étape 9: DeFi Explorer - Vérifier si l'utilisateur a exploré plusieurs réseaux
+    if (playerLevel === 8 && gameStats.networksSwitched >= 3) {
+      console.log(`🎉 DeFi Explorer détecté (multi-réseaux) - Passage au niveau 9!`);
+      levelUp('DeFi Explorer');
+      return;
+    }
+    
+    // Étape 10: Web3 Master - Vérifier si l'utilisateur a complété toutes les activités
+    if (playerLevel === 9 && gameStats.nftsMinted >= 1 && gameStats.transactionsCompleted >= 3 && gameStats.ethTransferred >= 0.01) {
+      console.log(`🎉 Web3 Master détecté (activités complètes) - Passage au niveau 10!`);
+      levelUp('Web3 Master');
+      return;
+    }
+  }, [playerLevel, balanceEth, network, gameStats]);
+
+  // Vérifier les conditions de progression quand les données changent
+  useEffect(() => {
+    if (mounted && playerLevel >= 2) {
+      console.log(`🔍 Vérification progression - Niveau: ${playerLevel}, Balance: ${balanceEth} ETH, Réseau: ${network}`);
+      checkAdvancedStepConditions();
+    }
+  }, [mounted, playerLevel, balanceEth, network, gameStats, checkAdvancedStepConditions]);
+
+  // Fonction de débogage pour tester la progression manuellement
+  const debugProgression = () => {
+    console.log('🔍 DEBUG PROGRESSION:');
+    console.log(`- Niveau actuel: ${playerLevel}`);
+    console.log(`- Balance ETH: ${balanceEth}`);
+    console.log(`- Réseau: ${network}`);
+    console.log(`- Transactions: ${gameStats.transactionsCompleted}`);
+    console.log(`- NFTs mintés: ${gameStats.nftsMinted}`);
+    console.log(`- ETH transférés: ${gameStats.ethTransferred}`);
+    console.log(`- Réseaux explorés: ${gameStats.networksSwitched}`);
+    
+    const balanceInEth = parseFloat(balanceEth || '0');
+    console.log(`- Balance en ETH (parseFloat): ${balanceInEth}`);
+    console.log(`- Condition niveau 3 (niveau 2 + balance > 0): ${playerLevel === 2 && balanceInEth > 0}`);
+    
+    // Afficher les actions accomplies
+    const completedActions = localStorage.getItem('spacewolf-completed-actions');
+    const actions = completedActions ? JSON.parse(completedActions) : [];
+    console.log(`- Actions accomplies: ${actions.join(', ') || 'Aucune'}`);
+    
+    checkAdvancedStepConditions();
+  };
+
+  // Fonction pour réinitialiser les actions accomplies (pour les tests)
+  const resetCompletedActions = () => {
+    localStorage.removeItem('spacewolf-completed-actions');
+    console.log('🔄 Actions accomplies réinitialisées');
   };
 
   // === SYSTÈME DE TOKEN SW (SPACEWOLF) ===
@@ -1828,7 +1959,7 @@ export default function Home() {
       localStorage.removeItem('spacewolf_privateKey');
       localStorage.removeItem('spacewolf_address');
     }
-  }, [getBalance]);
+  }, []); // Remove getBalance dependency to prevent circular dependency
 
   // Charger les données depuis localStorage au démarrage
   useEffect(() => {
@@ -1850,7 +1981,7 @@ export default function Home() {
       // Reconnecter automatiquement
       connectWithPrivateKeyFromStorage(savedPrivateKey);
     }
-  }, [connectWithPrivateKeyFromStorage, loadGameStats]); // Include dependencies
+  }, []); // Empty dependency array - only run once on mount
 
   // Effacer les erreurs automatiquement
   useEffect(() => {
@@ -1924,6 +2055,20 @@ export default function Home() {
                         title="Rafraîchir le solde"
                       >
                         {loading ? '⏳' : '🔄'}
+                      </button>
+                      <button 
+                        onClick={debugProgression}
+                        className="text-blue-500 hover:text-blue-700 transition-colors ml-2"
+                        title="Déboguer la progression"
+                      >
+                        🔍
+                      </button>
+                      <button 
+                        onClick={resetCompletedActions}
+                        className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                        title="Réinitialiser les actions accomplies"
+                      >
+                        🔄
                       </button>
                     </div>
                     {registeredUsername && (
