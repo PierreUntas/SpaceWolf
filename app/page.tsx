@@ -1845,11 +1845,11 @@ export default function Home() {
 
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20">
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-2 sm:p-4 lg:p-8 pb-16 sm:pb-20 gap-2 sm:gap-4 lg:gap-8 overflow-x-hidden">
       {/* 🎮 ANIMATIONS DE JEU */}
       {showLevelUp && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-lg shadow-2xl animate-bounce text-2xl font-bold">
+          <div className="bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] px-4 sm:px-8 py-3 sm:py-4 rounded-lg shadow-2xl animate-bounce text-lg sm:text-2xl font-bold">
             🎉 LEVEL UP! 🎉
             <div className="text-center text-lg mt-2">Niveau {playerLevel}!</div>
             <div className="text-center text-sm mt-1 opacity-90">{getCurrentStep().name}</div>
@@ -1859,7 +1859,7 @@ export default function Home() {
       
       {showClaimAnimation && (
         <div className="fixed top-20 right-20 z-50 pointer-events-none">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+          <div className="bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] px-3 sm:px-4 py-2 sm:py-2 rounded-lg shadow-lg animate-pulse">
             +{swClaimedAmount} SW 🪙
           </div>
         </div>
@@ -1870,7 +1870,7 @@ export default function Home() {
           <div
             onClick={undefined}
             role={undefined}
-            className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 backdrop-blur px-3 py-2 shadow-sm text-xs sm:text-sm cursor-default`}
+            className={`flex items-center gap-2 rounded-md border border-[#eeddde] bg-[#d8d0f3]/80 backdrop-blur px-2 sm:px-3 py-2 shadow-sm text-xs sm:text-sm cursor-default`}
             aria-label={'Wallet balance'}
           >
             {/* ETH logo */}
@@ -1896,59 +1896,59 @@ export default function Home() {
                   )}
                   <div className="flex flex-col items-end">
                     <div className="flex items-center gap-1">
-                      <span className="text-gray-900 font-semibold">Ξ {balanceEth ?? '...'}</span>
+                      <span className="text-[#59507b] font-semibold">Ξ {balanceEth ?? '...'}</span>
                       <button 
                         onClick={refreshBalance}
                         disabled={loading || !network}
-                        className="text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="text-[#59507b] hover:text-[#59507b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         title={!network ? "Sélectionnez d'abord un réseau" : "Rafraîchir le solde"}
                       >
                         {loading ? '⏳' : '🔄'}
                       </button>
                     </div>
                     {registeredUsername && (
-                      <span className="text-xs text-purple-600 font-medium">
+                      <span className="text-xs text-[#59507b] font-medium">
                         {registeredUsername}.eth
                       </span>
                     )}
                     
                     {/* 🎮 HUD DE JEU */}
                     <div className="mt-2 flex items-center gap-2 text-xs">
-                      <div className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-1 bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-[#fbf8f2] px-2 py-1 rounded-full">
                         <span className="font-bold">LVL {playerLevel}</span>
                       </div>
-                      <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full">
-                        <span className="text-white">🪙</span>
+                      <div className="flex items-center gap-1 bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#fbf8f2] px-2 py-1 rounded-full">
+                        <span className="text-[#fbf8f2]">🪙</span>
                         <span className="font-medium">{swBalance} SW</span>
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
-                <span className="text-gray-500">Générer un wallet</span>
+                <span className="text-[#59507b]">Générer un wallet</span>
               )}
             </div>
           </div>
         </div>
       )}
-      <main className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-[16px] row-start-2 items-center sm:items-start w-full max-w-7xl">
+      <main className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-4 lg:gap-[16px] row-start-2 items-center sm:items-start w-full max-w-7xl px-1 sm:px-2 lg:px-0 overflow-x-hidden">
         <div className="flex flex-col gap-[16px] items-center sm:items-start lg:flex-1">
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-6xl font-bold tracking-tight text-center sm:text-left break-words">
             SPACEWOLF JOURNEY
           </h1>
           {registeredUsername && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-lg">
-              <span className="text-purple-600">🌐</span>
-              <span className="text-lg font-semibold text-purple-800">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#eeddde] border border-[#d8d0f3] rounded-lg">
+              <span className="text-[#59507b]">🌐</span>
+              <span className="text-base sm:text-lg font-semibold text-[#59507b]">
                 {registeredUsername}.eth
               </span>
-              <span className="text-sm text-purple-600">Web3 Identity</span>
+              <span className="text-xs sm:text-sm text-[#59507b]">Web3 Identity</span>
             </div>
           )}
-          <p className="text-lg sm:text-xl text-center sm:text-left">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-center sm:text-left break-words">
             Hi, I'm SpaceWolf, a human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I'm learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
           </p>
-          <p className="text-lg sm:text-2xl font-semibold text-center sm:text-left opacity-95 pt-2">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-2xl font-semibold text-center sm:text-left opacity-95 pt-2 break-words">
             Discover Web3 step by step!
           </p>
           {mounted && (
@@ -1959,8 +1959,8 @@ export default function Home() {
                 onWalletDisconnected={handleSecureWalletDisconnected}
               />
               <div className="mt-4">
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 1</span>
+              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-xs sm:text-sm font-semibold align-middle">Step 1</span>
                   <span className="align-middle">Générer un wallet Ethereum avec clé privée.</span>
                   {isStep1Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="wallet-generated">
@@ -1970,67 +1970,67 @@ export default function Home() {
               </p>
                 
                 {/* 🎮 PANEL DE JEU */}
-                <div className="mt-4 p-6 border border-purple-200 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50">
+                <div className="mt-4 p-4 sm:p-6 border border-[#d8d0f3] rounded-lg bg-gradient-to-br from-[#d8d0f3] to-[#fcd6c5]">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-purple-800 flex items-center gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#59507b] flex items-center gap-2">
                       🎮 SpaceWolf Journey
-                      <span className="text-sm bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                      <span className="text-xs sm:text-sm bg-[#fcd6c5] text-[#59507b] px-2 py-1 rounded-full">
                         Level {playerLevel}
                       </span>
                     </h3>
                     <div className="text-right">
-                      <div className="text-sm text-gray-600">SW Tokens</div>
-                      <div className="text-lg font-bold text-yellow-600">{swBalance} 🪙</div>
+                      <div className="text-sm text-[#59507b]">SW Tokens</div>
+                      <div className="text-lg font-bold text-[#59507b]">{swBalance} 🪙</div>
                     </div>
                   </div>
                   
                   {/* Étape actuelle */}
-                  <div className="mb-4 p-3 bg-white/50 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Étape Actuelle</div>
-                    <div className="text-lg font-bold text-purple-700">{getCurrentStep().name}</div>
-                    <div className="text-sm text-gray-600">{getCurrentStep().description}</div>
+                  <div className="mb-4 p-3 sm:p-3 bg-[#fbf8f2]/50 rounded-lg">
+                    <div className="text-sm text-[#59507b] mb-1">Étape Actuelle</div>
+                    <div className="text-lg font-bold text-[#59507b]">{getCurrentStep().name}</div>
+                    <div className="text-sm text-[#59507b]">{getCurrentStep().description}</div>
                   </div>
                   
                   {/* Étape suivante */}
                   {getNextStep() && (
-                    <div className="mb-4 p-3 bg-white/50 rounded-lg border-2 border-dashed border-purple-300">
-                      <div className="text-sm text-gray-600 mb-1">Prochaine Étape</div>
-                      <div className="text-lg font-bold text-purple-700">{getNextStep()?.name}</div>
-                      <div className="text-sm text-gray-600">{getNextStep()?.description}</div>
-                      <div className="text-xs text-yellow-600 mt-1">
+                    <div className="mb-4 p-3 sm:p-3 bg-[#fbf8f2]/50 rounded-lg border-2 border-dashed border-[#d8d0f3]">
+                      <div className="text-sm text-[#59507b] mb-1">Prochaine Étape</div>
+                      <div className="text-lg font-bold text-[#59507b]">{getNextStep()?.name}</div>
+                      <div className="text-sm text-[#59507b]">{getNextStep()?.description}</div>
+                      <div className="text-xs text-[#59507b] mt-1">
                         🪙 Récompense: {getNextStep()?.swReward} SW tokens
                       </div>
                     </div>
                   )}
                   
                   {/* Système de Claim SW Tokens */}
-                  <div className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                  <div className="mb-4 p-3 sm:p-4 bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] rounded-lg border border-[#fcd6c5]">
                     <div className="flex justify-between items-center mb-3">
                       <div>
-                        <div className="text-sm font-semibold text-yellow-800">SW Tokens Disponibles</div>
-                        <div className="text-xs text-gray-600">Gagnés en complétant les étapes</div>
+                        <div className="text-sm font-semibold text-[#59507b]">SW Tokens Disponibles</div>
+                        <div className="text-xs text-[#59507b]">Gagnés en complétant les étapes</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-yellow-600">{getAvailableSW()} 🪙</div>
+                        <div className="text-xl font-bold text-[#59507b]">{getAvailableSW()} 🪙</div>
                       </div>
                     </div>
                     {getAvailableSW() > 0 && (
                       <button 
                         onClick={() => claimSW(getAvailableSW())}
-                        className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all duration-200"
+                        className="w-full bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#fbf8f2] px-3 sm:px-4 py-2 rounded-lg font-semibold hover:from-[#fcd6c5] hover:to-[#eeddde] transition-all duration-200 text-sm sm:text-base"
                       >
                         🪙 Claim {getAvailableSW()} SW Tokens
                       </button>
                     )}
                     {getAvailableSW() === 0 && (
-                      <div className="text-center text-gray-500 text-sm">
+                      <div className="text-center text-[#59507b] text-sm">
                         Complétez des étapes pour gagner plus de tokens SW !
                       </div>
                     )}
                     
                     {/* Correction pour le niveau 5 */}
                     {playerLevel === 5 && swClaimed === 1000 && (
-                      <div className="mt-2 p-2 bg-yellow-100 rounded text-xs text-yellow-800">
+                      <div className="mt-2 p-2 sm:p-2 bg-[#eeddde] rounded text-xs sm:text-xs text-[#59507b]">
                         ⚠️ Vous avez déjà claimé tous les tokens SW disponibles pour les niveaux 1-5.
                         <br />Progressez au niveau 6 pour débloquer de nouveaux tokens !
                       </div>
@@ -2039,31 +2039,31 @@ export default function Home() {
                   
                   {/* Statistiques de jeu */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">Transactions</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 sm:p-3 rounded-lg">
+                      <div className="text-sm text-[#59507b]">Transactions</div>
                       <div className="text-lg font-bold text-green-600">{gameStats.transactionsCompleted}</div>
                     </div>
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">NFTs Mintés</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 sm:p-3 rounded-lg">
+                      <div className="text-sm text-[#59507b]">NFTs Mintés</div>
                       <div className="text-lg font-bold text-blue-600">{gameStats.nftsMinted}</div>
                     </div>
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">Réseaux</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 sm:p-3 rounded-lg">
+                      <div className="text-sm text-[#59507b]">Réseaux</div>
                       <div className="text-lg font-bold text-orange-600">{gameStats.networksSwitched}</div>
                     </div>
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">Achievements</div>
-                      <div className="text-lg font-bold text-yellow-600">{achievements.length}</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 sm:p-3 rounded-lg">
+                      <div className="text-sm text-[#59507b]">Achievements</div>
+                      <div className="text-lg font-bold text-[#59507b]">{achievements.length}</div>
                     </div>
                   </div>
                   
                   {/* Achievements récents */}
                   {achievements.length > 0 && (
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-2">🏆 Achievements Récents</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 sm:p-3 rounded-lg">
+                      <div className="text-sm text-[#59507b] mb-2">🏆 Achievements Récents</div>
                       <div className="flex flex-wrap gap-2">
                         {achievements.slice(-3).map((achievement, index) => (
-                          <span key={index} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                          <span key={index} className="bg-[#eeddde] text-[#59507b] px-2 py-1 rounded-full text-xs">
                             {achievement}
                           </span>
                         ))}
@@ -2073,13 +2073,13 @@ export default function Home() {
                   
                   {/* Actions de Progression */}
                   {playerLevel >= 5 && (
-                    <div className="bg-white/50 p-3 rounded-lg border border-green-200">
-                      <div className="text-sm text-gray-600 mb-2">🚀 Actions de Progression</div>
+                    <div className="bg-[#fbf8f2]/50 p-3 rounded-lg border border-green-200">
+                      <div className="text-sm text-[#59507b] mb-2">🚀 Actions de Progression</div>
                       <div className="space-y-2">
                         {playerLevel === 5 && (
                           <button 
                             onClick={() => levelUp('Web3 Identity')}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                            className="w-full bg-[#d8d0f3] text-[#fbf8f2] px-3 py-2 rounded text-xs sm:text-sm hover:bg-[#59507b]"
                           >
                             🆔 Créer Identité Web3 (Niveau 6)
                           </button>
@@ -2087,7 +2087,7 @@ export default function Home() {
                         {playerLevel === 6 && (
                           <button 
                             onClick={() => levelUp('Real ETH')}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                            className="w-full bg-[#d8d0f3] text-[#fbf8f2] px-3 py-2 rounded text-xs sm:text-sm hover:bg-[#59507b]"
                           >
                             💰 Acheter de Vrais ETH (Niveau 7)
                           </button>
@@ -2095,7 +2095,7 @@ export default function Home() {
                         {playerLevel === 7 && (
                           <button 
                             onClick={() => levelUp('Advanced Security')}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                            className="w-full bg-[#d8d0f3] text-[#fbf8f2] px-3 py-2 rounded text-xs sm:text-sm hover:bg-[#59507b]"
                           >
                             🔒 Maîtriser la Sécurité (Niveau 8)
                           </button>
@@ -2103,7 +2103,7 @@ export default function Home() {
                         {playerLevel === 8 && (
                           <button 
                             onClick={() => levelUp('DeFi Explorer')}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                            className="w-full bg-[#d8d0f3] text-[#fbf8f2] px-3 py-2 rounded text-xs sm:text-sm hover:bg-[#59507b]"
                           >
                             🏦 Explorer la DeFi (Niveau 9)
                           </button>
@@ -2111,7 +2111,7 @@ export default function Home() {
                         {playerLevel === 9 && (
                           <button 
                             onClick={() => levelUp('Web3 Master')}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600"
+                            className="w-full bg-[#d8d0f3] text-[#fbf8f2] px-3 py-2 rounded text-xs sm:text-sm hover:bg-[#59507b]"
                           >
                             👑 Devenir Maître Web3 (Niveau 10)
                           </button>
@@ -2124,8 +2124,8 @@ export default function Home() {
 
               </div>
               <div className="mt-4">
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 2</span>
+              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 2</span>
                   <span className="align-middle">Sélectionner un réseau Ethereum.</span>
                 {isStep2Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="on-sepolia">
@@ -2135,28 +2135,28 @@ export default function Home() {
               </p>
                 
                 {/* Step 2: Network Configuration */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 2: Configuration du Réseau</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 2: Configuration du Réseau</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-2">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-2">
                         Sélectionnez un réseau Ethereum pour vos transactions. Nous recommandons Testnet pour les tests :
                       </p>
                       <div className="flex gap-2">
                         <button 
-                          className={`px-3 py-2 rounded text-sm ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                          className={`px-3 py-2 rounded text-sm ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-[#59507b]'}`}
                           onClick={() => switchNetwork('mainnet')}
                         >
                           🏠 Mainnet
                         </button>
                         <button 
-                          className={`px-3 py-2 rounded text-sm ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                          className={`px-3 py-2 rounded text-sm ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-[#59507b]'}`}
                           onClick={() => switchNetwork('sepolia')}
                         >
                           🧪 Testnet (Recommandé)
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-[#59507b] mt-2">
                         💡 Cliquez sur Testnet pour les tests ou Mainnet pour les transactions réelles
                       </p>
                     </div>
@@ -2166,12 +2166,12 @@ export default function Home() {
               
               {/* Informations du wallet */}
               {isConnected && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-[#eeddde]">
                   <h3 className="text-lg font-semibold mb-3">Informations du Wallet</h3>
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Adresse:</span>
+                      <span className="text-sm text-[#59507b]">Adresse:</span>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-mono">{address}</span>
                         <button 
@@ -2184,7 +2184,7 @@ export default function Home() {
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Solde:</span>
+                      <span className="text-sm text-[#59507b]">Solde:</span>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold">{balance} ETH</span>
                         <button 
@@ -2199,16 +2199,16 @@ export default function Home() {
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Réseau:</span>
+                      <span className="text-sm text-[#59507b]">Réseau:</span>
                       <div className="flex gap-2">
                         <button 
-                          className={`px-2 py-1 rounded text-xs ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                          className={`px-2 py-1 rounded text-xs ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-[#59507b]'}`}
                           onClick={() => switchNetwork('mainnet')}
                         >
                           🏠 Mainnet
                         </button>
                         <button 
-                          className={`px-2 py-1 rounded text-xs ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                          className={`px-2 py-1 rounded text-xs ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-[#59507b]'}`}
                           onClick={() => switchNetwork('sepolia')}
                         >
                           🧪 Sepolia
@@ -2219,8 +2219,8 @@ export default function Home() {
                 </div>
               )}
               <div className="mt-4">
-              <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 3</span>
+              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 3</span>
                 <span className="align-middle">Get Sepolia ETH for testing.</span>
                 {isStep3Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="has-sepolia-eth">
@@ -2230,17 +2230,17 @@ export default function Home() {
               </p>
                 
                 {/* Step 3: Get Sepolia ETH */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 3: Obtenir des ETH Sepolia</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 3: Obtenir des ETH Sepolia</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Pour tester les transactions, vous avez besoin d'ETH Sepolia (gratuit) :
                       </p>
                       <div className="flex items-center gap-4">
                   <button
                     onClick={copyAddressToClipboard}
-                    className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
+                    className="px-3 py-2 rounded-md bg-gray-100 text-[#59507b] border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
                   >
                     {copiedAddress ? 'Copied!' : 'Copy Address'}
                   </button>
@@ -2248,12 +2248,12 @@ export default function Home() {
                     href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer text-sm"
+                    className="px-3 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 transition cursor-pointer text-sm"
                   >
                     Get Sepolia ETH
                   </a>
                 </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-[#59507b] mt-2">
                         💡 Copiez votre adresse et utilisez le faucet pour obtenir des ETH de test gratuits
                       </p>
                     </div>
@@ -2261,8 +2261,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 4</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 4</span>
                   <span className="align-middle">Mint an NFT with IPFS metadata.</span>
                   {isStep4Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-minted">
@@ -2272,34 +2272,34 @@ export default function Home() {
                 </p>
                 
                 {/* Step 4: NFT Minting */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 4: Mint Your NFT</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 4: Mint Your NFT</h3>
                   
                   <div className="space-y-4">
                     {/* IPFS Node Status */}
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">IPFS Node Status</span>
+                        <span className="text-sm font-medium text-[#59507b]">IPFS Node Status</span>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           isIpfsNodeRunning ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
                           {isIpfsNodeRunning ? 'Running' : 'Not Running'}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600 mb-2">
+                      <p className="text-xs text-[#59507b] mb-2">
                         A local IPFS node is required to upload metadata. Click &quot;Start IPFS Node&quot; to initialize.
                       </p>
                       <button
                         onClick={startIpfsNode}
                         disabled={isIpfsNodeRunning}
-                        className="px-3 py-1 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-xs"
+                        className="px-3 py-1 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-xs"
                       >
                         {isIpfsNodeRunning ? 'Node Running' : 'Start IPFS Node'}
                       </button>
                     </div>
 
                     <div>
-                      <label htmlFor="nft-image" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="nft-image" className="block text-sm font-medium text-[#59507b] mb-2">
                         Select NFT Image
                       </label>
                       <input
@@ -2309,14 +2309,14 @@ export default function Home() {
                         onChange={handleImageSelect}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Supported formats: JPG, PNG, GIF, WebP (max 10MB)
                       </p>
                       
                       {imagePreview && (
                         <div className="mt-3">
-                          <p className="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
-                          <div className="border border-gray-200 rounded-md p-2 bg-white">
+                          <p className="text-sm font-medium text-[#59507b] mb-2">Image Preview:</p>
+                          <div className="border border-[#eeddde] rounded-md p-2 bg-white">
                             <Image
                               src={imagePreview}
                               alt="NFT Preview"
@@ -2325,7 +2325,7 @@ export default function Home() {
                               className="max-w-full max-h-48 mx-auto rounded-md"
                             />
                             {selectedImage && (
-                              <p className="text-xs text-gray-500 mt-2 text-center">
+                              <p className="text-xs text-[#59507b] mt-2 text-center">
                                 {selectedImage.name} ({(selectedImage.size / 1024).toFixed(1)} KB)
                               </p>
                             )}
@@ -2350,7 +2350,7 @@ export default function Home() {
                                 <button
                                   onClick={setNftAsProfilePicture}
                                   disabled={isUsingNftAsProfile}
-                                  className="px-2 py-1 rounded text-xs bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="px-2 py-1 rounded text-xs bg-blue-600 text-[#fbf8f2] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {isUsingNftAsProfile ? 'Active' : 'Set as Profile'}
                                 </button>
@@ -2361,18 +2361,18 @@ export default function Home() {
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <button
                         onClick={uploadToIpfs}
                         disabled={!selectedImage || !isIpfsNodeRunning || isUploadingToIpfs}
-                        className="flex-1 px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        className="flex-1 px-4 py-2 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                       >
                         {isUploadingToIpfs ? 'Uploading...' : 'Upload to IPFS'}
                       </button>
                       <button
                         onClick={simulateMintTransaction}
                         disabled={!imageIpfsCid || isSimulatingTransaction}
-                        className="flex-1 px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                        className="flex-1 px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                       >
                         {isSimulatingTransaction ? 'Minting...' : 'Mint NFT'}
                       </button>
@@ -2395,8 +2395,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 5</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 5</span>
                   <span className="align-middle">Send ETH to a friend's address.</span>
                   {isStep5Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-sent">
@@ -2406,16 +2406,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 5: ETH Transfer */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 5: Envoyer des ETH à un Ami</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 5: Envoyer des ETH à un Ami</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Testez l'envoi d'ETH à une adresse amie (vous pouvez utiliser votre propre adresse pour tester) :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="friend-address" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="friend-address" className="block text-sm font-medium text-[#59507b] mb-1">
                             Adresse de destination
                           </label>
                           <input
@@ -2428,7 +2428,7 @@ export default function Home() {
                           />
                         </div>
                         <div>
-                          <label htmlFor="eth-amount" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="eth-amount" className="block text-sm font-medium text-[#59507b] mb-1">
                             Montant en ETH
                           </label>
                           <input
@@ -2445,13 +2445,13 @@ export default function Home() {
                           <button
                             onClick={sendEthTransfer}
                             disabled={!friendAddress || !ethAmount || isSimulatingTransfer}
-                            className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                            className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                           >
                             {isSimulatingTransfer ? 'Envoi...' : 'Envoyer ETH'}
                           </button>
                           <button
                             onClick={() => setFriendAddress(address || '')}
-                            className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
+                            className="px-3 py-2 rounded-md bg-gray-100 text-[#59507b] border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
                           >
                             Utiliser mon adresse
                           </button>
@@ -2468,8 +2468,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 6</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 6</span>
                   <span className="align-middle">Create a Web3 username (.eth domain).</span>
                   {isStep6Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="username-created">
@@ -2479,16 +2479,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 6: Web3 Username */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 6: Créer un Nom Web3</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 6: Créer un Nom Web3</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Créez votre identité Web3 avec un nom de domaine .eth :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="web3-username" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="web3-username" className="block text-sm font-medium text-[#59507b] mb-1">
                             Nom d'utilisateur Web3
                           </label>
                           <div className="flex items-center gap-2">
@@ -2500,13 +2500,13 @@ export default function Home() {
                               onChange={(e) => setWeb3Username(e.target.value)}
                               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                             />
-                            <span className="text-gray-500">.eth</span>
+                            <span className="text-[#59507b]">.eth</span>
                           </div>
                         </div>
                         <button
                           onClick={registerWeb3Username}
                           disabled={!web3Username || isRegisteringUsername}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           {isRegisteringUsername ? 'Enregistrement...' : 'Enregistrer le nom'}
                         </button>
@@ -2527,8 +2527,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 7</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 7</span>
                   <span className="align-middle">Buy real ETH from a cryptocurrency exchange.</span>
                   {isStep7Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="eth-purchased">
@@ -2538,16 +2538,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 7: Buy Real ETH */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 7: Acheter des ETH Réels</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 7: Acheter des ETH Réels</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Achetez des ETH réels sur une plateforme d'échange :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="exchange-select" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="exchange-select" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme d'échange
                           </label>
                           <select
@@ -2565,7 +2565,7 @@ export default function Home() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="eth-amount-purchase" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="eth-amount-purchase" className="block text-sm font-medium text-[#59507b] mb-1">
                             Montant à acheter (ETH)
                           </label>
                           <input
@@ -2581,7 +2581,7 @@ export default function Home() {
                         <button
                           onClick={() => setHasBoughtRealEth(true)}
                           disabled={!selectedExchange || !ethPurchaseAmount}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Simulation...
                         </button>
@@ -2599,8 +2599,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 8</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 8</span>
                   <span className="align-middle">Set up advanced security with hardware wallets.</span>
                   {isStep8Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="security-setup">
@@ -2610,16 +2610,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 8: Advanced Security */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 8: Sécurité Avancée</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 8: Sécurité Avancée</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Configurez une sécurité avancée pour protéger vos actifs :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="hardware-wallet" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="hardware-wallet" className="block text-sm font-medium text-[#59507b] mb-1">
                             Portefeuille matériel
                           </label>
                           <select
@@ -2642,7 +2642,7 @@ export default function Home() {
                               onChange={(e) => setHasBackedUpSeedPhrase(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai sauvegardé ma phrase de récupération</span>
+                            <span className="text-sm text-[#59507b]">J'ai sauvegardé ma phrase de récupération</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2651,11 +2651,11 @@ export default function Home() {
                               onChange={(e) => setHasSetUpMultisig(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai configuré un multisig</span>
+                            <span className="text-sm text-[#59507b]">J'ai configuré un multisig</span>
                           </label>
                         </div>
                         <div>
-                          <label htmlFor="security-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="security-notes" className="block text-sm font-medium text-[#59507b] mb-1">
                             Notes de sécurité
                           </label>
                           <textarea
@@ -2670,7 +2670,7 @@ export default function Home() {
                         <button
                           onClick={() => setHasCompletedSecurity(true)}
                           disabled={!selectedHardwareWallet}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter la sécurité
                         </button>
@@ -2688,8 +2688,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 9</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 9</span>
                   <span className="align-middle">Explore DeFi: yield farming, staking, and lending.</span>
                   {isStep9Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="defi-exploration">
@@ -2699,16 +2699,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 9: DeFi Exploration */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 9: Explorer DeFi</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 9: Explorer DeFi</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Explorez les protocoles DeFi : yield farming, staking et lending :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="defi-protocol" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="defi-protocol" className="block text-sm font-medium text-[#59507b] mb-1">
                             Protocole DeFi
                           </label>
                           <select
@@ -2726,7 +2726,7 @@ export default function Home() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="defi-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="defi-activity" className="block text-sm font-medium text-[#59507b] mb-1">
                             Activité DeFi
                           </label>
                           <select
@@ -2751,7 +2751,7 @@ export default function Home() {
                               onChange={(e) => setHasExploredYieldFarming(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai exploré le yield farming</span>
+                            <span className="text-sm text-[#59507b]">J'ai exploré le yield farming</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2760,7 +2760,7 @@ export default function Home() {
                               onChange={(e) => setHasExploredStaking(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai exploré le staking</span>
+                            <span className="text-sm text-[#59507b]">J'ai exploré le staking</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2769,11 +2769,11 @@ export default function Home() {
                               onChange={(e) => setHasExploredLending(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai exploré le lending</span>
+                            <span className="text-sm text-[#59507b]">J'ai exploré le lending</span>
                           </label>
                         </div>
                         <div>
-                          <label htmlFor="defi-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="defi-notes" className="block text-sm font-medium text-[#59507b] mb-1">
                             Notes DeFi
                           </label>
                           <textarea
@@ -2788,7 +2788,7 @@ export default function Home() {
                         <button
                           onClick={() => setHasCompletedDeFi(true)}
                           disabled={!selectedDeFiProtocol || !defiActivity}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter l'exploration DeFi
                         </button>
@@ -2806,8 +2806,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 10</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 10</span>
                   <span className="align-middle">Bridge to Layer 2: Polygon, Arbitrum, and low-fee DeFi.</span>
                   {isStep10Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="l2-exploration">
@@ -2817,16 +2817,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 10: Layer 2 Exploration */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 10: Explorer Layer 2</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 10: Explorer Layer 2</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Explorez les réseaux Layer 2 pour des frais réduits :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="l2-network" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="l2-network" className="block text-sm font-medium text-[#59507b] mb-1">
                             Réseau Layer 2
                           </label>
                           <select
@@ -2844,7 +2844,7 @@ export default function Home() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="l2-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="l2-activity" className="block text-sm font-medium text-[#59507b] mb-1">
                             Activité L2
                           </label>
                           <select
@@ -2869,7 +2869,7 @@ export default function Home() {
                               onChange={(e) => setHasBridgedAssets(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai bridgé des actifs</span>
+                            <span className="text-sm text-[#59507b]">J'ai bridgé des actifs</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2878,7 +2878,7 @@ export default function Home() {
                               onChange={(e) => setHasExploredL2DeFi(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai exploré DeFi L2</span>
+                            <span className="text-sm text-[#59507b]">J'ai exploré DeFi L2</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2887,11 +2887,11 @@ export default function Home() {
                               onChange={(e) => setHasComparedGasFees(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai comparé les frais de gas</span>
+                            <span className="text-sm text-[#59507b]">J'ai comparé les frais de gas</span>
                           </label>
                         </div>
                         <div>
-                          <label htmlFor="l2-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="l2-notes" className="block text-sm font-medium text-[#59507b] mb-1">
                             Notes L2
                           </label>
                           <textarea
@@ -2906,7 +2906,7 @@ export default function Home() {
                         <button
                           onClick={() => setHasCompletedL2(true)}
                           disabled={!selectedL2Network || !l2Activity}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter l'exploration L2
                         </button>
@@ -2924,8 +2924,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 11</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 11</span>
                   <span className="align-middle">Master NFT marketplaces: list, buy, and trade NFTs.</span>
                   {isStep11Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="nft-marketplace">
@@ -2935,16 +2935,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 11: NFT Marketplace */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 11: Marketplaces NFT</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 11: Marketplaces NFT</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Maîtrisez les marketplaces NFT : listez, achetez et échangez :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="nft-marketplace" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="nft-marketplace" className="block text-sm font-medium text-[#59507b] mb-1">
                             Marketplace NFT
                           </label>
                           <select
@@ -2962,7 +2962,7 @@ export default function Home() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor="nft-marketplace-activity" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="nft-marketplace-activity" className="block text-sm font-medium text-[#59507b] mb-1">
                             Activité Marketplace
                           </label>
                           <select
@@ -2987,7 +2987,7 @@ export default function Home() {
                               onChange={(e) => setHasListedNFT(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai listé un NFT</span>
+                            <span className="text-sm text-[#59507b]">J'ai listé un NFT</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -2996,7 +2996,7 @@ export default function Home() {
                               onChange={(e) => setHasBoughtNFT(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai acheté un NFT</span>
+                            <span className="text-sm text-[#59507b]">J'ai acheté un NFT</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3005,11 +3005,11 @@ export default function Home() {
                               onChange={() => {}}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai vendu un NFT</span>
+                            <span className="text-sm text-[#59507b]">J'ai vendu un NFT</span>
                           </label>
                         </div>
                         <div>
-                          <label htmlFor="nft-marketplace-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="nft-marketplace-notes" className="block text-sm font-medium text-[#59507b] mb-1">
                             Notes Marketplace
                           </label>
                           <textarea
@@ -3024,7 +3024,7 @@ export default function Home() {
                         <button
                           onClick={() => setHasCompletedNFTMarketplace(true)}
                           disabled={!selectedNFTMarketplace || !nftMarketplaceActivity}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter l'exploration Marketplace
                         </button>
@@ -3042,8 +3042,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 12</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 12</span>
                   <span className="align-middle">Join DAO governance: vote, propose, and shape Web3 communities.</span>
                   {isStep12Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="dao-governance">
@@ -3053,16 +3053,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 12: DAO Governance */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 12: Gouvernance DAO</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 12: Gouvernance DAO</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Rejoignez la gouvernance DAO : votez, proposez et façonnez les communautés Web3 :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="dao-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="dao-platform" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme DAO
                           </label>
                           <select
@@ -3087,7 +3087,7 @@ export default function Home() {
                               onChange={() => {}}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai voté dans une DAO</span>
+                            <span className="text-sm text-[#59507b]">J'ai voté dans une DAO</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3096,13 +3096,13 @@ export default function Home() {
                               onChange={() => {}}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai proposé une proposition</span>
+                            <span className="text-sm text-[#59507b]">J'ai proposé une proposition</span>
                           </label>
                         </div>
                         <button
                           onClick={() => setHasCompletedDAOGovernance(true)}
                           disabled={!selectedDAOPlatform}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter la gouvernance DAO
                         </button>
@@ -3119,8 +3119,8 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 13</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 13</span>
                   <span className="align-middle">Build Web3 identity: aggregate profiles and join decentralized social.</span>
                   {isStep13Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-social">
@@ -3130,16 +3130,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 13: Web3 Social */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 13: Identité Web3 Sociale</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 13: Identité Web3 Sociale</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Construisez votre identité Web3 : agrégation de profils et réseaux sociaux décentralisés :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="web3-social-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="web3-social-platform" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme Web3 Sociale
                           </label>
                           <select
@@ -3164,7 +3164,7 @@ export default function Home() {
                               onChange={(e) => setHasCreatedWeb3Profile(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai créé un profil Web3</span>
+                            <span className="text-sm text-[#59507b]">J'ai créé un profil Web3</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3173,13 +3173,13 @@ export default function Home() {
                               onChange={() => {}}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai rejoint un réseau social décentralisé</span>
+                            <span className="text-sm text-[#59507b]">J'ai rejoint un réseau social décentralisé</span>
                           </label>
                         </div>
                         <button
                           onClick={() => setHasCompletedWeb3Social(true)}
                           disabled={!selectedWeb3SocialPlatform}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter l'identité Web3
                         </button>
@@ -3196,8 +3196,8 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 14</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 14</span>
                   <span className="align-middle">Build Web3 dApps: write smart contracts and create decentralized applications.</span>
                   {isStep14Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="web3-development">
@@ -3207,16 +3207,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 14: Web3 Development */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 14: Développement Web3</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 14: Développement Web3</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Développez des dApps Web3 : écrivez des smart contracts et créez des applications décentralisées :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="web3-dev-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="web3-dev-platform" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme de Développement
                           </label>
                           <select
@@ -3241,7 +3241,7 @@ export default function Home() {
                               onChange={(e) => setHasWrittenSmartContract(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai écrit un smart contract</span>
+                            <span className="text-sm text-[#59507b]">J'ai écrit un smart contract</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3250,13 +3250,13 @@ export default function Home() {
                               onChange={() => {}}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai déployé une dApp</span>
+                            <span className="text-sm text-[#59507b]">J'ai déployé une dApp</span>
                           </label>
                         </div>
                         <button
                           onClick={() => setHasCompletedWeb3Development(true)}
                           disabled={!selectedDevPlatform}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter le développement Web3
                         </button>
@@ -3273,8 +3273,8 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 15</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 15</span>
                   <span className="align-middle">Master advanced trading: DEX strategies, analytics, and yield optimization.</span>
                   {isStep15Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="trading-analytics">
@@ -3284,16 +3284,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 15: Trading Analytics */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 15: Trading Avancé</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 15: Trading Avancé</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Maîtrisez le trading avancé : stratégies DEX, analytics et optimisation de rendement :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="trading-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="trading-platform" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme de Trading
                           </label>
                           <select
@@ -3318,7 +3318,7 @@ export default function Home() {
                               onChange={(e) => setHasExecutedAdvancedTrade(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai exécuté un trade avancé</span>
+                            <span className="text-sm text-[#59507b]">J'ai exécuté un trade avancé</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3327,7 +3327,7 @@ export default function Home() {
                               onChange={(e) => setHasUsedAnalyticsTools(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai utilisé des outils d'analytics</span>
+                            <span className="text-sm text-[#59507b]">J'ai utilisé des outils d'analytics</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3336,13 +3336,13 @@ export default function Home() {
                               onChange={(e) => setHasOptimizedYield(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai optimisé le rendement</span>
+                            <span className="text-sm text-[#59507b]">J'ai optimisé le rendement</span>
                           </label>
                         </div>
                         <button
                           onClick={() => setHasCompletedTradingAnalytics(true)}
                           disabled={!selectedTradingPlatform}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter le trading avancé
                         </button>
@@ -3359,8 +3359,8 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
-                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 16</span>
+                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                  <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 16</span>
                   <span className="align-middle">Master Web3 gaming: play-to-earn, metaverse land, and virtual economies.</span>
                   {isStep16Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="gaming-metaverse">
@@ -3370,16 +3370,16 @@ export default function Home() {
                 </p>
                 
                 {/* Step 16: Gaming Metaverse */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 16: Gaming Web3</h3>
+                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 16: Gaming Web3</h3>
                   <div className="space-y-4">
-                    <div className="p-3 border border-gray-200 rounded-md bg-white">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
+                      <p className="text-sm text-[#59507b] mb-3">
                         Maîtrisez le gaming Web3 : play-to-earn, terrains metaverse et économies virtuelles :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="gaming-platform" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="gaming-platform" className="block text-sm font-medium text-[#59507b] mb-1">
                             Plateforme Gaming
                           </label>
                           <select
@@ -3404,7 +3404,7 @@ export default function Home() {
                               onChange={(e) => setHasPlayedToEarn(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai joué en play-to-earn</span>
+                            <span className="text-sm text-[#59507b]">J'ai joué en play-to-earn</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3413,7 +3413,7 @@ export default function Home() {
                               onChange={(e) => setHasOwnedMetaverseLand(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai possédé un terrain metaverse</span>
+                            <span className="text-sm text-[#59507b]">J'ai possédé un terrain metaverse</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -3422,13 +3422,13 @@ export default function Home() {
                               onChange={(e) => setHasParticipatedInVirtualWorld(e.target.checked)}
                               className="rounded border-gray-300"
                             />
-                            <span className="text-sm text-gray-700">J'ai participé à un monde virtuel</span>
+                            <span className="text-sm text-[#59507b]">J'ai participé à un monde virtuel</span>
                           </label>
                         </div>
                         <button
                           onClick={() => setHasCompletedGamingMetaverse(true)}
                           disabled={!selectedGamingPlatform}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                         >
                           Compléter le gaming Web3
                         </button>
@@ -3518,15 +3518,15 @@ export default function Home() {
               
               {/* Step 5 ETH Transfer Section - REMOVED (now integrated above) */}
               {false && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 5: Send ETH to a Friend</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 5: Send ETH to a Friend</h3>
                   
                   {/* Real Transaction Warning */}
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
                     <div className="flex items-start gap-2">
-                      <div className="text-yellow-600 mt-0.5">⚠️</div>
+                      <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
-                        <p className="text-sm font-medium text-yellow-800">Real Transaction Warning</p>
+                        <p className="text-sm font-medium text-[#59507b]">Real Transaction Warning</p>
                         <p className="text-xs text-yellow-700 mt-1">
                           This will send real ETH on Sepolia testnet. Make sure you're on the correct network and have sufficient balance for gas fees.
                         </p>
@@ -3536,7 +3536,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="friend-address" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="friend-address" className="block text-sm font-medium text-[#59507b] mb-2">
                         Friend's Ethereum Address
                       </label>
                       <input
@@ -3547,13 +3547,13 @@ export default function Home() {
                         placeholder="0x..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Enter your friend's Ethereum wallet address
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="eth-amount" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="eth-amount" className="block text-sm font-medium text-[#59507b] mb-2">
                         Amount to Send (ETH)
                       </label>
                       <div className="flex gap-2">
@@ -3567,11 +3567,11 @@ export default function Home() {
                           min="0"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                         />
-                        <span className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm">
+                        <span className="px-3 py-2 bg-gray-100 text-[#59507b] rounded-md text-sm">
                           ETH
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Your balance: Ξ {balanceEth ?? '0'}
                       </p>
                     </div>
@@ -3579,7 +3579,7 @@ export default function Home() {
                     <button
                       onClick={sendEthTransfer}
                       disabled={isSimulatingTransfer || !friendAddress.trim() || !ethAmount.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-orange-600 text-white border border-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-orange-600 text-[#fbf8f2] border border-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       {isSimulatingTransfer ? 'Sending ETH...' : 'Send ETH Transfer'}
                     </button>
@@ -3643,8 +3643,8 @@ export default function Home() {
               
               {/* Step 6 Web3 Username Section */}
               {isStep5Completed() && !isStep6Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 6: Create Your Web3 Username</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 6: Create Your Web3 Username</h3>
                   
                   {/* ENS Information */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
@@ -3661,11 +3661,11 @@ export default function Home() {
                   </div>
                   
                   {/* Real Registration Warning */}
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
                     <div className="flex items-start gap-2">
-                      <div className="text-yellow-600 mt-0.5">⚠️</div>
+                      <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
-                        <p className="text-sm font-medium text-yellow-800">Real Blockchain Transaction</p>
+                        <p className="text-sm font-medium text-[#59507b]">Real Blockchain Transaction</p>
                         <p className="text-xs text-yellow-700 mt-1">
                           This creates a real transaction on Sepolia testnet that demonstrates Web3 username concepts. 
                           Sends 0.000001 ETH to burn address with your username hash. Make sure you have sufficient ETH for gas fees.
@@ -3676,7 +3676,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="web3-username" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-username" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Your Username
                       </label>
                       <div className="flex gap-2">
@@ -3688,11 +3688,11 @@ export default function Home() {
                           placeholder="myusername"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                         />
-                        <span className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm">
+                        <span className="px-3 py-2 bg-gray-100 text-[#59507b] rounded-md text-sm">
                           .eth
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         3-20 characters, letters, numbers, hyphens, and underscores only
                       </p>
                       {web3Username && !isValidUsername(web3Username) && (
@@ -3702,12 +3702,12 @@ export default function Home() {
                       )}
                     </div>
                     
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-1">Preview:</p>
-                      <p className="text-sm text-gray-600">
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-1">Preview:</p>
+                      <p className="text-sm text-[#59507b]">
                         <strong>Domain:</strong> {web3Username ? `${web3Username}.eth` : 'yourname.eth'}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Points to:</strong> {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'Your wallet address'}
                       </p>
                     </div>
@@ -3715,17 +3715,17 @@ export default function Home() {
                     <button
                       onClick={registerWeb3Username}
                       disabled={isRegisteringUsername || !web3Username.trim() || !isValidUsername(web3Username)}
-                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       {isRegisteringUsername ? 'Registering Username...' : 'Register Web3 Username'}
                     </button>
                     
                     {usernameTransactionHash && (
-                      <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
-                        <p className="text-sm text-purple-800">
+                      <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md">
+                        <p className="text-sm text-[#59507b]">
                           <strong>Registration Transaction Hash:</strong> {usernameTransactionHash}
                         </p>
-                        <p className="text-xs text-purple-600 mt-1">
+                        <p className="text-xs text-[#59507b] mt-1">
                           ENS-like domain registered on Sepolia! Domain saved to localStorage.
                         </p>
                       </div>
@@ -3736,37 +3736,37 @@ export default function Home() {
               
               {/* Step 6 Completed Section */}
               {isStep6Completed() && (
-                <div className="mt-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                <div className="mt-6 p-4 border border-[#d8d0f3] rounded-lg bg-[#eeddde]">
                   <h3 className="text-lg font-semibold mb-3 text-purple-900">🎉 Step 6 Complete!</h3>
                   <div className="space-y-3">
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Your Web3 Username:</strong> {registeredUsername}.eth
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         ENS-like domain registered on Sepolia testnet
                       </p>
                     </div>
                     
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Registration Transaction Hash:</strong> {usernameTransactionHash}
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         ENS-like registration completed on blockchain
                       </p>
                     </div>
                     
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Points to Address:</strong> {account}
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Your wallet address is now accessible via {registeredUsername}.eth
                       </p>
                     </div>
                     
-                    <p className="text-xs text-purple-600 mt-2">
+                    <p className="text-xs text-[#59507b] mt-2">
                       🎊 Congratulations! You've completed Step 6! Now move on to Step 7 to buy real ETH and complete the ultimate Web3 journey!
                     </p>
                   </div>
@@ -3775,8 +3775,8 @@ export default function Home() {
               
               {/* Step 7 Buy Real ETH Section */}
               {isStep6Completed() && !isStep7Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 7: Buy Real ETH</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 7: Buy Real ETH</h3>
                   
                   {/* Real ETH Purchase Information */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
@@ -3792,11 +3792,11 @@ export default function Home() {
                   </div>
                   
                   {/* Important Warning */}
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
                     <div className="flex items-start gap-2">
-                      <div className="text-yellow-600 mt-0.5">⚠️</div>
+                      <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
-                        <p className="text-sm font-medium text-yellow-800">Important Considerations</p>
+                        <p className="text-sm font-medium text-[#59507b]">Important Considerations</p>
                         <p className="text-xs text-yellow-700 mt-1">
                           • Only invest what you can afford to lose<br/>
                           • Research exchanges thoroughly before using them<br/>
@@ -3809,7 +3809,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="exchange-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="exchange-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Exchange
                       </label>
                       <select
@@ -3826,13 +3826,13 @@ export default function Home() {
                         <option value="crypto.com">Crypto.com</option>
                         <option value="other">Other</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a reputable cryptocurrency exchange
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="eth-amount-purchase" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="eth-amount-purchase" className="block text-sm font-medium text-[#59507b] mb-2">
                         Amount to Purchase (ETH)
                       </label>
                       <div className="flex gap-2">
@@ -3846,17 +3846,17 @@ export default function Home() {
                           min="0"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                         />
-                        <span className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm">
+                        <span className="px-3 py-2 bg-gray-100 text-[#59507b] rounded-md text-sm">
                           ETH
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Enter the amount of ETH you plan to purchase
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="purchase-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="purchase-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Confirmation
                       </label>
                       <input
@@ -3867,14 +3867,14 @@ export default function Home() {
                         placeholder="Type 'I confirm' to confirm your purchase"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I confirm&quot; to confirm you understand this is a real purchase
                       </p>
                     </div>
                     
                     {/* Exchange Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Exchanges:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Exchanges:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://www.coinbase.com/"
@@ -3888,7 +3888,7 @@ export default function Home() {
                           href="https://www.binance.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Binance
                         </a>
@@ -3896,7 +3896,7 @@ export default function Home() {
                           href="https://www.kraken.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Kraken
                         </a>
@@ -3914,7 +3914,7 @@ export default function Home() {
                     <button
                       onClick={confirmEthPurchase}
                       disabled={!selectedExchange.trim() || !ethPurchaseAmount.trim() || !purchaseConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-green-600 text-white border border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-green-600 text-[#fbf8f2] border border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm ETH Purchase
                     </button>
@@ -3957,8 +3957,8 @@ export default function Home() {
               
               {/* Step 8 Advanced Security Section */}
               {isStep7Completed() && !isStep8Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 8: Advanced Security</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 8: Advanced Security</h3>
                   
                   {/* Security Importance */}
                   <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
@@ -3975,7 +3975,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="hardware-wallet-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="hardware-wallet-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Hardware Wallet
                       </label>
                       <select
@@ -3992,7 +3992,7 @@ export default function Home() {
                         <option value="keepkey">KeepKey</option>
                         <option value="other">Other</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Hardware wallets keep your private keys offline and secure
                       </p>
                     </div>
@@ -4023,7 +4023,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="security-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="security-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         Security Notes (Optional)
                       </label>
                       <textarea
@@ -4034,13 +4034,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your security measures (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="security-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="security-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Security Understanding Confirmation
                       </label>
                       <input
@@ -4051,14 +4051,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your security understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand the importance of security
                       </p>
                     </div>
                     
                     {/* Hardware Wallet Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Hardware Wallets:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Hardware Wallets:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://www.ledger.com/"
@@ -4080,7 +4080,7 @@ export default function Home() {
                           href="https://keepkey.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           KeepKey
                         </a>
@@ -4096,8 +4096,8 @@ export default function Home() {
                     </div>
                     
                     {/* Security Best Practices */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">Security Best Practices:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Security Best Practices:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Never share your seed phrase with anyone</li>
                         <li>• Store seed phrase offline in multiple secure locations</li>
@@ -4111,7 +4111,7 @@ export default function Home() {
                     <button
                       onClick={confirmSecuritySetup}
                       disabled={!selectedHardwareWallet.trim() || !securityConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-red-600 text-white border border-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-red-600 text-[#fbf8f2] border border-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm Security Setup
                     </button>
@@ -4168,8 +4168,8 @@ export default function Home() {
               
               {/* Step 9 DeFi Exploration Section */}
               {isStep8Completed() && !isStep9Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 9: DeFi Exploration</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 9: DeFi Exploration</h3>
                   
                   {/* DeFi Introduction */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
@@ -4187,7 +4187,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="defi-protocol-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="defi-protocol-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose DeFi Protocol
                       </label>
                       <select
@@ -4205,13 +4205,13 @@ export default function Home() {
                         <option value="sushiswap">SushiSwap (DEX & Farming)</option>
                         <option value="other">Other Protocol</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a DeFi protocol to explore
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="defi-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="defi-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         DeFi Activity
                       </label>
                       <select
@@ -4228,7 +4228,7 @@ export default function Home() {
                         <option value="trading">DEX Trading</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What DeFi activity interests you most?
                       </p>
                     </div>
@@ -4268,7 +4268,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="defi-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="defi-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         DeFi Notes (Optional)
                       </label>
                       <textarea
@@ -4279,13 +4279,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your DeFi strategies and learnings (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="defi-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="defi-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         DeFi Understanding Confirmation
                       </label>
                       <input
@@ -4296,14 +4296,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your DeFi understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand DeFi risks and opportunities
                       </p>
                     </div>
                     
                     {/* DeFi Protocol Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular DeFi Protocols:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular DeFi Protocols:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://uniswap.org/"
@@ -4317,7 +4317,7 @@ export default function Home() {
                           href="https://aave.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Aave
                         </a>
@@ -4341,7 +4341,7 @@ export default function Home() {
                           href="https://yearn.finance/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Yearn
                         </a>
@@ -4357,8 +4357,8 @@ export default function Home() {
                     </div>
                     
                     {/* DeFi Risk Warning */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">DeFi Risk Considerations:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">DeFi Risk Considerations:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Smart contract risks - protocols can have bugs</li>
                         <li>• Impermanent loss in liquidity pools</li>
@@ -4372,7 +4372,7 @@ export default function Home() {
                     <button
                       onClick={confirmDeFiExploration}
                       disabled={!selectedDeFiProtocol.trim() || !defiActivity.trim() || !defiConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-green-600 text-white border border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-green-600 text-[#fbf8f2] border border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm DeFi Exploration
                     </button>
@@ -4435,16 +4435,16 @@ export default function Home() {
               
               {/* Step 10 Layer 2 Solutions Section */}
               {isStep9Completed() && !isStep10Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 10: Layer 2 Solutions</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 10: Layer 2 Solutions</h3>
                   
                   {/* L2 Introduction */}
-                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-md mb-4">
+                  <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md mb-4">
                     <div className="flex items-start gap-2">
-                      <div className="text-purple-600 mt-0.5">⚡</div>
+                      <div className="text-[#59507b] mt-0.5">⚡</div>
                       <div>
-                        <p className="text-sm font-medium text-purple-800">Escape High Gas Fees</p>
-                        <p className="text-xs text-purple-700 mt-1">
+                        <p className="text-sm font-medium text-[#59507b]">Escape High Gas Fees</p>
+                        <p className="text-xs text-[#59507b] mt-1">
                           Layer 2 solutions like Polygon and Arbitrum offer the same DeFi experience with ultra-low fees. 
                           Bridge your assets and enjoy sub-dollar transactions!
                         </p>
@@ -4454,7 +4454,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="l2-network-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="l2-network-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Layer 2 Network
                       </label>
                       <select
@@ -4471,13 +4471,13 @@ export default function Home() {
                         <option value="zksync">zkSync - Zero Knowledge</option>
                         <option value="other">Other L2 Network</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a Layer 2 network to explore
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="l2-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="l2-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         L2 Activity
                       </label>
                       <select
@@ -4494,7 +4494,7 @@ export default function Home() {
                         <option value="gas-comparison">Gas Fee Comparison</option>
                         <option value="other">Other L2 Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What Layer 2 activity interests you most?
                       </p>
                     </div>
@@ -4534,7 +4534,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="l2-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="l2-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         L2 Notes (Optional)
                       </label>
                       <textarea
@@ -4545,13 +4545,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your Layer 2 experiences and gas savings (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="l2-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="l2-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         L2 Understanding Confirmation
                       </label>
                       <input
@@ -4562,20 +4562,20 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your L2 understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand Layer 2 benefits and bridging
                       </p>
                     </div>
                     
                     {/* L2 Network Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Layer 2 Networks:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Layer 2 Networks:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://polygon.technology/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Polygon
                         </a>
@@ -4607,7 +4607,7 @@ export default function Home() {
                           href="https://zksync.io/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           zkSync
                         </a>
@@ -4638,7 +4638,7 @@ export default function Home() {
                     <button
                       onClick={confirmL2Exploration}
                       disabled={!selectedL2Network.trim() || !l2Activity.trim() || !l2Confirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm L2 Exploration
                     </button>
@@ -4648,51 +4648,51 @@ export default function Home() {
               
               {/* Step 10 Completed Section */}
               {isStep10Completed() && (
-                <div className="mt-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                <div className="mt-6 p-4 border border-[#d8d0f3] rounded-lg bg-[#eeddde]">
                   <h3 className="text-lg font-semibold mb-3 text-purple-900">🎉 Step 10 Complete!</h3>
                   <div className="space-y-3">
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Network:</strong> {selectedL2Network}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Activity:</strong> {l2Activity}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Bridged Assets:</strong> {hasBridgedAssets ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>L2 DeFi:</strong> {hasExploredL2DeFi ? 'Explored' : 'Not Explored'}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Gas Comparison:</strong> {hasComparedGasFees ? 'Completed' : 'Not Completed'}
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Layer 2 exploration confirmed and saved to localStorage
                       </p>
                     </div>
                     
                     {l2Notes && (
-                      <div className="p-3 bg-white border border-purple-200 rounded-md">
-                        <p className="text-sm text-purple-800">
+                      <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                        <p className="text-sm text-[#59507b]">
                           <strong>L2 Notes:</strong>
                         </p>
-                        <p className="text-xs text-purple-700 mt-1 whitespace-pre-wrap">
+                        <p className="text-xs text-[#59507b] mt-1 whitespace-pre-wrap">
                           {l2Notes}
                         </p>
                       </div>
                     )}
                     
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Congratulations!</strong> You've mastered Layer 2 scaling!
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         You've completed the ULTIMATE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, and Layer 2 scaling!
                       </p>
                     </div>
                     
-                    <p className="text-xs text-purple-600 mt-2">
+                    <p className="text-xs text-[#59507b] mt-2">
                       🎊⚡ Layer 2 mastery complete! Now let's master NFT marketplaces and monetize your digital art! 🎨💰
                     </p>
                   </div>
@@ -4701,8 +4701,8 @@ export default function Home() {
               
               {/* Step 11 NFT Marketplace Mastery Section */}
               {isStep10Completed() && !isStep11Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 11: NFT Marketplace Mastery</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 11: NFT Marketplace Mastery</h3>
                   
                   {/* NFT Marketplace Introduction */}
                   <div className="p-3 bg-pink-50 border border-pink-200 rounded-md mb-4">
@@ -4720,7 +4720,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="nft-marketplace-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="nft-marketplace-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose NFT Marketplace
                       </label>
                       <select
@@ -4738,13 +4738,13 @@ export default function Home() {
                         <option value="zora">Zora - Creator Protocol</option>
                         <option value="other">Other Marketplace</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose an NFT marketplace to explore
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="nft-marketplace-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="nft-marketplace-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         NFT Marketplace Activity
                       </label>
                       <select
@@ -4762,7 +4762,7 @@ export default function Home() {
                         <option value="community">Community Building</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What NFT marketplace activity interests you most?
                       </p>
                     </div>
@@ -4802,7 +4802,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="nft-marketplace-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="nft-marketplace-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         NFT Marketplace Notes (Optional)
                       </label>
                       <textarea
@@ -4813,13 +4813,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your NFT trading experiences and strategies (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="nft-marketplace-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="nft-marketplace-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         NFT Marketplace Understanding Confirmation
                       </label>
                       <input
@@ -4830,14 +4830,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your NFT marketplace understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand NFT marketplace dynamics
                       </p>
                     </div>
                     
                     {/* NFT Marketplace Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular NFT Marketplaces:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular NFT Marketplaces:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://opensea.io/"
@@ -4851,7 +4851,7 @@ export default function Home() {
                           href="https://rarible.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Rarible
                         </a>
@@ -4875,7 +4875,7 @@ export default function Home() {
                           href="https://niftygateway.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Nifty Gateway
                         </a>
@@ -4891,8 +4891,8 @@ export default function Home() {
                     </div>
                     
                     {/* NFT Trading Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">NFT Trading Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">NFT Trading Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Research floor prices before listing</li>
                         <li>• Set realistic prices based on market trends</li>
@@ -4906,7 +4906,7 @@ export default function Home() {
                     <button
                       onClick={confirmNFTMarketplaceMastery}
                       disabled={!selectedNFTMarketplace.trim() || !nftMarketplaceActivity.trim() || !nftMarketplaceConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-pink-600 text-white border border-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-pink-600 text-[#fbf8f2] border border-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm NFT Marketplace Mastery
                     </button>
@@ -4969,8 +4969,8 @@ export default function Home() {
               
               {/* Step 12 DAO Governance & Voting Section */}
               {isStep11Completed() && !isStep12Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 12: DAO Governance & Voting</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 12: DAO Governance & Voting</h3>
                   
                   {/* DAO Governance Introduction */}
                   <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-md mb-4">
@@ -4988,7 +4988,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="dao-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="dao-platform-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose DAO Platform
                       </label>
                       <select
@@ -5007,13 +5007,13 @@ export default function Home() {
                         <option value="gitcoin">Gitcoin - Public Goods</option>
                         <option value="other">Other DAO Platform</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a DAO platform to explore governance
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="dao-governance-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="dao-governance-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         DAO Governance Activity
                       </label>
                       <select
@@ -5031,7 +5031,7 @@ export default function Home() {
                         <option value="grants">Grant Programs</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What DAO governance activity interests you most?
                       </p>
                     </div>
@@ -5071,7 +5071,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="dao-governance-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="dao-governance-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         DAO Governance Notes (Optional)
                       </label>
                       <textarea
@@ -5082,13 +5082,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your DAO participation and governance insights (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="dao-governance-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="dao-governance-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         DAO Governance Understanding Confirmation
                       </label>
                       <input
@@ -5099,14 +5099,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your DAO governance understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand DAO governance principles
                       </p>
                     </div>
                     
                     {/* DAO Platform Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular DAO Platforms:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular DAO Platforms:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://snapshot.org/"
@@ -5120,7 +5120,7 @@ export default function Home() {
                           href="https://aragon.org/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Aragon
                         </a>
@@ -5136,7 +5136,7 @@ export default function Home() {
                           href="https://compound.finance/governance"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Compound
                         </a>
@@ -5160,8 +5160,8 @@ export default function Home() {
                     </div>
                     
                     {/* DAO Governance Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">DAO Governance Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">DAO Governance Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Research proposals before voting</li>
                         <li>• Understand token economics and voting power</li>
@@ -5175,7 +5175,7 @@ export default function Home() {
                     <button
                       onClick={confirmDAOGovernance}
                       disabled={!selectedDAOPlatform.trim() || !daoGovernanceActivity.trim() || !daoGovernanceConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-indigo-600 text-white border border-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-indigo-600 text-[#fbf8f2] border border-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm DAO Governance Mastery
                     </button>
@@ -5238,8 +5238,8 @@ export default function Home() {
               
               {/* Step 13 Web3 Social & Identity Aggregation Section */}
               {isStep12Completed() && !isStep13Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 13: Web3 Social & Identity Aggregation</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 13: Web3 Social & Identity Aggregation</h3>
                   
                   {/* Web3 Social Introduction */}
                   <div className="p-3 bg-teal-50 border border-teal-200 rounded-md mb-4">
@@ -5257,7 +5257,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="web3-social-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-social-platform-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Web3 Social Platform
                       </label>
                       <select
@@ -5275,13 +5275,13 @@ export default function Home() {
                         <option value="galxe">Galxe - Web3 Identity</option>
                         <option value="other">Other Web3 Social Platform</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a Web3 social platform to explore identity aggregation
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-social-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-social-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Social Activity
                       </label>
                       <select
@@ -5299,7 +5299,7 @@ export default function Home() {
                         <option value="content-monetization">Monetize Content</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What Web3 social activity interests you most?
                       </p>
                     </div>
@@ -5339,7 +5339,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-social-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-social-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Social Notes (Optional)
                       </label>
                       <textarea
@@ -5350,13 +5350,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your Web3 social journey and identity building (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-social-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-social-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Social Understanding Confirmation
                       </label>
                       <input
@@ -5367,14 +5367,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your Web3 social understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand Web3 social principles
                       </p>
                     </div>
                     
                     {/* Web3 Social Platform Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Web3 Social Platforms:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Web3 Social Platforms:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://lens.xyz/"
@@ -5388,7 +5388,7 @@ export default function Home() {
                           href="https://farcaster.xyz/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Farcaster
                         </a>
@@ -5404,7 +5404,7 @@ export default function Home() {
                           href="https://gm.xyz/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           gm
                         </a>
@@ -5428,8 +5428,8 @@ export default function Home() {
                     </div>
                     
                     {/* Web3 Social Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">Web3 Social Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Web3 Social Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Build a consistent brand across all platforms</li>
                         <li>• Connect your wallet to aggregate your Web3 activities</li>
@@ -5443,7 +5443,7 @@ export default function Home() {
                     <button
                       onClick={confirmWeb3Social}
                       disabled={!selectedWeb3SocialPlatform.trim() || !web3SocialActivity.trim() || !web3SocialConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-teal-600 text-white border border-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-teal-600 text-[#fbf8f2] border border-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm Web3 Social Mastery
                     </button>
@@ -5506,8 +5506,8 @@ export default function Home() {
               
               {/* Step 14 Web3 Development & Smart Contracts Section */}
               {isStep13Completed() && !isStep14Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 14: Web3 Development & Smart Contracts</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 14: Web3 Development & Smart Contracts</h3>
                   
                   {/* Web3 Development Introduction */}
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-md mb-4">
@@ -5525,7 +5525,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="dev-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="dev-platform-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Development Platform
                       </label>
                       <select
@@ -5543,13 +5543,13 @@ export default function Home() {
                         <option value="scaffold-eth">Scaffold-ETH - React Templates</option>
                         <option value="other">Other Development Platform</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a Web3 development platform to explore
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-dev-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-dev-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Development Activity
                       </label>
                       <select
@@ -5567,7 +5567,7 @@ export default function Home() {
                         <option value="gas-optimization">Gas Optimization</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What Web3 development activity interests you most?
                       </p>
                     </div>
@@ -5607,7 +5607,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-dev-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-dev-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Development Notes (Optional)
                       </label>
                       <textarea
@@ -5618,13 +5618,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your Web3 development journey and technical insights (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="web3-dev-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="web3-dev-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Web3 Development Understanding Confirmation
                       </label>
                       <input
@@ -5635,14 +5635,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your Web3 development understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand Web3 development principles
                       </p>
                     </div>
                     
                     {/* Web3 Development Platform Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Web3 Development Platforms:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Web3 Development Platforms:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://hardhat.org/"
@@ -5656,7 +5656,7 @@ export default function Home() {
                           href="https://remix.ethereum.org/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Remix
                         </a>
@@ -5672,7 +5672,7 @@ export default function Home() {
                           href="https://trufflesuite.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Truffle
                         </a>
@@ -5696,8 +5696,8 @@ export default function Home() {
                     </div>
                     
                     {/* Web3 Development Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">Web3 Development Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Web3 Development Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Start with simple contracts and gradually increase complexity</li>
                         <li>• Always test your contracts thoroughly before deployment</li>
@@ -5711,7 +5711,7 @@ export default function Home() {
                     <button
                       onClick={confirmWeb3Development}
                       disabled={!selectedDevPlatform.trim() || !web3DevActivity.trim() || !web3DevConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-orange-600 text-white border border-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-orange-600 text-[#fbf8f2] border border-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm Web3 Development Mastery
                     </button>
@@ -5774,8 +5774,8 @@ export default function Home() {
               
               {/* Step 15 Advanced Trading & Analytics Section */}
               {isStep14Completed() && !isStep15Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 15: Advanced Trading & Analytics</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 15: Advanced Trading & Analytics</h3>
                   
                   {/* Trading Analytics Introduction */}
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md mb-4">
@@ -5793,7 +5793,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="trading-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="trading-platform-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Trading Platform
                       </label>
                       <select
@@ -5811,13 +5811,13 @@ export default function Home() {
                         <option value="paraswap">ParaSwap - Multi-DEX</option>
                         <option value="other">Other Trading Platform</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a DEX platform to explore advanced trading
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="trading-analytics-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="trading-analytics-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Trading Analytics Activity
                       </label>
                       <select
@@ -5835,7 +5835,7 @@ export default function Home() {
                         <option value="risk-management">Risk Management</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What trading analytics activity interests you most?
                       </p>
                     </div>
@@ -5875,7 +5875,7 @@ export default function Home() {
                     </div>
                     
                     <div>
-                      <label htmlFor="trading-analytics-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="trading-analytics-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         Trading Analytics Notes (Optional)
                       </label>
                       <textarea
@@ -5886,13 +5886,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your trading strategies and analytics insights (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="trading-analytics-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="trading-analytics-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Trading Analytics Understanding Confirmation
                       </label>
                       <input
@@ -5903,14 +5903,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your trading analytics understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand advanced trading principles
                       </p>
                     </div>
                     
                     {/* Trading Platform Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Trading Platforms:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Trading Platforms:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://app.uniswap.org/"
@@ -5924,7 +5924,7 @@ export default function Home() {
                           href="https://www.sushi.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           SushiSwap
                         </a>
@@ -5940,7 +5940,7 @@ export default function Home() {
                           href="https://balancer.fi/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Balancer
                         </a>
@@ -5964,8 +5964,8 @@ export default function Home() {
                     </div>
                     
                     {/* Analytics Tools Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Analytics & Research Tools:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Analytics & Research Tools:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://dune.com/"
@@ -5979,7 +5979,7 @@ export default function Home() {
                           href="https://defipulse.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           DeFiPulse
                         </a>
@@ -5995,7 +5995,7 @@ export default function Home() {
                           href="https://glassnode.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Glassnode
                         </a>
@@ -6019,8 +6019,8 @@ export default function Home() {
                     </div>
                     
                     {/* Trading Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">Advanced Trading Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Advanced Trading Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Always research before trading - use analytics tools</li>
                         <li>• Start with small amounts to test strategies</li>
@@ -6034,7 +6034,7 @@ export default function Home() {
                     <button
                       onClick={confirmTradingAnalytics}
                       disabled={!selectedTradingPlatform.trim() || !tradingAnalyticsActivity.trim() || !tradingAnalyticsConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-emerald-600 text-[#fbf8f2] border border-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm Trading Analytics Mastery
                     </button>
@@ -6097,16 +6097,16 @@ export default function Home() {
               
               {/* Step 16 Web3 Gaming & Metaverse Section */}
               {isStep15Completed() && !isStep16Completed() && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 16: Web3 Gaming & Metaverse</h3>
+                <div className="mt-6 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
+                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 16: Web3 Gaming & Metaverse</h3>
                   
                   {/* Gaming Metaverse Introduction */}
-                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-md mb-4">
+                  <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md mb-4">
                     <div className="flex items-start gap-2">
-                      <div className="text-purple-600 mt-0.5">🎮</div>
+                      <div className="text-[#59507b] mt-0.5">🎮</div>
                       <div>
-                        <p className="text-sm font-medium text-purple-800">Enter the Metaverse</p>
-                        <p className="text-xs text-purple-700 mt-1">
+                        <p className="text-sm font-medium text-[#59507b]">Enter the Metaverse</p>
+                        <p className="text-xs text-[#59507b] mt-1">
                           You've mastered professional trading, now enter the virtual world! 
                           Learn play-to-earn gaming, metaverse land ownership, and virtual economies.
                         </p>
@@ -6116,7 +6116,7 @@ export default function Home() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="gaming-platform-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="gaming-platform-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Choose Gaming Platform
                       </label>
                       <select
@@ -6134,13 +6134,13 @@ export default function Home() {
                         <option value="splinterlands">Splinterlands - Battle Card Game</option>
                         <option value="other">Other Gaming Platform</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Choose a Web3 gaming platform to explore
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="gaming-metaverse-activity-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="gaming-metaverse-activity-select" className="block text-sm font-medium text-[#59507b] mb-2">
                         Gaming Metaverse Activity
                       </label>
                       <select
@@ -6158,47 +6158,47 @@ export default function Home() {
                         <option value="gaming-guilds">Gaming Guilds & Communities</option>
                         <option value="other">Other Activity</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         What gaming metaverse activity interests you most?
                       </p>
                     </div>
                     
                     {/* Gaming Metaverse Checklist */}
-                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
-                      <p className="text-sm font-medium text-purple-800 mb-2">Gaming Metaverse Mastery Checklist:</p>
+                    <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Gaming Metaverse Mastery Checklist:</p>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
                             checked={hasPlayedToEarn}
                             onChange={(e) => setHasPlayedToEarn(e.target.checked)}
-                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            className="rounded border-gray-300 text-[#59507b] focus:ring-purple-500"
                           />
-                          <span className="text-xs text-purple-700">I have played play-to-earn games</span>
+                          <span className="text-xs text-[#59507b]">I have played play-to-earn games</span>
                         </label>
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
                             checked={hasOwnedMetaverseLand}
                             onChange={(e) => setHasOwnedMetaverseLand(e.target.checked)}
-                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            className="rounded border-gray-300 text-[#59507b] focus:ring-purple-500"
                           />
-                          <span className="text-xs text-purple-700">I have owned metaverse land or virtual assets</span>
+                          <span className="text-xs text-[#59507b]">I have owned metaverse land or virtual assets</span>
                         </label>
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
                             checked={hasParticipatedInVirtualWorld}
                             onChange={(e) => setHasParticipatedInVirtualWorld(e.target.checked)}
-                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            className="rounded border-gray-300 text-[#59507b] focus:ring-purple-500"
                           />
-                          <span className="text-xs text-purple-700">I have participated in virtual worlds</span>
+                          <span className="text-xs text-[#59507b]">I have participated in virtual worlds</span>
                         </label>
                       </div>
                     </div>
                     
                     <div>
-                      <label htmlFor="gaming-metaverse-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="gaming-metaverse-notes" className="block text-sm font-medium text-[#59507b] mb-2">
                         Gaming Metaverse Notes (Optional)
                       </label>
                       <textarea
@@ -6209,13 +6209,13 @@ export default function Home() {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Keep track of your gaming experiences and metaverse insights (this is stored locally)
                       </p>
                     </div>
                     
                     <div>
-                      <label htmlFor="gaming-metaverse-confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="gaming-metaverse-confirmation" className="block text-sm font-medium text-[#59507b] mb-2">
                         Gaming Metaverse Understanding Confirmation
                       </label>
                       <input
@@ -6226,14 +6226,14 @@ export default function Home() {
                         placeholder="Type 'I understand' to confirm your gaming metaverse understanding"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Type &quot;I understand&quot; to confirm you understand Web3 gaming and metaverse principles
                       </p>
                     </div>
                     
                     {/* Gaming Platform Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Popular Gaming Platforms:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Popular Gaming Platforms:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://axieinfinity.com/"
@@ -6247,7 +6247,7 @@ export default function Home() {
                           href="https://www.sandbox.game/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           The Sandbox
                         </a>
@@ -6263,7 +6263,7 @@ export default function Home() {
                           href="https://illuvium.io/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Illuvium
                         </a>
@@ -6287,8 +6287,8 @@ export default function Home() {
                     </div>
                     
                     {/* Metaverse Platforms Links */}
-                    <div className="p-3 bg-gray-100 border border-gray-200 rounded-md">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Metaverse & Virtual Worlds:</p>
+                    <div className="p-3 bg-gray-100 border border-[#eeddde] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Metaverse & Virtual Worlds:</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <a
                           href="https://www.sandbox.game/"
@@ -6302,7 +6302,7 @@ export default function Home() {
                           href="https://decentraland.org/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition"
+                          className="px-2 py-1 bg-purple-100 text-[#59507b] rounded hover:bg-[#fcd6c5] transition"
                         >
                           Decentraland
                         </a>
@@ -6318,7 +6318,7 @@ export default function Home() {
                           href="https://somniumspace.com/"
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition"
+                          className="px-2 py-1 bg-[#eeddde] text-[#59507b] rounded hover:bg-yellow-200 transition"
                         >
                           Somnium Space
                         </a>
@@ -6342,8 +6342,8 @@ export default function Home() {
                     </div>
                     
                     {/* Gaming Tips */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm font-medium text-yellow-800 mb-2">Web3 Gaming Tips:</p>
+                    <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md">
+                      <p className="text-sm font-medium text-[#59507b] mb-2">Web3 Gaming Tips:</p>
                       <ul className="text-xs text-yellow-700 space-y-1">
                         <li>• Research games before investing - check tokenomics</li>
                         <li>• Start with free-to-play games to learn mechanics</li>
@@ -6357,7 +6357,7 @@ export default function Home() {
                     <button
                       onClick={confirmGamingMetaverse}
                       disabled={!selectedGamingPlatform.trim() || !gamingMetaverseActivity.trim() || !gamingMetaverseConfirmation.trim()}
-                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-white border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
+                      className="w-full px-4 py-2 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-sm"
                     >
                       Confirm Gaming Metaverse Mastery
                     </button>
@@ -6367,51 +6367,51 @@ export default function Home() {
               
               {/* Step 16 Completed Section */}
               {isStep16Completed() && (
-                <div className="mt-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                <div className="mt-6 p-4 border border-[#d8d0f3] rounded-lg bg-[#eeddde]">
                   <h3 className="text-lg font-semibold mb-3 text-purple-900">🎉 Step 16 Complete!</h3>
                   <div className="space-y-3">
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Platform:</strong> {selectedGamingPlatform}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Activity:</strong> {gamingMetaverseActivity}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Played to Earn:</strong> {hasPlayedToEarn ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Owned Metaverse Land:</strong> {hasOwnedMetaverseLand ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-sm text-purple-800">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Participated in Virtual World:</strong> {hasParticipatedInVirtualWorld ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         Gaming metaverse mastery confirmed and saved to localStorage
                       </p>
                     </div>
                     
                     {gamingMetaverseNotes && (
-                      <div className="p-3 bg-white border border-purple-200 rounded-md">
-                        <p className="text-sm text-purple-800">
+                      <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                        <p className="text-sm text-[#59507b]">
                           <strong>Gaming Metaverse Notes:</strong>
                         </p>
-                        <p className="text-xs text-purple-700 mt-1 whitespace-pre-wrap">
+                        <p className="text-xs text-[#59507b] mt-1 whitespace-pre-wrap">
                           {gamingMetaverseNotes}
                         </p>
                       </div>
                     )}
                     
-                    <div className="p-3 bg-white border border-purple-200 rounded-md">
-                      <p className="text-sm text-purple-800">
+                    <div className="p-3 bg-white border border-[#d8d0f3] rounded-md">
+                      <p className="text-sm text-[#59507b]">
                         <strong>Congratulations!</strong> You've mastered Web3 gaming and metaverse!
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#59507b] mt-1">
                         You've completed the METAVERSE Web3 journey: wallet connection, network switching, test ETH, NFT minting, ETH transfers, Web3 identity, real ETH purchase, advanced security, DeFi exploration, Layer 2 scaling, NFT marketplace mastery, DAO governance, Web3 social identity aggregation, Web3 development, advanced trading analytics, and Web3 gaming metaverse!
                       </p>
                     </div>
                     
-                    <p className="text-xs text-purple-600 mt-2">
+                    <p className="text-xs text-[#59507b] mt-2">
                       🎮🌐🎊 You are now a METAVERSE Web3 master! You can navigate virtual worlds, earn through gaming, and build virtual economies! 🎊🌐🎮
                     </p>
                   </div>
