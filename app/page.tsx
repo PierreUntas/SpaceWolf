@@ -23,8 +23,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState<boolean>(false);
   
-  // États pour le système sécurisé
-  const [secureWalletMode, setSecureWalletMode] = useState<'secure' | 'simple'>('simple');
+  // États pour le système sécurisé (mode sécurisé uniquement)
   
   // États pour l'interface
   const [account, setAccount] = useState<string | null>(null);
@@ -221,73 +220,7 @@ export default function Home() {
   }), []);
 
   // Créer un nouveau wallet
-  const createNewWallet = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Générer un nouveau wallet
-      const newWallet = ethers.Wallet.createRandom();
-      
-      setWallet(newWallet);
-      setAddress(newWallet.address);
-      setPrivateKey(newWallet.privateKey);
-      setIsConnected(true);
-      setAccount(newWallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('spacewolf_privateKey', newWallet.privateKey);
-      localStorage.setItem('spacewolf_address', newWallet.address);
-      localStorage.setItem('spacewolf_network', network);
-      
-      // Récupérer le solde
-      await getBalance(newWallet.address);
-      
-      // 🎮 GAMIFICATION: Level up et récompense SW
-      levelUp('Wallet Created');
-      setGameStats(prev => ({ ...prev, transactionsCompleted: prev.transactionsCompleted + 1 }));
-      
-    } catch (err) {
-      setError('Erreur lors de la création du wallet: ' + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Se connecter avec une clé privée
-  const connectWithPrivateKey = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      if (!privateKey.trim()) {
-        throw new Error('Veuillez entrer une clé privée');
-      }
-
-      // Créer le wallet à partir de la clé privée
-      const wallet = new ethers.Wallet(privateKey.trim());
-      
-      setWallet(wallet);
-      setAddress(wallet.address);
-      setIsConnected(true);
-      setAccount(wallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('spacewolf_privateKey', privateKey.trim());
-      localStorage.setItem('spacewolf_address', wallet.address);
-      localStorage.setItem('spacewolf_network', network);
-      
-      // Récupérer le solde
-      await getBalance(wallet.address);
-      
-    } catch (err) {
-      setError('Erreur de connexion: ' + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Fonctions pour le système sécurisé
   const handleSecureWalletConnected = (connectedWallet: ethers.Wallet) => {
@@ -754,23 +687,6 @@ export default function Home() {
     setTimeout(() => setCopiedAddress(false), 2000);
   };
 
-  // Déconnexion
-  const disconnect = () => {
-    setWallet(null);
-    setAddress('');
-    setPrivateKey('');
-    setBalance('0');
-    setBalanceEth('0');
-    setIsConnected(false);
-    setShowPrivateKey(false);
-    setAccount(null);
-    setError('');
-    
-    // Nettoyer le localStorage
-    localStorage.removeItem('spacewolf_privateKey');
-    localStorage.removeItem('spacewolf_address');
-    localStorage.removeItem('spacewolf_network');
-  };
 
   // Helper functions to check step completion
   const isStep1Completed = () => !!account && !!wallet;
@@ -1162,9 +1078,6 @@ export default function Home() {
     }
   }, [account, chainId]);
 
-  async function connectWallet() {
-    await createNewWallet();
-  }
 
   // Initialize Helia IPFS node
   const initializeHelia = async () => {
@@ -1959,31 +1872,6 @@ export default function Home() {
     }
   }, [account, chainId, checkUserTransactionHistory]);
 
-  // Se connecter avec une clé privée (depuis localStorage)
-  const connectWithPrivateKeyFromStorage = useCallback(async (privateKeyValue: string) => {
-    try {
-      if (!privateKeyValue.trim()) return;
-
-      // Créer le wallet à partir de la clé privée
-      const wallet = new ethers.Wallet(privateKeyValue.trim());
-      
-      setWallet(wallet);
-      setAddress(wallet.address);
-      setIsConnected(true);
-      setAccount(wallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Récupérer le solde avec le réseau sauvegardé
-      const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
-      await getBalance(wallet.address, savedNetwork);
-      
-    } catch (err) {
-      console.error('Erreur de connexion automatique:', err);
-      // Nettoyer le localStorage si la clé est invalide
-      localStorage.removeItem('spacewolf_privateKey');
-      localStorage.removeItem('spacewolf_address');
-    }
-  }, []); // Remove getBalance dependency to prevent circular dependency
 
   // Charger les données depuis localStorage au démarrage
   useEffect(() => {
@@ -1992,19 +1880,10 @@ export default function Home() {
     // 🎮 Charger les stats de jeu
     loadGameStats();
     
-    const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
-    const savedAddress = localStorage.getItem('spacewolf_address');
     const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
     
     // Toujours définir le réseau sauvegardé
     setNetwork(savedNetwork);
-    
-    if (savedPrivateKey && savedAddress) {
-      setPrivateKey(savedPrivateKey);
-      setAddress(savedAddress);
-      // Reconnecter automatiquement
-      connectWithPrivateKeyFromStorage(savedPrivateKey);
-    }
   }, []); // Empty dependency array - only run once on mount
 
   // Effacer les erreurs automatiquement
@@ -2043,7 +1922,7 @@ export default function Home() {
       {mounted && (
         <div className="fixed top-4 right-4 z-50">
           <div
-            onClick={!account ? connectWallet : undefined}
+            onClick={undefined}
             role={!account ? 'button' : undefined}
             className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 backdrop-blur px-3 py-2 shadow-sm text-xs sm:text-sm ${!account ? 'cursor-pointer hover:bg-white' : 'cursor-default'}`}
             aria-label={!account ? 'Connect wallet' : 'Wallet balance'}
@@ -2142,89 +2021,11 @@ export default function Home() {
           </p>
           {mounted && (
             <>
-              {/* Sélecteur de mode de sécurité */}
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="text-lg font-semibold mb-3">🔐 Mode de Sécurité</h3>
-                <div className="flex gap-4 mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="simple"
-                      checked={secureWalletMode === 'simple'}
-                      onChange={(e) => setSecureWalletMode(e.target.value as 'simple' | 'secure')}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">
-                      <strong>Mode Simple</strong><br/>
-                      <span className="text-gray-600">Stockage localStorage basique</span>
-                    </span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="secure"
-                      checked={secureWalletMode === 'secure'}
-                      onChange={(e) => setSecureWalletMode(e.target.value as 'simple' | 'secure')}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">
-                      <strong>Mode Sécurisé</strong><br/>
-                      <span className="text-gray-600">Chiffrement AES-256 + IndexedDB</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Interface de connexion selon le mode */}
-              {secureWalletMode === 'secure' ? (
-                <SecureWalletUI
-                  onWalletConnected={handleSecureWalletConnected}
-                  onWalletDisconnected={handleSecureWalletDisconnected}
-                />
-              ) : (
-                <div className="flex items-center gap-4">
-                  {!isConnected ? (
-                    <>
-                      <button
-                        onClick={createNewWallet}
-                        disabled={loading}
-                        className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                      >
-                        {loading ? 'Création...' : 'Créer un nouveau wallet'}
-                      </button>
-                      
-                      <div className="form-group">
-                        <input
-                          type="password"
-                          className="px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Ou entrez votre clé privée (0x...)"
-                          value={privateKey}
-                          onChange={(e) => setPrivateKey(e.target.value)}
-                        />
-                        <button
-                          className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
-                          onClick={connectWithPrivateKey}
-                          disabled={loading || !privateKey.trim()}
-                        >
-                          {loading ? 'Connexion...' : 'Se connecter'}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
-                        Connecté: {address.slice(0, 6)}...{address.slice(-4)}
-                      </div>
-                      <button
-                        onClick={disconnect}
-                        className="px-3 py-2 rounded-md bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition cursor-pointer"
-                      >
-                        Se déconnecter
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
+              {/* Interface de portefeuille sécurisé */}
+              <SecureWalletUI
+                onWalletConnected={handleSecureWalletConnected}
+                onWalletDisconnected={handleSecureWalletDisconnected}
+              />
               <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 1</span>
@@ -2411,46 +2212,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Step 1: Wallet Generation */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 1: Générer un Wallet Ethereum</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      {!isConnected ? (
-                        <>
-                          <button
-                            onClick={createNewWallet}
-                            disabled={loading}
-                            className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                          >
-                            {loading ? 'Création...' : 'Créer un nouveau wallet'}
-                          </button>
-                          
-                          <div className="form-group">
-                            <input
-                              type="password"
-                              className="px-3 py-2 border border-gray-300 rounded-md"
-                              placeholder="Ou entrez votre clé privée (0x...)"
-                              value={privateKey}
-                              onChange={(e) => setPrivateKey(e.target.value)}
-                            />
-                            <button 
-                              className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
-                              onClick={connectWithPrivateKey}
-                              disabled={loading || !privateKey.trim()}
-                            >
-                              {loading ? 'Connexion...' : 'Se connecter'}
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
-                          ✅ Wallet généré avec succès !
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">

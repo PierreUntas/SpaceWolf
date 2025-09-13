@@ -2,10 +2,7 @@
 
 ## Vue d'ensemble
 
-Le système de portefeuille sécurisé de SpaceWolf Journey s'inspire de l'architecture de MetaMask pour offrir une sécurité maximale tout en gardant une expérience utilisateur simple. Il propose deux modes de fonctionnement :
-
-- **Mode Simple** : Stockage localStorage basique (comme avant)
-- **Mode Sécurisé** : Chiffrement AES-256 + IndexedDB + phrases mnémoniques
+Le système de portefeuille sécurisé de SpaceWolf Journey s'inspire de l'architecture de MetaMask pour offrir une sécurité maximale avec une expérience utilisateur intuitive. Il utilise exclusivement le mode sécurisé avec chiffrement AES-256 et stockage IndexedDB.
 
 ## 🛡️ Fonctionnalités de Sécurité
 
@@ -80,49 +77,6 @@ interface SecureWalletUIProps {
   onWalletDisconnected: () => void;
 }
 ```
-
-## 🔄 Modes de Fonctionnement
-
-### **Mode Simple (Existant)**
-```typescript
-// Stockage localStorage basique
-localStorage.setItem('spacewolf_privateKey', privateKey);
-localStorage.setItem('spacewolf_address', address);
-```
-
-**Avantages :**
-- ✅ Simplicité
-- ✅ Reconnexion automatique
-- ✅ Pas de mot de passe requis
-
-**Inconvénients :**
-- ❌ Vulnérable aux attaques XSS
-- ❌ Stockage non chiffré
-- ❌ Accessible via DevTools
-
-### **Mode Sécurisé (Nouveau)**
-```typescript
-// Stockage chiffré avec IndexedDB
-const encryptedData = {
-  encryptedPrivateKey: encryptPrivateKey(privateKey, password),
-  address: wallet.address,
-  mnemonic: encryptMnemonic(mnemonic, password),
-  createdAt: Date.now(),
-  lastUsed: Date.now()
-};
-```
-
-**Avantages :**
-- ✅ Chiffrement AES-256
-- ✅ Stockage sécurisé IndexedDB
-- ✅ Phrases mnémoniques BIP39
-- ✅ Sessions temporaires
-- ✅ Validation de mot de passe
-
-**Inconvénients :**
-- ❌ Mot de passe requis à chaque connexion
-- ❌ Plus complexe à utiliser
-- ❌ Pas de reconnexion automatique
 
 ## 🚀 Utilisation
 
@@ -257,32 +211,30 @@ const key = CryptoJS.PBKDF2(password, salt, {
 ## 📊 Métriques de Sécurité
 
 ### **Niveau de Sécurité**
-- **Mode Simple** : ⭐⭐ (2/5)
-- **Mode Sécurisé** : ⭐⭐⭐⭐ (4/5)
+- **SpaceWolf Sécurisé** : ⭐⭐⭐⭐ (4/5)
 - **MetaMask** : ⭐⭐⭐⭐⭐ (5/5)
 
 ### **Facilité d'Utilisation**
-- **Mode Simple** : ⭐⭐⭐⭐⭐ (5/5)
-- **Mode Sécurisé** : ⭐⭐⭐ (3/5)
+- **SpaceWolf Sécurisé** : ⭐⭐⭐ (3/5)
 - **MetaMask** : ⭐⭐⭐⭐ (4/5)
 
 ## 🎯 Recommandations
 
 ### **Pour les Débutants**
-- Commencer avec le **Mode Simple**
-- Apprendre les concepts de base
-- Passer au **Mode Sécurisé** progressivement
+- Utiliser le système sécurisé par défaut
+- Apprendre les concepts de sécurité Web3
+- Sauvegarder les phrases mnémoniques
 
 ### **Pour les Utilisateurs Avancés**
-- Utiliser le **Mode Sécurisé** par défaut
+- Utiliser le système sécurisé par défaut
 - Sauvegarder les phrases mnémoniques
 - Considérer les hardware wallets
 
 ### **Pour les Développeurs**
-- Intégrer les deux modes
-- Permettre le choix utilisateur
-- Documenter les différences
+- Intégrer le système sécurisé
+- Documenter les bonnes pratiques
+- Tester la sécurité régulièrement
 
 ---
 
-**Note** : Ce système offre un équilibre entre sécurité et simplicité, inspiré des meilleures pratiques de MetaMask tout en restant accessible aux débutants Web3.
+**Note** : Ce système offre une sécurité maximale inspirée des meilleures pratiques de MetaMask, avec chiffrement AES-256 et stockage sécurisé IndexedDB pour une expérience Web3 sécurisée.
