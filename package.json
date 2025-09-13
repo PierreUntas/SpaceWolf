@@ -15,11 +15,10 @@
     "crypto-js": "^4.2.0",
     "ethers": "^6.15.0",
     "helia": "^5.5.1",
-    "next": "15.4.5",
+    "next": "^15.5.3",
     "postcss": "^8.5.6",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "viem": "^2.33.2"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

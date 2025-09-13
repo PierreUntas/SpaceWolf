@@ -13,18 +13,15 @@ export default function Home() {
   
   // États principaux du wallet
   const [wallet, setWallet] = useState<ethers.HDNodeWallet | ethers.Wallet | null>(null);
-  const [privateKey, setPrivateKey] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [balance, setBalance] = useState<string>('0');
-  const [network, setNetwork] = useState<string>('sepolia');
+  const [network, setNetwork] = useState<string>('');
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState<boolean>(false);
   
   // États pour le système sécurisé
-  const [secureWalletMode, setSecureWalletMode] = useState<'secure' | 'simple'>('simple');
   
   // États pour l'interface
   const [account, setAccount] = useState<string | null>(null);
@@ -220,75 +217,6 @@ export default function Home() {
     }
   }), []);
 
-  // Créer un nouveau wallet
-  const createNewWallet = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Générer un nouveau wallet
-      const newWallet = ethers.Wallet.createRandom();
-      
-      setWallet(newWallet);
-      setAddress(newWallet.address);
-      setPrivateKey(newWallet.privateKey);
-      setIsConnected(true);
-      setAccount(newWallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('spacewolf_privateKey', newWallet.privateKey);
-      localStorage.setItem('spacewolf_address', newWallet.address);
-      localStorage.setItem('spacewolf_network', network);
-      
-      // Récupérer le solde
-      await getBalance(newWallet.address);
-      
-      // 🎮 GAMIFICATION: Level up et récompense SW
-      levelUp('Wallet Created');
-      setGameStats(prev => ({ ...prev, transactionsCompleted: prev.transactionsCompleted + 1 }));
-      
-    } catch (err) {
-      setError('Erreur lors de la création du wallet: ' + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Se connecter avec une clé privée
-  const connectWithPrivateKey = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      if (!privateKey.trim()) {
-        throw new Error('Veuillez entrer une clé privée');
-      }
-
-      // Créer le wallet à partir de la clé privée
-      const wallet = new ethers.Wallet(privateKey.trim());
-      
-      setWallet(wallet);
-      setAddress(wallet.address);
-      setIsConnected(true);
-      setAccount(wallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('spacewolf_privateKey', privateKey.trim());
-      localStorage.setItem('spacewolf_address', wallet.address);
-      localStorage.setItem('spacewolf_network', network);
-      
-      // Récupérer le solde
-      await getBalance(wallet.address);
-      
-    } catch (err) {
-      setError('Erreur de connexion: ' + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Fonctions pour le système sécurisé
   const handleSecureWalletConnected = (connectedWallet: ethers.Wallet) => {
     setWallet(connectedWallet);
@@ -297,8 +225,10 @@ export default function Home() {
     setAccount(connectedWallet.address);
     setChainId('0xaa36a7'); // Sepolia
     
-    // Récupérer le solde
-    getBalance(connectedWallet.address);
+    // Récupérer le solde seulement si un réseau est sélectionné
+    if (network) {
+      getBalance(connectedWallet.address);
+    }
   };
 
   const handleSecureWalletDisconnected = () => {
@@ -369,6 +299,12 @@ export default function Home() {
   // Récupérer le solde
   const getBalance = useCallback(async (walletAddress: string, networkName: string = network) => {
     try {
+      // Vérifier qu'un réseau valide est sélectionné
+      if (!networkName || networkName === '') {
+        console.log('⚠️ Aucun réseau sélectionné, impossible de récupérer le solde');
+        return;
+      }
+      
       console.log(`🔍 Récupération du solde pour ${walletAddress} sur ${networkName}`);
       
       // S'assurer qu'on utilise bien le réseau spécifié
@@ -459,6 +395,11 @@ export default function Home() {
   const refreshBalance = async () => {
     if (!wallet || !address) {
       setError('Aucun wallet connecté');
+      return;
+    }
+    
+    if (!network || network === '') {
+      setError('Veuillez d\'abord sélectionner un réseau');
       return;
     }
     
@@ -612,35 +553,6 @@ export default function Home() {
     }
   }, [mounted, playerLevel, balanceEth, network, gameStats, checkAdvancedStepConditions]);
 
-  // Fonction de débogage pour tester la progression manuellement
-  const debugProgression = () => {
-    console.log('🔍 DEBUG PROGRESSION:');
-    console.log(`- Niveau actuel: ${playerLevel}`);
-    console.log(`- Balance ETH: ${balanceEth}`);
-    console.log(`- Réseau: ${network}`);
-    console.log(`- Transactions: ${gameStats.transactionsCompleted}`);
-    console.log(`- NFTs mintés: ${gameStats.nftsMinted}`);
-    console.log(`- ETH transférés: ${gameStats.ethTransferred}`);
-    console.log(`- Réseaux explorés: ${gameStats.networksSwitched}`);
-    
-    const balanceInEth = parseFloat(balanceEth || '0');
-    console.log(`- Balance en ETH (parseFloat): ${balanceInEth}`);
-    console.log(`- Condition niveau 3 (niveau 2 + balance > 0): ${playerLevel === 2 && balanceInEth > 0}`);
-    
-    // Afficher les actions accomplies
-    const completedActions = localStorage.getItem('spacewolf-completed-actions');
-    const actions = completedActions ? JSON.parse(completedActions) : [];
-    console.log(`- Actions accomplies: ${actions.join(', ') || 'Aucune'}`);
-    
-    checkAdvancedStepConditions();
-  };
-
-  // Fonction pour réinitialiser les actions accomplies (pour les tests)
-  const resetCompletedActions = () => {
-    localStorage.removeItem('spacewolf-completed-actions');
-    console.log('🔄 Actions accomplies réinitialisées');
-  };
-
   // === SYSTÈME DE TOKEN SW (SPACEWOLF) ===
   
   // Claimer des tokens SW
@@ -735,18 +647,6 @@ export default function Home() {
     }
   };
 
-  // Fonction de debug pour diagnostiquer les problèmes
-  const debugGameState = () => {
-    console.log('🔍 === DEBUG GAME STATE ===');
-    console.log(`Niveau: ${playerLevel}`);
-    console.log(`SW Balance: ${swBalance}`);
-    console.log(`SW Claimed: ${swClaimed}`);
-    console.log(`SW Disponibles: ${getAvailableSW()}`);
-    console.log('Journey Steps:', journeySteps);
-    console.log('LocalStorage:', localStorage.getItem('spacewolf_game_stats'));
-    console.log('=========================');
-  };
-
   // Copier dans le presse-papiers
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -754,27 +654,9 @@ export default function Home() {
     setTimeout(() => setCopiedAddress(false), 2000);
   };
 
-  // Déconnexion
-  const disconnect = () => {
-    setWallet(null);
-    setAddress('');
-    setPrivateKey('');
-    setBalance('0');
-    setBalanceEth('0');
-    setIsConnected(false);
-    setShowPrivateKey(false);
-    setAccount(null);
-    setError('');
-    
-    // Nettoyer le localStorage
-    localStorage.removeItem('spacewolf_privateKey');
-    localStorage.removeItem('spacewolf_address');
-    localStorage.removeItem('spacewolf_network');
-  };
-
   // Helper functions to check step completion
   const isStep1Completed = () => !!account && !!wallet;
-  const isStep2Completed = () => chainId === '0xaa36a7';
+  const isStep2Completed = () => network === 'sepolia' || network === 'mainnet';
   const isStep3Completed = () => {
     if (!balanceEth) return false;
     const balance = parseFloat(balanceEth);
@@ -1162,10 +1044,6 @@ export default function Home() {
     }
   }, [account, chainId]);
 
-  async function connectWallet() {
-    await createNewWallet();
-  }
-
   // Initialize Helia IPFS node
   const initializeHelia = async () => {
     try {
@@ -1240,18 +1118,6 @@ export default function Home() {
       
       console.log('NFT image set as profile picture');
     }
-  };
-
-  // Reset profile picture
-  const resetProfilePicture = () => {
-    setProfilePicture(null);
-    setIsUsingNftAsProfile(false);
-    
-    // Remove from localStorage
-    localStorage.removeItem('spacewolf-profile-picture');
-    localStorage.removeItem('spacewolf-using-nft-profile');
-    
-    console.log('Profile picture reset');
   };
 
   // Validate Ethereum address
@@ -1954,58 +1820,17 @@ export default function Home() {
     }
     
     // Check if user has sent ETH to any address (from transaction history)
-    if (account && chainId === '0xaa36a7') {
+    if (account && network === 'sepolia') {
       checkUserTransactionHistory();
     }
   }, [account, chainId, checkUserTransactionHistory]);
 
-  // Se connecter avec une clé privée (depuis localStorage)
-  const connectWithPrivateKeyFromStorage = useCallback(async (privateKeyValue: string) => {
-    try {
-      if (!privateKeyValue.trim()) return;
-
-      // Créer le wallet à partir de la clé privée
-      const wallet = new ethers.Wallet(privateKeyValue.trim());
-      
-      setWallet(wallet);
-      setAddress(wallet.address);
-      setIsConnected(true);
-      setAccount(wallet.address);
-      setChainId('0xaa36a7'); // Sepolia
-      
-      // Récupérer le solde avec le réseau sauvegardé
-      const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
-      await getBalance(wallet.address, savedNetwork);
-      
-    } catch (err) {
-      console.error('Erreur de connexion automatique:', err);
-      // Nettoyer le localStorage si la clé est invalide
-      localStorage.removeItem('spacewolf_privateKey');
-      localStorage.removeItem('spacewolf_address');
-    }
-  }, []); // Remove getBalance dependency to prevent circular dependency
-
-  // Charger les données depuis localStorage au démarrage
+  // Initialiser le composant
   useEffect(() => {
     setMounted(true);
-    
     // 🎮 Charger les stats de jeu
     loadGameStats();
-    
-    const savedPrivateKey = localStorage.getItem('spacewolf_privateKey');
-    const savedAddress = localStorage.getItem('spacewolf_address');
-    const savedNetwork = localStorage.getItem('spacewolf_network') || 'sepolia';
-    
-    // Toujours définir le réseau sauvegardé
-    setNetwork(savedNetwork);
-    
-    if (savedPrivateKey && savedAddress) {
-      setPrivateKey(savedPrivateKey);
-      setAddress(savedAddress);
-      // Reconnecter automatiquement
-      connectWithPrivateKeyFromStorage(savedPrivateKey);
-    }
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
   // Effacer les erreurs automatiquement
   useEffect(() => {
@@ -2043,10 +1868,10 @@ export default function Home() {
       {mounted && (
         <div className="fixed top-4 right-4 z-50">
           <div
-            onClick={!account ? connectWallet : undefined}
-            role={!account ? 'button' : undefined}
-            className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 backdrop-blur px-3 py-2 shadow-sm text-xs sm:text-sm ${!account ? 'cursor-pointer hover:bg-white' : 'cursor-default'}`}
-            aria-label={!account ? 'Connect wallet' : 'Wallet balance'}
+            onClick={undefined}
+            role={undefined}
+            className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 backdrop-blur px-3 py-2 shadow-sm text-xs sm:text-sm cursor-default`}
+            aria-label={'Wallet balance'}
           >
             {/* ETH logo */}
             <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" className="opacity-90">
@@ -2074,25 +1899,11 @@ export default function Home() {
                       <span className="text-gray-900 font-semibold">Ξ {balanceEth ?? '...'}</span>
                       <button 
                         onClick={refreshBalance}
-                        disabled={loading}
+                        disabled={loading || !network}
                         className="text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        title="Rafraîchir le solde"
+                        title={!network ? "Sélectionnez d'abord un réseau" : "Rafraîchir le solde"}
                       >
                         {loading ? '⏳' : '🔄'}
-                      </button>
-                      <button 
-                        onClick={debugProgression}
-                        className="text-blue-500 hover:text-blue-700 transition-colors ml-2"
-                        title="Déboguer la progression"
-                      >
-                        🔍
-                      </button>
-                      <button 
-                        onClick={resetCompletedActions}
-                        className="text-red-500 hover:text-red-700 transition-colors ml-1"
-                        title="Réinitialiser les actions accomplies"
-                      >
-                        🔄
                       </button>
                     </div>
                     {registeredUsername && (
@@ -2142,89 +1953,11 @@ export default function Home() {
           </p>
           {mounted && (
             <>
-              {/* Sélecteur de mode de sécurité */}
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="text-lg font-semibold mb-3">🔐 Mode de Sécurité</h3>
-                <div className="flex gap-4 mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="simple"
-                      checked={secureWalletMode === 'simple'}
-                      onChange={(e) => setSecureWalletMode(e.target.value as 'simple' | 'secure')}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">
-                      <strong>Mode Simple</strong><br/>
-                      <span className="text-gray-600">Stockage localStorage basique</span>
-                    </span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="secure"
-                      checked={secureWalletMode === 'secure'}
-                      onChange={(e) => setSecureWalletMode(e.target.value as 'simple' | 'secure')}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">
-                      <strong>Mode Sécurisé</strong><br/>
-                      <span className="text-gray-600">Chiffrement AES-256 + IndexedDB</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Interface de connexion selon le mode */}
-              {secureWalletMode === 'secure' ? (
-                <SecureWalletUI
-                  onWalletConnected={handleSecureWalletConnected}
-                  onWalletDisconnected={handleSecureWalletDisconnected}
-                />
-              ) : (
-                <div className="flex items-center gap-4">
-                  {!isConnected ? (
-                    <>
-                      <button
-                        onClick={createNewWallet}
-                        disabled={loading}
-                        className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                      >
-                        {loading ? 'Création...' : 'Créer un nouveau wallet'}
-                      </button>
-                      
-                      <div className="form-group">
-                        <input
-                          type="password"
-                          className="px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Ou entrez votre clé privée (0x...)"
-                          value={privateKey}
-                          onChange={(e) => setPrivateKey(e.target.value)}
-                        />
-                        <button
-                          className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
-                          onClick={connectWithPrivateKey}
-                          disabled={loading || !privateKey.trim()}
-                        >
-                          {loading ? 'Connexion...' : 'Se connecter'}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
-                        Connecté: {address.slice(0, 6)}...{address.slice(-4)}
-                      </div>
-                      <button
-                        onClick={disconnect}
-                        className="px-3 py-2 rounded-md bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition cursor-pointer"
-                      >
-                        Se déconnecter
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
+              {/* Interface de connexion sécurisée */}
+              <SecureWalletUI
+                onWalletConnected={handleSecureWalletConnected}
+                onWalletDisconnected={handleSecureWalletDisconnected}
+              />
               <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 1</span>
@@ -2387,75 +2120,13 @@ export default function Home() {
                     </div>
                   )}
                   
-                  {/* Debug & Reset */}
-                  <div className="bg-white/50 p-3 rounded-lg border border-red-200">
-                    <div className="text-sm text-gray-600 mb-2">🛠️ Debug & Reset</div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={debugGameState}
-                        className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
-                      >
-                        Debug Console
-                      </button>
-                      <button 
-                        onClick={() => {
-                          localStorage.removeItem('spacewolf_game_stats');
-                          localStorage.removeItem('spacewolf_achievements');
-                          window.location.reload();
-                        }}
-                        className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
-                      >
-                        Reset Game
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Step 1: Wallet Generation */}
-                <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Step 1: Générer un Wallet Ethereum</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      {!isConnected ? (
-                        <>
-                          <button
-                            onClick={createNewWallet}
-                            disabled={loading}
-                            className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-300 hover:opacity-95 transition cursor-pointer"
-                          >
-                            {loading ? 'Création...' : 'Créer un nouveau wallet'}
-                          </button>
-                          
-                          <div className="form-group">
-                            <input
-                              type="password"
-                              className="px-3 py-2 border border-gray-300 rounded-md"
-                              placeholder="Ou entrez votre clé privée (0x...)"
-                              value={privateKey}
-                              onChange={(e) => setPrivateKey(e.target.value)}
-                            />
-                            <button 
-                              className="px-3 py-2 rounded-md bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 transition cursor-pointer ml-2"
-                              onClick={connectWithPrivateKey}
-                              disabled={loading || !privateKey.trim()}
-                            >
-                              {loading ? 'Connexion...' : 'Se connecter'}
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="px-3 py-2 rounded-md bg-green-100 text-green-800 border border-green-300">
-                          ✅ Wallet généré avec succès !
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="mt-4">
               <p className="text-base sm:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-gray-900 text-sm font-semibold align-middle">Step 2</span>
-                  <span className="align-middle">Réseau Sepolia configuré automatiquement.</span>
+                  <span className="align-middle">Sélectionner un réseau Ethereum.</span>
                 {isStep2Completed() && (
                   <span className="ml-2 align-middle text-[#6e6289]" aria-label="on-sepolia">
                     ✓
@@ -2469,7 +2140,7 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="p-3 border border-gray-200 rounded-md bg-white">
                       <p className="text-sm text-gray-600 mb-2">
-                        Le réseau Sepolia est configuré automatiquement pour les tests. Vous pouvez basculer entre les réseaux :
+                        Sélectionnez un réseau Ethereum pour vos transactions. Nous recommandons Testnet pour les tests :
                       </p>
                       <div className="flex gap-2">
                         <button 
@@ -2482,11 +2153,11 @@ export default function Home() {
                           className={`px-3 py-2 rounded text-sm ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
                           onClick={() => switchNetwork('sepolia')}
                         >
-                          🧪 Sepolia (Recommandé)
+                          🧪 Testnet (Recommandé)
                         </button>
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        ✅ Réseau Sepolia configuré automatiquement pour les tests
+                        💡 Cliquez sur Testnet pour les tests ou Mainnet pour les transactions réelles
                       </p>
                     </div>
                   </div>
@@ -2513,35 +2184,14 @@ export default function Home() {
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Clé privée:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-mono">
-                          {showPrivateKey ? privateKey : '••••••••••••••••••••••••••••••••'}
-                        </span>
-                        <button 
-                          onClick={() => setShowPrivateKey(!showPrivateKey)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          {showPrivateKey ? '👁️‍🗨️' : '👁️'}
-                        </button>
-                        <button 
-                          onClick={() => copyToClipboard(privateKey)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          📋
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Solde:</span>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold">{balance} ETH</span>
                         <button 
                           onClick={refreshBalance}
-                          disabled={loading}
+                          disabled={loading || !network}
                           className="text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          title="Rafraîchir le solde"
+                          title={!network ? "Sélectionnez d'abord un réseau" : "Rafraîchir le solde"}
                         >
                           {loading ? '⏳' : '🔄'}
                         </button>
@@ -2703,13 +2353,6 @@ export default function Home() {
                                   className="px-2 py-1 rounded text-xs bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {isUsingNftAsProfile ? 'Active' : 'Set as Profile'}
-                                </button>
-                                <button
-                                  onClick={resetProfilePicture}
-                                  disabled={!isUsingNftAsProfile}
-                                  className="px-2 py-1 rounded text-xs bg-gray-600 text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  Reset
                                 </button>
                               </div>
                             </div>
