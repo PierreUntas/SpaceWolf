@@ -9,6 +9,8 @@ import { ethers } from 'ethers';
 import SecureWalletUI from '../components/SecureWalletUI';
 import { useLanguage } from '../lib/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import StepExplanation from '../components/StepExplanation';
+import Web3Glossary from '../components/Web3Glossary';
 
 export default function Home() {
   const router = useRouter();
@@ -441,6 +443,23 @@ export default function Home() {
     { level: 9, name: "DeFi Explorer", description: "Explorer la DeFi", swReward: 750 },
     { level: 10, name: "Web3 Master", description: "Maître du Web3", swReward: 1000 }
   ];
+
+  // Fonction générique pour vérifier si une étape est complétée
+  const isStepCompleted = (stepNumber: number): boolean => {
+    switch (stepNumber) {
+      case 1: return isStep1Completed();
+      case 2: return isStep2Completed();
+      case 3: return isStep3Completed();
+      case 4: return isStep4Completed();
+      case 5: return isStep5Completed();
+      case 6: return isStep6Completed();
+      case 7: return isStep7Completed();
+      case 8: return isStep8Completed();
+      case 9: return isStep9Completed();
+      case 10: return isStep10Completed();
+      default: return false;
+    }
+  };
 
   // Obtenir les informations de l'étape actuelle
   const getCurrentStep = () => {
@@ -1866,6 +1885,9 @@ export default function Home() {
         <LanguageSwitcher />
       </div>
 
+      {/* Glossaire Web3 */}
+      <Web3Glossary />
+
       <main className="flex flex-col items-center justify-center gap-2 sm:gap-4 lg:gap-8 p-2 sm:p-4 lg:p-8 overflow-x-hidden w-full max-w-7xl mx-auto">
         {/* 🎮 ANIMATIONS DE JEU */}
         {showLevelUp && (
@@ -2006,12 +2028,11 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  {/* Étape actuelle */}
-                  <div className="mb-4 p-3 sm:p-3 bg-[#fbf8f2]/50 rounded-lg">
-                    <div className="text-sm text-[#59507b] mb-1">Étape Actuelle</div>
-                    <div className="text-lg font-bold text-[#59507b]">{getCurrentStep().name}</div>
-                    <div className="text-sm text-[#59507b]">{getCurrentStep().description}</div>
-                  </div>
+                  {/* Étape actuelle avec explications détaillées */}
+                  <StepExplanation 
+                    stepNumber={playerLevel} 
+                    isCompleted={isStepCompleted(playerLevel)}
+                  />
                   
                   {/* Étape suivante */}
                   {getNextStep() && (
