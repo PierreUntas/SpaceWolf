@@ -116,6 +116,22 @@ export interface Translations {
   step5Description: string;
   step6Description: string;
   
+  // Descriptions détaillées pour débutants
+  step1DetailedDescription: string;
+  step2DetailedDescription: string;
+  step3DetailedDescription: string;
+  step4DetailedDescription: string;
+  step5DetailedDescription: string;
+  step6DetailedDescription: string;
+  
+  // Conseils et avertissements
+  step1Tips: string;
+  step2Tips: string;
+  step3Tips: string;
+  step4Tips: string;
+  step5Tips: string;
+  step6Tips: string;
+  
   // Actions
   start: string;
   next: string;
@@ -264,7 +280,7 @@ export const translations: Record<Language, Translations> = {
     // Interface principale
     spaceWolf: 'SpaceWolf',
     welcomeToSpaceWolf: 'Bienvenue dans SpaceWolf',
-    spaceWolfDescription: 'Salut, je suis SpaceWolf, un humain connu sous le nom de Pierre Untas, qui veut partager son amour pour le Web3. En tant que développeur web C#, j\'apprends Solidity et tout ce qui concerne la blockchain chez Alyra. Bienvenue chez moi, n\'hésitez pas à explorer mes projets GitHub.',
+    spaceWolfDescription: 'Bienvenue dans SpaceWolf Journey ! Un jeu interactif qui vous guide pas à pas dans l\'univers du Web3. Créez votre premier portefeuille, explorez les réseaux de test pour apprendre en toute sécurité, puis relevez des défis sur le vrai réseau Ethereum. Découvrez les NFT, la DeFi, la gouvernance et bien plus encore. Commencez votre aventure Web3 maintenant !',
     discoverWeb3: 'Découvrez le Web3 étape par étape !',
     connectYourWallet: 'Connectez votre portefeuille',
     gameProgress: 'Progression du jeu',
@@ -296,6 +312,22 @@ export const translations: Record<Language, Translations> = {
     step4Description: 'Transférez des ETH à un ami',
     step5Description: 'Créez votre identité Web3',
     step6Description: 'Participez à la gouvernance',
+    
+    // Descriptions détaillées pour débutants
+    step1DetailedDescription: 'Un wallet (portefeuille) est comme votre compte bancaire numérique pour les cryptomonnaies. Il contient vos clés privées qui permettent d\'accéder à vos fonds. SpaceWolf vous guide pour créer un wallet sécurisé avec chiffrement AES-256.',
+    step2DetailedDescription: 'Ethereum est le réseau principal, mais il existe des réseaux de test gratuits pour apprendre. Nous commençons par Sepolia (test) pour éviter les frais, puis passons au réseau principal quand vous êtes prêt.',
+    step3DetailedDescription: 'Un NFT (Non-Fungible Token) est un certificat numérique unique qui prouve que vous possédez un objet digital. Vous allez créer votre premier NFT avec une image et le stocker sur IPFS (système de fichiers décentralisé).',
+    step4DetailedDescription: 'Envoyer des ETH est comme faire un virement bancaire, mais instantané et mondial. Vous allez apprendre à transférer des cryptomonnaies de manière sécurisée en utilisant l\'adresse du destinataire.',
+    step5DetailedDescription: 'Votre identité Web3 est votre profil décentralisé qui vous suit sur toutes les applications blockchain. C\'est comme un compte social, mais vous en êtes le seul propriétaire.',
+    step6DetailedDescription: 'La gouvernance décentralisée permet aux détenteurs de tokens de voter sur l\'évolution d\'un protocole. Vous allez créer une proposition et participer au processus démocratique du Web3.',
+    
+    // Conseils et avertissements
+    step1Tips: '💡 Conseil : Sauvegardez votre phrase de récupération dans un endroit sûr. Sans elle, vous perdrez définitivement l\'accès à vos fonds !',
+    step2Tips: '💡 Conseil : Les réseaux de test utilisent des ETH gratuits pour les tests. Aucun risque financier !',
+    step3Tips: '💡 Conseil : Votre NFT sera visible publiquement sur la blockchain. Choisissez une image que vous voulez partager !',
+    step4Tips: '⚠️ Attention : Vérifiez toujours l\'adresse du destinataire. Les transactions sont irréversibles !',
+    step5Tips: '💡 Conseil : Votre nom Web3 peut être utilisé sur toutes les applications compatibles ENS.',
+    step6Tips: '💡 Conseil : Les propositions de gouvernance peuvent influencer l\'avenir des protocoles DeFi.',
     
     // Actions
     start: 'Commencer',
@@ -444,7 +476,7 @@ export const translations: Record<Language, Translations> = {
     // Interface principale
     spaceWolf: 'SpaceWolf',
     welcomeToSpaceWolf: 'Welcome to SpaceWolf',
-    spaceWolfDescription: 'Hi, I\'m SpaceWolf, a human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I\'m learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.',
+    spaceWolfDescription: 'Welcome to SpaceWolf Journey! An interactive game that guides you step by step into the Web3 universe. Create your first wallet, explore test networks to learn safely, then take on challenges on the real Ethereum network. Discover NFTs, DeFi, governance and much more. Start your Web3 adventure now!',
     discoverWeb3: 'Discover Web3 step by step!',
     connectYourWallet: 'Connect your wallet',
     gameProgress: 'Game progress',
@@ -476,6 +508,22 @@ export const translations: Record<Language, Translations> = {
     step4Description: 'Transfer ETH to a friend',
     step5Description: 'Create your Web3 identity',
     step6Description: 'Participate in governance',
+    
+    // Descriptions détaillées pour débutants
+    step1DetailedDescription: 'A wallet is like your digital bank account for cryptocurrencies. It contains your private keys that allow access to your funds. SpaceWolf guides you to create a secure wallet with AES-256 encryption.',
+    step2DetailedDescription: 'Ethereum is the main network, but there are free test networks for learning. We start with Sepolia (test) to avoid fees, then move to the main network when you\'re ready.',
+    step3DetailedDescription: 'An NFT (Non-Fungible Token) is a unique digital certificate that proves you own a digital object. You\'ll create your first NFT with an image and store it on IPFS (decentralized file system).',
+    step4DetailedDescription: 'Sending ETH is like making a bank transfer, but instant and global. You\'ll learn to transfer cryptocurrencies securely using the recipient\'s address.',
+    step5DetailedDescription: 'Your Web3 identity is your decentralized profile that follows you across all blockchain applications. It\'s like a social account, but you\'re the only owner.',
+    step6DetailedDescription: 'Decentralized governance allows token holders to vote on protocol evolution. You\'ll create a proposal and participate in the democratic process of Web3.',
+    
+    // Conseils et avertissements
+    step1Tips: '💡 Tip: Save your recovery phrase in a safe place. Without it, you\'ll permanently lose access to your funds!',
+    step2Tips: '💡 Tip: Test networks use free ETH for testing. No financial risk!',
+    step3Tips: '💡 Tip: Your NFT will be publicly visible on the blockchain. Choose an image you want to share!',
+    step4Tips: '⚠️ Warning: Always verify the recipient\'s address. Transactions are irreversible!',
+    step5Tips: '💡 Tip: Your Web3 name can be used on all ENS-compatible applications.',
+    step6Tips: '💡 Tip: Governance proposals can influence the future of DeFi protocols.',
     
     // Actions
     start: 'Start',
