@@ -7,9 +7,12 @@ import { createHelia, Helia } from 'helia';
 import { unixfs } from '@helia/unixfs';
 import { ethers } from 'ethers';
 import SecureWalletUI from '../components/SecureWalletUI';
+import { useLanguage } from '../lib/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useLanguage();
   
   // États principaux du wallet
   const [wallet, setWallet] = useState<ethers.HDNodeWallet | ethers.Wallet | null>(null);
@@ -1858,6 +1861,11 @@ export default function Home() {
         />
       </div>
 
+      {/* Sélecteur de langue */}
+      <div className="fixed top-4 left-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       <main className="flex flex-col items-center justify-center gap-2 sm:gap-4 lg:gap-8 p-2 sm:p-4 lg:p-8 overflow-x-hidden w-full max-w-7xl mx-auto">
         {/* 🎮 ANIMATIONS DE JEU */}
         {showLevelUp && (
@@ -1938,7 +1946,7 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <span className="text-[#59507b]">Générer un wallet</span>
+                <span className="text-[#59507b]"></span>
               )}
             </div>
           </div>
@@ -1960,10 +1968,10 @@ export default function Home() {
             </div>
           )}
           <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-center sm:text-left break-words">
-            Hi, I'm SpaceWolf, a human known as Pierre Untas, who wants to share his love for Web3. Programming as a C# web developer, I'm learning Solidity and stuff about blockchain at Alyra. Welcome home, feel free to travel around my GitHub projects.
+            {t.spaceWolfDescription}
           </p>
           <p className="text-sm sm:text-base lg:text-lg xl:text-2xl font-semibold text-center sm:text-left opacity-95 pt-2 break-words">
-            Discover Web3 step by step!
+            {t.discoverWeb3}
           </p>
           {mounted && (
             <>
@@ -1975,7 +1983,7 @@ export default function Home() {
               <div className="mt-4">
               <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-xs sm:text-sm font-semibold align-middle">Step 1</span>
-                  <span className="align-middle">Générer un wallet Ethereum avec clé privée.</span>
+                  <span className="align-middle"></span>
                   {isStep1Completed() && (
                     <span className="ml-2 align-middle text-[#6e6289]" aria-label="wallet-generated">
                     ✓
@@ -1987,13 +1995,13 @@ export default function Home() {
                 <div className="mt-4 p-4 sm:p-6 border border-[#d8d0f3] rounded-lg bg-gradient-to-br from-[#d8d0f3] to-[#fcd6c5]">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg sm:text-xl font-bold text-[#59507b] flex items-center gap-2">
-                      🎮 SpaceWolf Journey
+                      🎮 {t.spaceWolf} Journey
                       <span className="text-xs sm:text-sm bg-[#fcd6c5] text-[#59507b] px-2 py-1 rounded-full">
-                        Level {playerLevel}
+                        {t.level} {playerLevel}
                       </span>
                     </h3>
                     <div className="text-right">
-                      <div className="text-sm text-[#59507b]">SW Tokens</div>
+                      <div className="text-sm text-[#59507b]">{t.swTokens}</div>
                       <div className="text-lg font-bold text-[#59507b]">{swBalance} 🪙</div>
                     </div>
                   </div>

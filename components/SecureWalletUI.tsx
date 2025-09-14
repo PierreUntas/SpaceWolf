@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { secureWalletManager } from '../lib/secureWallet';
 import { ethers } from 'ethers';
+import { useLanguage } from '../lib/LanguageContext';
 
 interface SecureWalletUIProps {
   onWalletConnected: (wallet: ethers.Wallet) => void;
@@ -10,6 +11,8 @@ interface SecureWalletUIProps {
 }
 
 export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected }: SecureWalletUIProps) {
+  const { t } = useLanguage();
+  
   // États pour l'interface
   const [mode, setMode] = useState<'create' | 'import' | 'restore' | 'login'>('create');
   const [password, setPassword] = useState('');
@@ -46,18 +49,18 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
     } catch (err) {
-      setError('Erreur d\'initialisation: ' + (err as Error).message);
+      setError(t.initializationError + ': ' + (err as Error).message);
     }
   };
 
   const handleCreateWallet = async () => {
     if (!password || password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t.passwordsDoNotMatch);
       return;
     }
 
     if (!passwordValidation.isValid) {
-      setError('Le mot de passe ne respecte pas les critères de sécurité');
+      setError(t.passwordCriteriaNotMet);
       return;
     }
 
@@ -69,14 +72,14 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       
       setGeneratedMnemonic(walletData.mnemonic || '');
       setShowMnemonic(true);
-      setSuccess('Wallet créé avec succès !');
+      setSuccess(t.walletCreatedSuccess);
       
       // Charger la liste des wallets
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
       
     } catch (err) {
-      setError('Erreur de création: ' + (err as Error).message);
+      setError(t.creationError + ': ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -84,7 +87,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
 
   const handleImportWallet = async () => {
     if (!privateKey.trim() || !password) {
-      setError('Veuillez remplir tous les champs');
+      setError(t.fillAllFields);
       return;
     }
 
@@ -101,14 +104,14 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
         address: wallet.address
       }, password);
       
-      setSuccess('Wallet importé avec succès !');
+      setSuccess(t.walletImportedSuccess);
       
       // Charger la liste des wallets
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
       
     } catch (err) {
-      setError('Erreur d\'importation: ' + (err as Error).message);
+      setError(t.importError + ': ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -116,7 +119,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
 
   const handleRestoreWallet = async () => {
     if (!mnemonic.trim() || !password) {
-      setError('Veuillez remplir tous les champs');
+      setError(t.fillAllFields);
       return;
     }
 
@@ -125,14 +128,14 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
 
     try {
       const walletData = await secureWalletManager.restoreFromMnemonic(mnemonic.trim(), password);
-      setSuccess('Wallet restauré avec succès !');
+      setSuccess(t.walletRestoredSuccess);
       
       // Charger la liste des wallets
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
       
     } catch (err) {
-      setError('Erreur de restauration: ' + (err as Error).message);
+      setError(t.restoreError + ': ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -140,7 +143,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
 
   const handleLogin = async () => {
     if (!selectedAddress || !password) {
-      setError('Veuillez sélectionner un wallet et entrer le mot de passe');
+      setError(t.selectWalletAndPassword);
       return;
     }
 
@@ -152,10 +155,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       const wallet = new ethers.Wallet(walletData.privateKey);
       
       onWalletConnected(wallet);
-      setSuccess('Connexion réussie !');
+      setSuccess(t.loginSuccess);
       
     } catch (err) {
-      setError('Erreur de connexion: ' + (err as Error).message);
+      setError(t.connectionError + ': ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -164,7 +167,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   const handleLogout = () => {
     secureWalletManager.logout();
     onWalletDisconnected();
-    setSuccess('Déconnexion réussie');
+    setSuccess(t.logoutSuccess);
   };
 
   const getPasswordStrengthColor = (score: number) => {
@@ -174,9 +177,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const getPasswordStrengthText = (score: number) => {
-    if (score <= 2) return 'Faible';
-    if (score <= 3) return 'Moyen';
-    return 'Fort';
+    if (score <= 2) return t.weak;
+    if (score <= 3) return t.medium;
+    return t.strong;
   };
 
   return (
@@ -188,9 +191,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
           </svg>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#59507b] to-[#d8d0f3] bg-clip-text text-transparent">
-          Portefeuille Sécurisé
+          {t.secureWallet}
         </h2>
-        <p className="text-[#59507b] mt-2">Gérez vos wallets de manière sécurisée</p>
+        <p className="text-[#59507b] mt-2">{t.secureWalletDescription}</p>
       </div>
       
       {/* Navigation des modes */}
@@ -203,7 +206,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
           }`}
         >
-          Créer
+          {t.create}
         </button>
         <button
           onClick={() => setMode('import')}
@@ -213,7 +216,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
           }`}
         >
-          Importer
+          {t.import}
         </button>
         <button
           onClick={() => setMode('restore')}
@@ -223,7 +226,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
           }`}
         >
-          Restaurer
+          {t.restore}
         </button>
         <button
           onClick={() => setMode('login')}
@@ -233,7 +236,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
           }`}
         >
-          Connexion
+          {t.login}
         </button>
       </div>
 
@@ -272,20 +275,20 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       {mode === 'create' && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">Créer un nouveau portefeuille</h3>
-            <p className="text-[#59507b] text-sm">Générez un nouveau wallet avec une phrase de récupération sécurisée</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">{t.createNewWallet}</h3>
+            <p className="text-[#59507b] text-sm">{t.createNewWalletDescription}</p>
           </div>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#59507b] mb-2">Mot de passe</label>
+              <label className="block text-sm font-medium text-[#59507b] mb-2">{t.password}</label>
               <div className="relative">
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
-                  placeholder="Mot de passe sécurisé"
+                  placeholder={t.securePassword}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +299,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               {password && (
                 <div className="mt-3 p-3 bg-[#eeddde] rounded-lg">
                   <div className={`text-sm font-medium ${getPasswordStrengthColor(passwordValidation.score)}`}>
-                    Force: {getPasswordStrengthText(passwordValidation.score)}
+                    {t.passwordStrength}: {getPasswordStrengthText(passwordValidation.score)}
                   </div>
                   <div className="mt-2 space-y-1">
                     {passwordValidation.feedback.map((feedback, index) => (
@@ -311,14 +314,14 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-[#59507b] mb-2">Confirmer le mot de passe</label>
+              <label className="block text-sm font-medium text-[#59507b] mb-2">{t.confirmPassword}</label>
               <div className="relative">
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
-                  placeholder="Confirmer le mot de passe"
+                  placeholder={t.confirmSecurePassword}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,10 +342,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Création...
+                  {t.creating}
                 </div>
               ) : (
-                'Créer le portefeuille'
+                t.createWallet
               )}
             </button>
           </div>
@@ -353,19 +356,19 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       {mode === 'import' && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">Importer un portefeuille existant</h3>
-            <p className="text-[#59507b] text-sm">Importez votre wallet avec une clé privée</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">{t.importExistingWallet}</h3>
+            <p className="text-[#59507b] text-sm">{t.importExistingWalletDescription}</p>
           </div>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#59507b] mb-2">Clé privée</label>
+              <label className="block text-sm font-medium text-[#59507b] mb-2">{t.privateKey}</label>
               <textarea
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
                 className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 resize-none text-base"
                 rows={3}
-                placeholder="0x..."
+                placeholder={t.enterPrivateKey}
               />
             </div>
             
@@ -377,7 +380,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
-                  placeholder="Mot de passe pour chiffrer"
+                  placeholder={t.passwordToEncrypt}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,10 +401,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Importation...
+                  {t.importing}
                 </div>
               ) : (
-                'Importer le portefeuille'
+                t.importWallet
               )}
             </button>
           </div>
@@ -412,19 +415,19 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       {mode === 'restore' && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">Restaurer avec phrase mnémonique</h3>
-            <p className="text-[#59507b] text-sm">Récupérez votre wallet avec votre phrase de récupération</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">{t.restoreWithMnemonic}</h3>
+            <p className="text-[#59507b] text-sm">{t.restoreWithMnemonicDescription}</p>
           </div>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#59507b] mb-2">Phrase mnémonique</label>
+              <label className="block text-sm font-medium text-[#59507b] mb-2">{t.mnemonicPhrase}</label>
               <textarea
                 value={mnemonic}
                 onChange={(e) => setMnemonic(e.target.value)}
                 className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 resize-none text-base"
                 rows={3}
-                placeholder="word1 word2 word3..."
+                placeholder={t.enterMnemonicPhrase}
               />
             </div>
             
@@ -436,7 +439,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
-                  placeholder="Mot de passe pour chiffrer"
+                  placeholder={t.passwordToEncrypt}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -457,10 +460,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Restauration...
+                  {t.restoring}
                 </div>
               ) : (
-                'Restaurer le portefeuille'
+                t.restoreWallet
               )}
             </button>
           </div>
@@ -471,20 +474,20 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       {mode === 'login' && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">Se connecter</h3>
-            <p className="text-[#59507b] text-sm">Accédez à votre wallet sauvegardé</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-[#59507b] mb-2">{t.connectToWallet}</h3>
+            <p className="text-[#59507b] text-sm">{t.connectToWalletDescription}</p>
           </div>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#59507b] mb-2">Portefeuille sauvegardé</label>
+              <label className="block text-sm font-medium text-[#59507b] mb-2">{t.savedWallet}</label>
               <div className="relative">
                 <select
                   value={selectedAddress}
                   onChange={(e) => setSelectedAddress(e.target.value)}
                   className="w-full px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 appearance-none bg-[#fbf8f2]"
                 >
-                  <option value="">Sélectionner un portefeuille</option>
+                  <option value="">{t.selectWallet}</option>
                   {savedWallets.map((address) => (
                     <option key={address} value={address}>
                       {address.slice(0, 6)}...{address.slice(-4)}
@@ -507,7 +510,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
-                  placeholder="Mot de passe du portefeuille"
+                  placeholder={t.walletPassword}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,10 +531,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Connexion...
+                  {t.connecting}
                 </div>
               ) : (
-                'Se connecter'
+                t.connect
               )}
             </button>
           </div>
@@ -548,9 +551,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               </svg>
             </div>
             <div className="ml-3 flex-1">
-              <h4 className="text-base sm:text-lg font-semibold text-[#59507b] mb-2">Phrase de récupération</h4>
+              <h4 className="text-base sm:text-lg font-semibold text-[#59507b] mb-2">{t.recoveryPhrase}</h4>
               <p className="text-sm text-[#59507b] mb-4">
-                Sauvegardez cette phrase dans un endroit sûr. Elle vous permettra de récupérer votre portefeuille.
+                {t.recoveryPhraseDescription}
               </p>
               <div className="bg-[#fbf8f2] p-3 sm:p-4 rounded-xl border border-[#fcd6c5] font-mono text-xs sm:text-sm text-[#59507b] break-all">
                 {generatedMnemonic}
@@ -559,7 +562,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                 onClick={() => setShowMnemonic(false)}
                 className="mt-4 bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white px-4 sm:px-6 py-2 rounded-xl font-medium hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base"
               >
-                J'ai sauvegardé la phrase
+                t.savePhraseSecurely
               </button>
             </div>
           </div>
@@ -573,7 +576,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             onClick={handleLogout}
               className="w-full bg-gradient-to-r from-[#59507b] to-[#fcd6c5] text-white py-3 px-4 sm:px-6 rounded-xl font-medium hover:from-[#59507b] hover:to-[#fcd6c5] transition-all duration-200 transform hover:scale-[1.02] text-base"
           >
-            Se déconnecter
+            t.logout
           </button>
         </div>
       )}
