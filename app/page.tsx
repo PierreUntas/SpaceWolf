@@ -1845,19 +1845,32 @@ export default function Home() {
 
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-2 sm:p-4 lg:p-8 pb-16 sm:pb-20 gap-2 sm:gap-4 lg:gap-8 overflow-x-hidden">
-      {/* 🎮 ANIMATIONS DE JEU */}
-      {showLevelUp && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] px-4 sm:px-8 py-3 sm:py-4 rounded-lg shadow-2xl animate-bounce text-lg sm:text-2xl font-bold">
-            🎉 LEVEL UP! 🎉
-            <div className="text-center text-lg mt-2">Niveau {playerLevel}!</div>
-            <div className="text-center text-sm mt-1 opacity-90">{getCurrentStep().name}</div>
+    <div className="font-sans min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 lg:p-8 overflow-x-hidden">
+      {/* Image SpaceWolf en haut */}
+      <div className="w-full max-w-md mb-8 flex justify-center">
+        <Image
+          src="/space-wolf-large.png"
+          alt="SpaceWolf"
+          width={200}
+          height={200}
+          className="rounded-full shadow-lg"
+          priority
+        />
+      </div>
+
+      <main className="flex flex-col items-center justify-center gap-2 sm:gap-4 lg:gap-8 p-2 sm:p-4 lg:p-8 overflow-x-hidden w-full max-w-7xl mx-auto">
+        {/* 🎮 ANIMATIONS DE JEU */}
+        {showLevelUp && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] px-4 sm:px-8 py-3 sm:py-4 rounded-lg shadow-2xl animate-bounce text-lg sm:text-2xl font-bold">
+              🎉 LEVEL UP! 🎉
+              <div className="text-center text-lg mt-2">Niveau {playerLevel}!</div>
+              <div className="text-center text-sm mt-1 opacity-90">{getCurrentStep().name}</div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       
-      {showClaimAnimation && (
+        {showClaimAnimation && (
         <div className="fixed top-20 right-20 z-50 pointer-events-none">
           <div className="bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] px-3 sm:px-4 py-2 sm:py-2 rounded-lg shadow-lg animate-pulse">
             +{swClaimedAmount} SW 🪙
@@ -1931,7 +1944,8 @@ export default function Home() {
           </div>
         </div>
       )}
-      <main className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-4 lg:gap-[16px] row-start-2 items-center sm:items-start w-full max-w-7xl px-1 sm:px-2 lg:px-0 overflow-x-hidden">
+      
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-4 lg:gap-[16px] row-start-2 items-center sm:items-start w-full max-w-7xl px-1 sm:px-2 lg:px-0 overflow-x-hidden">
         <div className="flex flex-col gap-[16px] items-center sm:items-start lg:flex-1">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-6xl font-bold tracking-tight text-center sm:text-left break-words">
             SPACEWOLF JOURNEY
@@ -6436,15 +6450,9 @@ export default function Home() {
             </>
           )}
         </div>
-        <div className="flex flex-col items-center gap-4 lg:ml-8">
-          <Image
-            className=""
-            src="/space-wolf-large.png"
-            alt="Spacewolf Journey logo"
-            width={380}
-            height={380}
-            priority
-          />
+        
+        {/* GitHub Link centré */}
+        <div className="w-full max-w-md mx-auto mt-8 flex justify-center">
           <button onClick={redirect} className="cursor-pointer">
             <Image
               className=""
@@ -6456,6 +6464,7 @@ export default function Home() {
             />
           </button>
         </div>
+      </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
       </footer>
