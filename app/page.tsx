@@ -11,6 +11,7 @@ import { useLanguage } from '../lib/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import StepExplanation from '../components/StepExplanation';
 import Web3Glossary from '../components/Web3Glossary';
+import ThemeSelector from '../components/ThemeSelector';
 
 export default function Home() {
   const router = useRouter();
@@ -1884,6 +1885,9 @@ export default function Home() {
       <div className="fixed top-4 left-4 z-50">
         <LanguageSwitcher />
       </div>
+
+      {/* Sélecteur de thème */}
+      <ThemeSelector />
 
       {/* Glossaire Web3 */}
       <Web3Glossary />

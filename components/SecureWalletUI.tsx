@@ -184,17 +184,28 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-2 sm:p-4 lg:p-8 bg-[#d8d0f3]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#eeddde]/20 overflow-x-hidden">
+    <div className="w-full max-w-md mx-auto p-2 sm:p-4 lg:p-8 rounded-2xl shadow-xl border overflow-x-hidden" 
+         style={{ 
+           backgroundColor: 'var(--theme-accent-2)', 
+           borderColor: 'var(--theme-accent-2)',
+           backdropFilter: 'blur(10px)'
+         }}>
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#59507b] to-[#d8d0f3] rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+             style={{ 
+               background: 'linear-gradient(135deg, var(--theme-secondary), var(--theme-primary))'
+             }}>
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#59507b] to-[#d8d0f3] bg-clip-text text-transparent">
+        <h2 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent"
+            style={{ 
+              backgroundImage: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+            }}>
           {t.secureWallet}
         </h2>
-        <p className="text-[#59507b] mt-2">{t.secureWalletDescription}</p>
+        <p className="mt-2" style={{ color: 'var(--theme-text)' }}>{t.secureWalletDescription}</p>
       </div>
       
       {/* Navigation des modes - Interface simplifiée */}
@@ -206,9 +217,27 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             onClick={() => setMode('login')}
             className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
               mode === 'login' 
-                ? 'bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white shadow-lg transform scale-[1.02]' 
-                : 'text-[#59507b] hover:text-white hover:bg-gradient-to-r hover:from-[#59507b] hover:to-[#d8d0f3] hover:shadow-md border-2 border-[#59507b]'
+                ? 'text-white shadow-lg transform scale-[1.02]' 
+                : 'hover:text-white hover:shadow-md border-2'
             }`}
+            style={mode === 'login' 
+              ? { background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))' }
+              : { 
+                  color: 'var(--theme-secondary)', 
+                  borderColor: 'var(--theme-secondary)',
+                  background: 'transparent'
+                }
+            }
+            onMouseEnter={(e) => {
+              if (mode !== 'login') {
+                e.currentTarget.style.background = 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== 'login') {
+                e.currentTarget.style.background = 'transparent';
+              }
+            }}
           >
             🔑 {t.login}
           </button>
@@ -218,9 +247,32 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             onClick={() => setMode('create')}
             className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
               mode === 'create' 
-                ? 'bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] shadow-md' 
-                : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/70 border-2 border-[#fcd6c5]'
+                ? 'shadow-md' 
+                : 'hover:border-2'
             }`}
+            style={mode === 'create' 
+              ? { 
+                  background: 'linear-gradient(to right, var(--theme-accent), var(--theme-accent-2))',
+                  color: 'var(--theme-text)'
+                }
+              : { 
+                  color: 'var(--theme-text)', 
+                  borderColor: 'var(--theme-accent)',
+                  background: 'transparent'
+                }
+            }
+            onMouseEnter={(e) => {
+              if (mode !== 'create') {
+                e.currentTarget.style.background = 'var(--theme-accent)';
+                e.currentTarget.style.opacity = '0.7';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== 'create') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.opacity = '1';
+              }
+            }}
           >
             ✨ {t.create}
           </button>
@@ -230,7 +282,14 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
         <div className="text-center">
           <button
             onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            className="text-sm text-[#59507b]/70 hover:text-[#59507b] hover:underline transition-colors duration-200"
+            className="text-sm hover:underline transition-colors duration-200"
+            style={{ color: 'var(--theme-text)', opacity: 0.7 }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.7';
+            }}
           >
             {showAdvancedOptions ? 'Masquer les options avancées' : 'Options avancées (Import/Restore)'}
           </button>
@@ -238,8 +297,8 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
         
         {/* Options avancées - Masquées par défaut */}
         {showAdvancedOptions && (
-          <div className="mt-4 p-3 bg-[#eeddde]/50 rounded-lg">
-            <p className="text-xs text-[#59507b]/80 mb-3 text-center">
+          <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--theme-accent-2)', opacity: 0.5 }}>
+            <p className="text-xs mb-3 text-center" style={{ color: 'var(--theme-text)', opacity: 0.8 }}>
               Ces options sont destinées aux utilisateurs expérimentés qui comprennent les concepts de clé privée et de phrase mnémonique.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -247,9 +306,33 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                 onClick={() => setMode('import')}
                 className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
                   mode === 'import' 
-                    ? 'bg-[#fcd6c5]/50 text-[#59507b]' 
-                    : 'text-[#59507b]/70 hover:text-[#59507b] hover:bg-[#fcd6c5]/30'
+                    ? '' 
+                    : 'hover:opacity-100'
                 }`}
+                style={mode === 'import' 
+                  ? { 
+                      backgroundColor: 'var(--theme-accent)', 
+                      color: 'var(--theme-text)',
+                      opacity: 0.5
+                    }
+                  : { 
+                      color: 'var(--theme-text)', 
+                      backgroundColor: 'transparent',
+                      opacity: 0.7
+                    }
+                }
+                onMouseEnter={(e) => {
+                  if (mode !== 'import') {
+                    e.currentTarget.style.backgroundColor = 'var(--theme-accent)';
+                    e.currentTarget.style.opacity = '0.3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (mode !== 'import') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.opacity = '0.7';
+                  }
+                }}
               >
                 📥 {t.import}
               </button>
@@ -257,9 +340,33 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                 onClick={() => setMode('restore')}
                 className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
                   mode === 'restore' 
-                    ? 'bg-[#fcd6c5]/50 text-[#59507b]' 
-                    : 'text-[#59507b]/70 hover:text-[#59507b] hover:bg-[#fcd6c5]/30'
+                    ? '' 
+                    : 'hover:opacity-100'
                 }`}
+                style={mode === 'restore' 
+                  ? { 
+                      backgroundColor: 'var(--theme-accent)', 
+                      color: 'var(--theme-text)',
+                      opacity: 0.5
+                    }
+                  : { 
+                      color: 'var(--theme-text)', 
+                      backgroundColor: 'transparent',
+                      opacity: 0.7
+                    }
+                }
+                onMouseEnter={(e) => {
+                  if (mode !== 'restore') {
+                    e.currentTarget.style.backgroundColor = 'var(--theme-accent)';
+                    e.currentTarget.style.opacity = '0.3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (mode !== 'restore') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.opacity = '0.7';
+                  }
+                }}
               >
                 🔄 {t.restore}
               </button>

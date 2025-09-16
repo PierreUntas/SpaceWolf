@@ -1,12 +1,29 @@
 @import "tailwindcss";
 
-/* Palette de couleurs SpaceWolf */
+/* Palettes de couleurs SpaceWolf */
 :root {
+  /* Thème par défaut - SpaceWolf Original */
   --primary-purple: #d8d0f3;
   --secondary-purple: #59507b;
   --accent-coral: #fcd6c5;
   --accent-pink: #eeddde;
   --background-cream: #fbf8f2;
+  
+  /* Thème Minimaliste */
+  --primary-black: #111827;
+  --secondary-gray-min: #6b7280;
+  --accent-blue-min: #3b82f6;
+  --background-white-min: #ffffff;
+  --background-gray-min: #f3f4f6;
+  --border-gray: #e5e7eb;
+  
+  /* Variables de thème dynamiques */
+  --theme-primary: var(--primary-purple);
+  --theme-secondary: var(--secondary-purple);
+  --theme-accent: var(--accent-coral);
+  --theme-accent-2: var(--accent-pink);
+  --theme-background: var(--background-cream);
+  --theme-text: var(--secondary-purple);
 }
 
 /* Styles globaux pour éviter le débordement */
