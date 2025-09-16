@@ -18,11 +18,12 @@ interface WalletCredentials {
 
 // Configuration de sécurité
 const SECURITY_CONFIG = {
-  encryptionKey: 'SpaceWolf-Secure-2024', // En production, générer dynamiquement
   dbName: 'SpaceWolfSecureWallet',
   dbVersion: 1,
   storeName: 'wallets',
-  sessionTimeout: 30 * 60 * 1000, // 30 minutes
+  sessionTimeout: 5 * 60 * 1000, // 5 minutes (réduit pour plus de sécurité)
+  maxInactiveTime: 2 * 60 * 1000, // 2 minutes d'inactivité max
+  keyDerivationIterations: 100000, // Augmenté pour plus de sécurité
 };
 
 /**
@@ -32,6 +33,8 @@ export class SecureWalletManager {
   private db: IDBDatabase | null = null;
   private currentWallet: ethers.Wallet | null = null;
   private sessionExpiry: number = 0;
+  private lastActivity: number = 0;
+  private userSalt: string | null = null;
 
   /**
    * Initialiser la base de données IndexedDB
@@ -53,6 +56,27 @@ export class SecureWalletManager {
           db.createObjectStore(SECURITY_CONFIG.storeName, { keyPath: 'address' });
         }
       };
+    });
+  }
+
+  /**
+   * Générer un sel unique pour l'utilisateur
+   */
+  private generateUserSalt(): string {
+    if (!this.userSalt) {
+      this.userSalt = CryptoJS.lib.WordArray.random(256/8).toString();
+    }
+    return this.userSalt;
+  }
+
+  /**
+   * Générer une clé de chiffrement dynamique basée sur le mot de passe utilisateur
+   */
+  private generateEncryptionKey(password: string, salt?: string): CryptoJS.lib.WordArray {
+    const userSalt = salt || this.generateUserSalt();
+    return CryptoJS.PBKDF2(password, userSalt, {
+      keySize: 256/32,
+      iterations: SECURITY_CONFIG.keyDerivationIterations
     });
   }
 
@@ -93,14 +117,11 @@ export class SecureWalletManager {
   }
 
   /**
-   * Chiffrer une clé privée avec AES-256
+   * Chiffrer une clé privée avec AES-256 et clé dynamique
    */
   private encryptPrivateKey(privateKey: string, password: string): string {
     const salt = CryptoJS.lib.WordArray.random(256/8);
-    const key = CryptoJS.PBKDF2(password, salt, {
-      keySize: 256/32,
-      iterations: 10000
-    });
+    const key = this.generateEncryptionKey(password, salt.toString());
     
     const iv = CryptoJS.lib.WordArray.random(128/8);
     const encrypted = CryptoJS.AES.encrypt(privateKey, key, {
@@ -113,17 +134,14 @@ export class SecureWalletManager {
   }
 
   /**
-   * Déchiffrer une clé privée
+   * Déchiffrer une clé privée avec clé dynamique
    */
   private decryptPrivateKey(encryptedData: string, password: string): string {
     const salt = CryptoJS.enc.Hex.parse(encryptedData.substr(0, 64));
     const iv = CryptoJS.enc.Hex.parse(encryptedData.substr(64, 32));
     const encrypted = encryptedData.substring(96);
     
-    const key = CryptoJS.PBKDF2(password, salt, {
-      keySize: 256/32,
-      iterations: 10000
-    });
+    const key = this.generateEncryptionKey(password, salt.toString());
     
     const decrypted = CryptoJS.AES.decrypt(encrypted, key, {
       iv: iv,
@@ -199,9 +217,10 @@ export class SecureWalletManager {
           const privateKey = this.decryptPrivateKey(encryptedData.encryptedPrivateKey, password);
           const wallet = new ethers.Wallet(privateKey);
           
-          // Mettre à jour la session
+          // Mettre à jour la session avec le nouveau système
           this.currentWallet = wallet;
           this.sessionExpiry = Date.now() + SECURITY_CONFIG.sessionTimeout;
+          this.lastActivity = Date.now();
           
           resolve({
             privateKey,
@@ -218,10 +237,30 @@ export class SecureWalletManager {
   }
 
   /**
-   * Vérifier si une session est active
+   * Vérifier si une session est active et la renouveler si nécessaire
    */
   isSessionActive(): boolean {
-    return this.currentWallet !== null && Date.now() < this.sessionExpiry;
+    const now = Date.now();
+    
+    if (!this.currentWallet || now > this.sessionExpiry) {
+      this.logout();
+      return false;
+    }
+    
+    // Renouveler la session si l'utilisateur est actif
+    if (now - this.lastActivity < SECURITY_CONFIG.maxInactiveTime) {
+      this.sessionExpiry = now + SECURITY_CONFIG.sessionTimeout;
+      this.lastActivity = now;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Enregistrer l'activité utilisateur pour le renouvellement de session
+   */
+  recordActivity(): void {
+    this.lastActivity = Date.now();
   }
 
   /**
@@ -292,45 +331,65 @@ export class SecureWalletManager {
   }
 
   /**
-   * Valider la force d'un mot de passe
+   * Valider la force d'un mot de passe avec critères renforcés
    */
   validatePassword(password: string): { isValid: boolean; score: number; feedback: string[] } {
     const feedback: string[] = [];
     let score = 0;
 
-    if (password.length < 8) {
-      feedback.push('Le mot de passe doit contenir au moins 8 caractères');
+    // Longueur minimale augmentée
+    if (password.length < 12) {
+      feedback.push('Le mot de passe doit contenir au moins 12 caractères');
+    } else if (password.length >= 16) {
+      score += 2;
     } else {
       score += 1;
     }
 
+    // Vérification des majuscules
     if (!/[A-Z]/.test(password)) {
       feedback.push('Ajoutez des majuscules');
     } else {
       score += 1;
     }
 
+    // Vérification des minuscules
     if (!/[a-z]/.test(password)) {
       feedback.push('Ajoutez des minuscules');
     } else {
       score += 1;
     }
 
+    // Vérification des chiffres
     if (!/[0-9]/.test(password)) {
       feedback.push('Ajoutez des chiffres');
     } else {
       score += 1;
     }
 
+    // Vérification des caractères spéciaux
     if (!/[^A-Za-z0-9]/.test(password)) {
-      feedback.push('Ajoutez des caractères spéciaux');
+      feedback.push('Ajoutez des caractères spéciaux (!@#$%^&*)');
     } else {
       score += 1;
     }
 
+    // Vérification contre les mots de passe communs
+    const commonPasswords = ['password', '123456', 'qwerty', 'admin', 'letmein'];
+    if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
+      feedback.push('Évitez les mots de passe courants');
+      score = Math.max(0, score - 2);
+    }
+
+    // Vérification des répétitions
+    if (/(.)\1{2,}/.test(password)) {
+      feedback.push('Évitez les caractères répétés');
+      score = Math.max(0, score - 1);
+    }
+
     return {
-      isValid: score >= 3,
-      score,
+      isValid: score >= 4 && password.length >= 12,
+      score: Math.max(0, score),
       feedback
     };
   }

@@ -155,6 +155,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       const walletData = await secureWalletManager.loadSecureWallet(selectedAddress, password);
       const wallet = new ethers.Wallet(walletData.privateKey);
       
+      // Enregistrer l'activité pour le système de sessions
+      secureWalletManager.recordActivity();
+      
       onWalletConnected(wallet);
       setSuccess(t.loginSuccess);
       
@@ -172,9 +175,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const getPasswordStrengthColor = (score: number) => {
-    if (score <= 2) return 'text-[#fcd6c5]';
-    if (score <= 3) return 'text-[#eeddde]';
-    return 'text-[#d8d0f3]';
+    if (score <= 1) return 'text-red-500';
+    if (score <= 2) return 'text-orange-500';
+    if (score <= 3) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
   const getPasswordStrengthText = (score: number) => {
@@ -377,30 +381,38 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
 
       {/* Messages d'erreur et de succès */}
       {error && (
-        <div className="bg-[#fcd6c5] border-l-4 border-[#59507b] p-4 rounded-lg mb-6">
+        <div className="border-l-4 p-4 rounded-lg mb-6"
+             style={{
+               backgroundColor: 'var(--theme-accent)',
+               borderLeftColor: 'var(--theme-secondary)'
+             }}>
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-[#59507b]" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5" style={{ color: 'var(--theme-text)' }} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-[#59507b]">{error}</p>
+              <p className="text-sm" style={{ color: 'var(--theme-text)' }}>{error}</p>
             </div>
           </div>
         </div>
       )}
       
       {success && (
-        <div className="bg-[#d8d0f3] border-l-4 border-[#59507b] p-4 rounded-lg mb-6">
+        <div className="border-l-4 p-4 rounded-lg mb-6"
+             style={{
+               backgroundColor: 'var(--theme-primary)',
+               borderLeftColor: 'var(--theme-secondary)'
+             }}>
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-[#59507b]" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5" style={{ color: 'var(--theme-text)' }} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-[#59507b]">{success}</p>
+              <p className="text-sm" style={{ color: 'var(--theme-text)' }}>{success}</p>
             </div>
           </div>
         </div>
@@ -469,7 +481,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             <button
               onClick={handleCreateWallet}
               disabled={loading || !passwordValidation.isValid}
-              className="w-full bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-base"
+              className="w-full py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] text-base text-white"
+              style={{
+                background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+              }}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -658,7 +673,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-base"
+              className="w-full py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] text-base text-white"
+              style={{
+                background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+              }}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -695,7 +713,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               </div>
               <button
                 onClick={() => setShowMnemonic(false)}
-                className="mt-4 bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white px-4 sm:px-6 py-2 rounded-xl font-medium hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base"
+                className="mt-4 px-4 sm:px-6 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base text-white"
+                style={{
+                  background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+                }}
               >
                 t.savePhraseSecurely
               </button>

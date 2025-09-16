@@ -65,7 +65,11 @@ export default function StepExplanation({ stepNumber, isCompleted = false }: Ste
   if (!stepData) return null;
 
   return (
-    <div className="bg-gradient-to-br from-[#d8d0f3] to-[#fcd6c5] rounded-xl p-4 mb-4 border border-[#eeddde]">
+    <div className="rounded-xl p-4 mb-4 border"
+         style={{
+           background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+           borderColor: 'var(--theme-accent-2)'
+         }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -76,13 +80,14 @@ export default function StepExplanation({ stepNumber, isCompleted = false }: Ste
             {isCompleted ? '✓' : stepNumber}
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-[#59507b]">{stepData.title}</h3>
-            <p className="text-sm text-[#59507b] opacity-80">{stepData.description}</p>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--theme-text)' }}>{stepData.title}</h3>
+            <p className="text-sm opacity-80" style={{ color: 'var(--theme-text)' }}>{stepData.description}</p>
           </div>
         </div>
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="text-[#59507b] hover:text-[#59507b] opacity-70 hover:opacity-100 transition-opacity"
+          className="opacity-70 hover:opacity-100 transition-opacity"
+          style={{ color: 'var(--theme-text)' }}
         >
           <svg 
             className={`w-5 h-5 transform transition-transform ${showDetails ? 'rotate-180' : ''}`} 
@@ -97,16 +102,16 @@ export default function StepExplanation({ stepNumber, isCompleted = false }: Ste
 
       {showDetails && (
         <div className="mt-4 space-y-3 animate-fadeIn">
-          <div className="bg-white/50 rounded-lg p-3">
-            <h4 className="text-sm font-semibold text-[#59507b] mb-2">📚 Explication détaillée</h4>
-            <p className="text-sm text-[#59507b] leading-relaxed">
+          <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--theme-background)', opacity: 0.5 }}>
+            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--theme-text)' }}>📚 Explication détaillée</h4>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text)' }}>
               {stepData.detailedDescription}
             </p>
           </div>
           
-          <div className="bg-white/50 rounded-lg p-3">
-            <h4 className="text-sm font-semibold text-[#59507b] mb-2">💡 Conseils pratiques</h4>
-            <p className="text-sm text-[#59507b] leading-relaxed">
+          <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--theme-background)', opacity: 0.5 }}>
+            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--theme-text)' }}>💡 Conseils pratiques</h4>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text)' }}>
               {stepData.tips}
             </p>
           </div>
