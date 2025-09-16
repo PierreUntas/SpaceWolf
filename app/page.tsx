@@ -7,10 +7,12 @@ import { createHelia, Helia } from 'helia';
 import { unixfs } from '@helia/unixfs';
 import { ethers } from 'ethers';
 import SecureWalletUI from '../components/SecureWalletUI';
+import SecurityTestPanel from '../components/SecurityTestPanel';
 import { useLanguage } from '../lib/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import StepExplanation from '../components/StepExplanation';
 import Web3Glossary from '../components/Web3Glossary';
+import ThemeSelector from '../components/ThemeSelector';
 
 export default function Home() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function Home() {
   const [mounted, setMounted] = useState<boolean>(false);
   
   // États pour le système sécurisé
+  const [showSecurityTest, setShowSecurityTest] = useState<boolean>(false);
   
   // États pour l'interface
   const [account, setAccount] = useState<string | null>(null);
@@ -1885,6 +1888,10 @@ export default function Home() {
         <LanguageSwitcher />
       </div>
 
+
+      {/* Sélecteur de thème */}
+      <ThemeSelector />
+
       {/* Glossaire Web3 */}
       <Web3Glossary />
 
@@ -1975,9 +1982,9 @@ export default function Home() {
         </div>
       )}
       
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-4 lg:gap-[16px] row-start-2 items-center sm:items-start w-full max-w-7xl px-1 sm:px-2 lg:px-0 overflow-x-hidden">
-        <div className="flex flex-col gap-[16px] items-center sm:items-start lg:flex-1">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-6xl font-bold tracking-tight text-center sm:text-left break-words">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-2 sm:gap-4 lg:gap-[16px] row-start-2 items-center w-full max-w-7xl px-1 sm:px-2 lg:px-0 overflow-x-hidden">
+        <div className="flex flex-col gap-[16px] items-center lg:flex-1">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-6xl font-bold tracking-tight text-center break-words">
             SPACEWOLF JOURNEY
           </h1>
           {registeredUsername && (
@@ -1989,10 +1996,10 @@ export default function Home() {
               <span className="text-xs sm:text-sm text-[#59507b]">Web3 Identity</span>
             </div>
           )}
-          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-center sm:text-left break-words">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-center break-words">
             {t.spaceWolfDescription}
           </p>
-          <p className="text-sm sm:text-base lg:text-lg xl:text-2xl font-semibold text-center sm:text-left opacity-95 pt-2 break-words">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-2xl font-semibold text-center opacity-95 pt-2 break-words">
             {t.discoverWeb3}
           </p>
           {mounted && (
@@ -2003,7 +2010,7 @@ export default function Home() {
                 onWalletDisconnected={handleSecureWalletDisconnected}
               />
               <div className="mt-4">
-              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+              <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-xs sm:text-sm font-semibold align-middle">Step 1</span>
                   <span className="align-middle"></span>
                   {isStep1Completed() && (
@@ -2014,17 +2021,26 @@ export default function Home() {
               </p>
                 
                 {/* 🎮 PANEL DE JEU */}
-                <div className="mt-4 p-4 sm:p-6 border border-[#d8d0f3] rounded-lg bg-gradient-to-br from-[#d8d0f3] to-[#fcd6c5]">
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl bg-gradient-to-br text-center shadow-lg" 
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg sm:text-xl font-bold text-[#59507b] flex items-center gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                       🎮 {t.spaceWolf} Journey
-                      <span className="text-xs sm:text-sm bg-[#fcd6c5] text-[#59507b] px-2 py-1 rounded-full">
+                      <span className="text-xs sm:text-sm px-2 py-1 rounded-full" 
+                            style={{ 
+                              backgroundColor: 'var(--theme-accent)', 
+                              color: 'var(--theme-text)' 
+                            }}>
                         {t.level} {playerLevel}
                       </span>
                     </h3>
                     <div className="text-right">
-                      <div className="text-sm text-[#59507b]">{t.swTokens}</div>
-                      <div className="text-lg font-bold text-[#59507b]">{swBalance} 🪙</div>
+                      <div className="text-sm" style={{ color: 'var(--theme-text)' }}>{t.swTokens}</div>
+                      <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>{swBalance} 🪙</div>
                     </div>
                   </div>
                   
@@ -2036,37 +2052,50 @@ export default function Home() {
                   
                   {/* Étape suivante */}
                   {getNextStep() && (
-                    <div className="mb-4 p-3 sm:p-3 bg-[#fbf8f2]/50 rounded-lg border-2 border-dashed border-[#d8d0f3]">
-                      <div className="text-sm text-[#59507b] mb-1">Prochaine Étape</div>
-                      <div className="text-lg font-bold text-[#59507b]">{getNextStep()?.name}</div>
-                      <div className="text-sm text-[#59507b]">{getNextStep()?.description}</div>
-                      <div className="text-xs text-[#59507b] mt-1">
+                    <div className="mb-4 p-3 sm:p-3 rounded-xl border-2 border-dashed shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.5,
+                           borderColor: 'var(--theme-primary)'
+                         }}>
+                      <div className="text-sm mb-1" style={{ color: 'var(--theme-text)' }}>Prochaine Étape</div>
+                      <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>{getNextStep()?.name}</div>
+                      <div className="text-sm" style={{ color: 'var(--theme-text)' }}>{getNextStep()?.description}</div>
+                      <div className="text-xs mt-1" style={{ color: 'var(--theme-text)' }}>
                         🪙 Récompense: {getNextStep()?.swReward} SW tokens
                       </div>
                     </div>
                   )}
                   
                   {/* Système de Claim SW Tokens */}
-                  <div className="mb-4 p-3 sm:p-4 bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] rounded-lg border border-[#fcd6c5]">
+                  <div className="mb-4 p-3 sm:p-4 rounded-xl border shadow-lg"
+                       style={{
+                         background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))',
+                         borderColor: 'var(--theme-secondary)'
+                       }}>
                     <div className="flex justify-between items-center mb-3">
                       <div>
-                        <div className="text-sm font-semibold text-[#59507b]">SW Tokens Disponibles</div>
-                        <div className="text-xs text-[#59507b]">Gagnés en complétant les étapes</div>
+                        <div className="text-sm font-semibold text-white">SW Tokens Disponibles</div>
+                        <div className="text-xs text-white/80">Gagnés en complétant les étapes</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-[#59507b]">{getAvailableSW()} 🪙</div>
+                        <div className="text-xl font-bold text-white">{getAvailableSW()} 🪙</div>
                       </div>
                     </div>
                     {getAvailableSW() > 0 && (
                       <button 
                         onClick={() => claimSW(getAvailableSW())}
-                        className="w-full bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#fbf8f2] px-3 sm:px-4 py-2 rounded-lg font-semibold hover:from-[#fcd6c5] hover:to-[#eeddde] transition-all duration-200 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base shadow-md"
+                        style={{
+                          background: 'linear-gradient(to right, var(--theme-accent), var(--theme-accent-2))',
+                          color: 'var(--theme-text)'
+                        }}
                       >
                         🪙 Claim {getAvailableSW()} SW Tokens
                       </button>
                     )}
                     {getAvailableSW() === 0 && (
-                      <div className="text-center text-[#59507b] text-sm">
+                      <div className="text-center text-white/80 text-sm">
                         Complétez des étapes pour gagner plus de tokens SW !
                       </div>
                     )}
@@ -2167,7 +2196,7 @@ export default function Home() {
 
               </div>
               <div className="mt-4">
-              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+              <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 2</span>
                   <span className="align-middle">Sélectionner un réseau Ethereum.</span>
                 {isStep2Completed() && (
@@ -2177,29 +2206,73 @@ export default function Home() {
                 )}
               </p>
                 
-                {/* Step 2: Network Configuration */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 2: Configuration du Réseau</h3>
+                {/* Step 2: Network Configuration - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      2
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Configuration du Réseau
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-2">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Sélectionnez un réseau Ethereum pour vos transactions. Nous recommandons Testnet pour les tests :
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3 justify-center">
                         <button 
-                          className={`px-3 py-2 rounded text-sm ${network === 'mainnet' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-[#59507b]'}`}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] ${
+                            network === 'mainnet' 
+                              ? 'text-white shadow-md' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                          style={{
+                            backgroundColor: network === 'mainnet' 
+                              ? 'var(--theme-secondary)' 
+                              : 'var(--theme-background)',
+                            borderColor: 'var(--theme-accent-2)',
+                            border: '1px solid'
+                          }}
                           onClick={() => switchNetwork('mainnet')}
                         >
                           🏠 Mainnet
                         </button>
                         <button 
-                          className={`px-3 py-2 rounded text-sm ${network === 'sepolia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-[#59507b]'}`}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] ${
+                            network === 'sepolia' 
+                              ? 'text-white shadow-md' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                          style={{
+                            backgroundColor: network === 'sepolia' 
+                              ? 'var(--theme-secondary)' 
+                              : 'var(--theme-background)',
+                            borderColor: 'var(--theme-accent-2)',
+                            border: '1px solid'
+                          }}
                           onClick={() => switchNetwork('sepolia')}
                         >
                           🧪 Testnet (Recommandé)
                         </button>
                       </div>
-                      <p className="text-xs text-[#59507b] mt-2">
+                      <p className="text-xs mt-3" style={{ color: 'var(--theme-text)', opacity: 0.7 }}>
                         💡 Cliquez sur Testnet pour les tests ou Mainnet pour les transactions réelles
                       </p>
                     </div>
@@ -2262,7 +2335,7 @@ export default function Home() {
                 </div>
               )}
               <div className="mt-4">
-              <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+              <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                 <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 3</span>
                 <span className="align-middle">Get Sepolia ETH for testing.</span>
                 {isStep3Completed() && (
@@ -2273,30 +2346,65 @@ export default function Home() {
               </p>
                 
                 {/* Step 3: Get Sepolia ETH */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 3: Obtenir des ETH Sepolia</h3>
+                {/* Step 3: Get Sepolia ETH - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep3Completed() ? '✓' : '3'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Obtenir des ETH Sepolia
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Pour tester les transactions, vous avez besoin d'ETH Sepolia (gratuit) :
                       </p>
-                      <div className="flex items-center gap-4">
-                  <button
-                    onClick={copyAddressToClipboard}
-                    className="px-3 py-2 rounded-md bg-gray-100 text-[#59507b] border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
-                  >
-                    {copiedAddress ? 'Copied!' : 'Copy Address'}
-                  </button>
-                  <a
-                    href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 transition cursor-pointer text-sm"
-                  >
-                    Get Sepolia ETH
-                  </a>
-                </div>
-                      <p className="text-xs text-[#59507b] mt-2">
+                      <div className="flex items-center gap-4 justify-center">
+                        <button
+                          onClick={copyAddressToClipboard}
+                          className="px-3 py-2 rounded-lg font-semibold transition-all duration-200 text-sm"
+                          style={{
+                            backgroundColor: 'var(--theme-background)',
+                            color: 'var(--theme-text)',
+                            borderColor: 'var(--theme-accent)',
+                            border: '1px solid'
+                          }}
+                        >
+                          {copiedAddress ? 'Copied!' : 'Copy Address'}
+                        </button>
+                        <a
+                          href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] text-sm"
+                          style={{
+                            backgroundColor: 'var(--theme-secondary)',
+                            color: 'var(--theme-background)'
+                          }}
+                        >
+                          Get Sepolia ETH
+                        </a>
+                      </div>
+                      <p className="text-xs mt-3" style={{ color: 'var(--theme-text)', opacity: 0.7 }}>
                         💡 Copiez votre adresse et utilisez le faucet pour obtenir des ETH de test gratuits
                       </p>
                     </div>
@@ -2304,7 +2412,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 4</span>
                   <span className="align-middle">Mint an NFT with IPFS metadata.</span>
                   {isStep4Completed() && (
@@ -2314,28 +2422,61 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 4: NFT Minting */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 4: Mint Your NFT</h3>
+                {/* Step 4: NFT Minting - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      4
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Mint Your NFT
+                    </h3>
+                  </div>
                   
                   <div className="space-y-4">
                     {/* IPFS Node Status */}
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-[#59507b]">IPFS Node Status</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isIpfsNodeRunning ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium" style={{ color: 'var(--theme-text)' }}>IPFS Node Status</span>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium"
+                              style={{
+                                backgroundColor: isIpfsNodeRunning ? '#10b981' : '#6b7280',
+                                color: 'white'
+                              }}>
                           {isIpfsNodeRunning ? 'Running' : 'Not Running'}
                         </span>
                       </div>
-                      <p className="text-xs text-[#59507b] mb-2">
-                        A local IPFS node is required to upload metadata. Click &quot;Start IPFS Node&quot; to initialize.
+                      <p className="text-xs mb-3" style={{ color: 'var(--theme-text)' }}>
+                        A local IPFS node is required to upload metadata. Click "Start IPFS Node" to initialize.
                       </p>
                       <button
                         onClick={startIpfsNode}
                         disabled={isIpfsNodeRunning}
-                        className="px-3 py-1 rounded-md bg-purple-600 text-[#fbf8f2] border border-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer text-xs"
+                        className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: isIpfsNodeRunning 
+                            ? 'var(--theme-background)' 
+                            : 'var(--theme-secondary)',
+                          color: isIpfsNodeRunning 
+                            ? 'var(--theme-text)' 
+                            : 'white',
+                          borderColor: 'var(--theme-accent-2)',
+                          border: '1px solid'
+                        }}
                       >
                         {isIpfsNodeRunning ? 'Node Running' : 'Start IPFS Node'}
                       </button>
@@ -2375,8 +2516,8 @@ export default function Home() {
                           </div>
                           
                           {/* Profile Picture Status */}
-                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                            <div className="flex items-center gap-3">
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md text-center">
+                            <div className="flex items-center gap-3 justify-center">
                               <div className="flex items-center gap-2">
                                 <Image
                                   src={imagePreview}
@@ -2404,7 +2545,7 @@ export default function Home() {
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center">
                       <button
                         onClick={uploadToIpfs}
                         disabled={!selectedImage || !isIpfsNodeRunning || isUploadingToIpfs}
@@ -2438,7 +2579,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 5</span>
                   <span className="align-middle">Send ETH to a friend's address.</span>
                   {isStep5Completed() && (
@@ -2449,16 +2590,41 @@ export default function Home() {
                 </p>
                 
                 {/* Step 5: ETH Transfer */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 5: Envoyer des ETH à un Ami</h3>
+                {/* Step 5: ETH Transfer - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep5Completed() ? '✓' : '5'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Envoyer des ETH à un Ami
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Testez l'envoi d'ETH à une adresse amie (vous pouvez utiliser votre propre adresse pour tester) :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="friend-address" className="block text-sm font-medium text-[#59507b] mb-1">
+                          <label htmlFor="friend-address" className="block text-sm font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
                             Adresse de destination
                           </label>
                           <input
@@ -2467,11 +2633,15 @@ export default function Home() {
                             placeholder="0x..."
                             value={friendAddress}
                             onChange={(e) => setFriendAddress(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                            style={{
+                              borderColor: 'var(--theme-accent)',
+                              color: 'var(--theme-text)'
+                            }}
                           />
                         </div>
                         <div>
-                          <label htmlFor="eth-amount" className="block text-sm font-medium text-[#59507b] mb-1">
+                          <label htmlFor="eth-amount" className="block text-sm font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
                             Montant en ETH
                           </label>
                           <input
@@ -2481,28 +2651,47 @@ export default function Home() {
                             placeholder="0.001"
                             value={ethAmount}
                             onChange={(e) => setEthAmount(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                            style={{
+                              borderColor: 'var(--theme-accent)',
+                              color: 'var(--theme-text)'
+                            }}
                           />
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 justify-center items-center">
                           <button
                             onClick={sendEthTransfer}
                             disabled={!friendAddress || !ethAmount || isSimulatingTransfer}
-                            className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                            className="px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                              backgroundColor: 'var(--theme-secondary)',
+                              color: 'var(--theme-background)'
+                            }}
                           >
                             {isSimulatingTransfer ? 'Envoi...' : 'Envoyer ETH'}
                           </button>
                           <button
                             onClick={() => setFriendAddress(address || '')}
-                            className="px-3 py-2 rounded-md bg-gray-100 text-[#59507b] border border-gray-300 hover:bg-gray-200 transition cursor-pointer text-sm"
+                            className="px-3 py-2 rounded-lg font-semibold transition-all duration-200 text-sm"
+                            style={{
+                              backgroundColor: 'var(--theme-background)',
+                              color: 'var(--theme-text)',
+                              borderColor: 'var(--theme-accent)',
+                              border: '1px solid'
+                            }}
                           >
                             Utiliser mon adresse
                           </button>
                         </div>
                         {transferTransactionHash && (
-                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                            <p className="text-sm font-medium text-green-800 mb-1">✅ ETH envoyés avec succès !</p>
-                            <p className="text-xs text-green-600">Transaction Hash: {transferTransactionHash}</p>
+                          <div className="p-3 rounded-lg border"
+                               style={{
+                                 backgroundColor: '#10b981',
+                                 borderColor: '#059669',
+                                 color: 'white'
+                               }}>
+                            <p className="text-sm font-medium mb-1">✅ ETH envoyés avec succès !</p>
+                            <p className="text-xs opacity-90">Transaction Hash: {transferTransactionHash}</p>
                           </div>
                         )}
                       </div>
@@ -2511,7 +2700,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 6</span>
                   <span className="align-middle">Create a Web3 username (.eth domain).</span>
                   {isStep6Completed() && (
@@ -2522,16 +2711,39 @@ export default function Home() {
                 </p>
                 
                 {/* Step 6: Web3 Username */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 6: Créer un Nom Web3</h3>
+                {/* Step 6: Web3 Username - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      {isStep6Completed() ? '✓' : '6'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Créer un Nom Web3
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Créez votre identité Web3 avec un nom de domaine .eth :
                       </p>
                       <div className="space-y-3">
                         <div>
-                          <label htmlFor="web3-username" className="block text-sm font-medium text-[#59507b] mb-1">
+                          <label htmlFor="web3-username" className="block text-sm font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
                             Nom d'utilisateur Web3
                           </label>
                           <div className="flex items-center gap-2">
@@ -2541,36 +2753,49 @@ export default function Home() {
                               placeholder="monnom"
                               value={web3Username}
                               onChange={(e) => setWeb3Username(e.target.value)}
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                              style={{
+                                borderColor: 'var(--theme-accent-2)',
+                                color: 'var(--theme-text)'
+                              }}
                             />
-                            <span className="text-[#59507b]">.eth</span>
+                            <span style={{ color: 'var(--theme-text)' }}>.eth</span>
                           </div>
                         </div>
                         <button
                           onClick={registerWeb3Username}
                           disabled={!web3Username || isRegisteringUsername}
-                          className="px-4 py-2 rounded-md bg-gray-800 text-[#fbf8f2] border border-gray-300 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="w-full px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            backgroundColor: 'var(--theme-secondary)',
+                            color: 'white'
+                          }}
                         >
                           {isRegisteringUsername ? 'Enregistrement...' : 'Enregistrer le nom'}
                         </button>
                         {usernameTransactionHash && (
-                          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                            <p className="text-sm font-medium text-green-800 mb-1">✅ Nom Web3 enregistré !</p>
-                            <p className="text-xs text-green-600">Transaction Hash: {usernameTransactionHash}</p>
+                          <div className="p-3 rounded-lg border"
+                               style={{
+                                 backgroundColor: '#10b981',
+                                 borderColor: '#059669',
+                                 color: 'white'
+                               }}>
+                            <p className="text-sm font-medium mb-1">✅ Nom Web3 enregistré !</p>
+                            <p className="text-xs opacity-90">Transaction Hash: {usernameTransactionHash}</p>
                             {registeredUsername && (
-                        <p className="text-xs text-green-600 mt-1">
+                              <p className="text-xs opacity-90 mt-1">
                                 Votre nom: <strong>{registeredUsername}.eth</strong>
-                        </p>
+                              </p>
                             )}
-                      </div>
-                    )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 7</span>
                   <span className="align-middle">Buy real ETH from a cryptocurrency exchange.</span>
                   {isStep7Completed() && (
@@ -2580,12 +2805,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 7: Buy Real ETH */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 7: Acheter des ETH Réels</h3>
+                {/* Step 7: Buy Real ETH - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep7Completed() ? '✓' : '7'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Acheter des ETH Réels
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Achetez des ETH réels sur une plateforme d'échange :
                       </p>
                       <div className="space-y-3">
@@ -2642,7 +2891,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 8</span>
                   <span className="align-middle">Set up advanced security with hardware wallets.</span>
                   {isStep8Completed() && (
@@ -2652,12 +2901,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 8: Advanced Security */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 8: Sécurité Avancée</h3>
+                {/* Step 8: Advanced Security - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep8Completed() ? '✓' : '8'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Sécurité Avancée
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Configurez une sécurité avancée pour protéger vos actifs :
                       </p>
                       <div className="space-y-3">
@@ -2731,7 +3004,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 9</span>
                   <span className="align-middle">Explore DeFi: yield farming, staking, and lending.</span>
                   {isStep9Completed() && (
@@ -2741,12 +3014,34 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 9: DeFi Exploration */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 9: Explorer DeFi</h3>
+                {/* Step 9: DeFi Exploration - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      {isStep9Completed() ? '✓' : '9'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Explorer DeFi
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Explorez les protocoles DeFi : yield farming, staking et lending :
                       </p>
                       <div className="space-y-3">
@@ -2849,7 +3144,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 10</span>
                   <span className="align-middle">Bridge to Layer 2: Polygon, Arbitrum, and low-fee DeFi.</span>
                   {isStep10Completed() && (
@@ -2859,12 +3154,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 10: Layer 2 Exploration */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 10: Explorer Layer 2</h3>
+                {/* Step 10: Layer 2 Exploration - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep10Completed() ? '✓' : '10'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Explorer Layer 2
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Explorez les réseaux Layer 2 pour des frais réduits :
                       </p>
                       <div className="space-y-3">
@@ -2967,7 +3286,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 11</span>
                   <span className="align-middle">Master NFT marketplaces: list, buy, and trade NFTs.</span>
                   {isStep11Completed() && (
@@ -2977,12 +3296,34 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 11: NFT Marketplace */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 11: Marketplaces NFT</h3>
+                {/* Step 11: NFT Marketplace - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      {isStep11Completed() ? '✓' : '11'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Marketplaces NFT
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Maîtrisez les marketplaces NFT : listez, achetez et échangez :
                       </p>
                       <div className="space-y-3">
@@ -3085,7 +3426,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 12</span>
                   <span className="align-middle">Join DAO governance: vote, propose, and shape Web3 communities.</span>
                   {isStep12Completed() && (
@@ -3095,12 +3436,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 12: DAO Governance */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 12: Gouvernance DAO</h3>
+                {/* Step 12: DAO Governance - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep12Completed() ? '✓' : '12'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Gouvernance DAO
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Rejoignez la gouvernance DAO : votez, proposez et façonnez les communautés Web3 :
                       </p>
                       <div className="space-y-3">
@@ -3162,7 +3527,7 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 13</span>
                   <span className="align-middle">Build Web3 identity: aggregate profiles and join decentralized social.</span>
                   {isStep13Completed() && (
@@ -3172,12 +3537,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 13: Web3 Social */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 13: Identité Web3 Sociale</h3>
+                {/* Step 13: Web3 Social - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep13Completed() ? '✓' : '13'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Identité Web3 Sociale
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Construisez votre identité Web3 : agrégation de profils et réseaux sociaux décentralisés :
                       </p>
                       <div className="space-y-3">
@@ -3239,7 +3628,7 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 14</span>
                   <span className="align-middle">Build Web3 dApps: write smart contracts and create decentralized applications.</span>
                   {isStep14Completed() && (
@@ -3249,12 +3638,34 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 14: Web3 Development */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 14: Développement Web3</h3>
+                {/* Step 14: Web3 Development - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      {isStep14Completed() ? '✓' : '14'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Développement Web3
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Développez des dApps Web3 : écrivez des smart contracts et créez des applications décentralisées :
                       </p>
                       <div className="space-y-3">
@@ -3316,7 +3727,7 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 15</span>
                   <span className="align-middle">Master advanced trading: DEX strategies, analytics, and yield optimization.</span>
                   {isStep15Completed() && (
@@ -3326,12 +3737,36 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 15: Trading Analytics */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 15: Trading Avancé</h3>
+                {/* Step 15: Trading Analytics - Style Minimaliste */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'var(--theme-background)',
+                       color: 'var(--theme-text)',
+                       border: '2px solid'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'var(--theme-background)'
+                         }}>
+                      {isStep15Completed() ? '✓' : '15'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Trading Avancé
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           borderColor: 'var(--theme-accent)',
+                           border: '1px solid',
+                           opacity: 1
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Maîtrisez le trading avancé : stratégies DEX, analytics et optimisation de rendement :
                       </p>
                       <div className="space-y-3">
@@ -3402,7 +3837,7 @@ export default function Home() {
               </div>
               
               <div className="mt-4">
-                <p className="text-sm sm:text-base lg:text-lg text-center sm:text-left opacity-90 mt-1">
+                <p className="text-sm sm:text-base lg:text-lg text-center opacity-90 mt-1">
                   <span className="inline-block mr-2 px-2 py-0.5 rounded-full bg-[#d8d0f3] text-[#59507b] text-sm font-semibold align-middle">Step 16</span>
                   <span className="align-middle">Master Web3 gaming: play-to-earn, metaverse land, and virtual economies.</span>
                   {isStep16Completed() && (
@@ -3412,12 +3847,34 @@ export default function Home() {
                   )}
                 </p>
                 
-                {/* Step 16: Gaming Metaverse */}
-                <div className="mt-4 p-4 border border-[#eeddde] rounded-lg bg-gray-50">
-                  <h3 className="text-lg font-semibold mb-3 text-[#59507b]">Step 16: Gaming Web3</h3>
+                {/* Step 16: Gaming Metaverse - Style SpaceWolf */}
+                <div className="mt-4 p-4 sm:p-6 border rounded-xl text-center shadow-lg"
+                     style={{
+                       borderColor: 'var(--theme-primary)',
+                       background: 'linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent))',
+                       color: 'var(--theme-text)'
+                     }}>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-3"
+                         style={{
+                           backgroundColor: 'var(--theme-secondary)',
+                           color: 'white'
+                         }}>
+                      {isStep16Completed() ? '✓' : '16'}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                      Gaming Web3
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <div className="p-3 border border-[#eeddde] rounded-md bg-white">
-                      <p className="text-sm text-[#59507b] mb-3">
+                    <div className="p-4 rounded-xl border shadow-sm"
+                         style={{
+                           backgroundColor: 'var(--theme-background)',
+                           opacity: 0.8,
+                           borderColor: 'var(--theme-accent-2)'
+                         }}>
+                      <p className="text-sm mb-3" style={{ color: 'var(--theme-text)' }}>
                         Maîtrisez le gaming Web3 : play-to-earn, terrains metaverse et économies virtuelles :
                       </p>
                       <div className="space-y-3">
@@ -3531,7 +3988,7 @@ export default function Home() {
                     
                     {isUsingNftAsProfile && (
                       <div className="p-3 bg-white border border-green-200 rounded-md">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 justify-center">
                           <Image
                             src={profilePicture || ''}
                             alt="Profile Picture"
@@ -3566,7 +4023,7 @@ export default function Home() {
                   
                   {/* Real Transaction Warning */}
                   <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
                         <p className="text-sm font-medium text-[#59507b]">Real Transaction Warning</p>
@@ -3691,7 +4148,7 @@ export default function Home() {
                   
                   {/* ENS Information */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-blue-600 mt-0.5">ℹ️</div>
                       <div>
                         <p className="text-sm font-medium text-blue-800">ENS-like Domain Registration</p>
@@ -3705,7 +4162,7 @@ export default function Home() {
                   
                   {/* Real Registration Warning */}
                   <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
                         <p className="text-sm font-medium text-[#59507b]">Real Blockchain Transaction</p>
@@ -3823,7 +4280,7 @@ export default function Home() {
                   
                   {/* Real ETH Purchase Information */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-blue-600 mt-0.5">💰</div>
                       <div>
                         <p className="text-sm font-medium text-blue-800">Real ETH Purchase</p>
@@ -3836,7 +4293,7 @@ export default function Home() {
                   
                   {/* Important Warning */}
                   <div className="p-3 bg-yellow-50 border border-[#fcd6c5] rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-[#59507b] mt-0.5">⚠️</div>
                       <div>
                         <p className="text-sm font-medium text-[#59507b]">Important Considerations</p>
@@ -4005,7 +4462,7 @@ export default function Home() {
                   
                   {/* Security Importance */}
                   <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-red-600 mt-0.5">🔐</div>
                       <div>
                         <p className="text-sm font-medium text-red-800">Critical Security Step</p>
@@ -4216,7 +4673,7 @@ export default function Home() {
                   
                   {/* DeFi Introduction */}
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-blue-600 mt-0.5">💰</div>
                       <div>
                         <p className="text-sm font-medium text-blue-800">Make Your Crypto Work for You</p>
@@ -4483,7 +4940,7 @@ export default function Home() {
                   
                   {/* L2 Introduction */}
                   <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-[#59507b] mt-0.5">⚡</div>
                       <div>
                         <p className="text-sm font-medium text-[#59507b]">Escape High Gas Fees</p>
@@ -4749,7 +5206,7 @@ export default function Home() {
                   
                   {/* NFT Marketplace Introduction */}
                   <div className="p-3 bg-pink-50 border border-pink-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-pink-600 mt-0.5">🎨</div>
                       <div>
                         <p className="text-sm font-medium text-pink-800">Monetize Your Digital Art</p>
@@ -5017,7 +5474,7 @@ export default function Home() {
                   
                   {/* DAO Governance Introduction */}
                   <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-indigo-600 mt-0.5">🗳️</div>
                       <div>
                         <p className="text-sm font-medium text-indigo-800">Shape Web3 Communities</p>
@@ -5286,7 +5743,7 @@ export default function Home() {
                   
                   {/* Web3 Social Introduction */}
                   <div className="p-3 bg-teal-50 border border-teal-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-teal-600 mt-0.5">👥</div>
                       <div>
                         <p className="text-sm font-medium text-teal-800">Build Your Web3 Identity</p>
@@ -5554,7 +6011,7 @@ export default function Home() {
                   
                   {/* Web3 Development Introduction */}
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-orange-600 mt-0.5">💻</div>
                       <div>
                         <p className="text-sm font-medium text-orange-800">Become a Web3 Builder</p>
@@ -5822,7 +6279,7 @@ export default function Home() {
                   
                   {/* Trading Analytics Introduction */}
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-emerald-600 mt-0.5">📊</div>
                       <div>
                         <p className="text-sm font-medium text-emerald-800">Become a Professional Trader</p>
@@ -6145,7 +6602,7 @@ export default function Home() {
                   
                   {/* Gaming Metaverse Introduction */}
                   <div className="p-3 bg-[#eeddde] border border-[#d8d0f3] rounded-md mb-4">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="text-[#59507b] mt-0.5">🎮</div>
                       <div>
                         <p className="text-sm font-medium text-[#59507b]">Enter the Metaverse</p>
@@ -6480,23 +6937,50 @@ export default function Home() {
           )}
         </div>
         
-        {/* GitHub Link centré */}
-        <div className="w-full max-w-md mx-auto mt-8 flex justify-center">
-          <button onClick={redirect} className="cursor-pointer">
-            <Image
-              className=""
-              src="/GitHub_light.svg"
-              alt="GitHub"
-              width={50}
-              height={50}
-              priority
-            />
-          </button>
-        </div>
       </div>
       </main>
+      
+      {/* GitHub Link en bas de page */}
+      <div className="w-full flex justify-center mt-8 mb-4">
+        <button onClick={redirect} className="cursor-pointer">
+          <Image
+            className=""
+            src="/GitHub_light.svg"
+            alt="GitHub"
+            width={50}
+            height={50}
+            priority
+          />
+        </button>
+      </div>
+
+      {/* Bouton de test de sécurité minimaliste */}
+      <div className="w-full flex justify-center mb-4">
+        <button
+          onClick={() => setShowSecurityTest(!showSecurityTest)}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          title="Tests de sécurité"
+        >
+          🔒
+        </button>
+      </div>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
       </footer>
+
+      {/* Panneau de test de sécurité */}
+      {showSecurityTest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowSecurityTest(false)}
+              className="absolute top-4 right-4 z-10 bg-gray-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-700 transition-colors"
+            >
+              ×
+            </button>
+            <SecurityTestPanel />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

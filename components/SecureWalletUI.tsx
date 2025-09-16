@@ -14,7 +14,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   const { t } = useLanguage();
   
   // États pour l'interface
-  const [mode, setMode] = useState<'create' | 'import' | 'restore' | 'login'>('create');
+  const [mode, setMode] = useState<'create' | 'import' | 'restore' | 'login'>('login');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mnemonic, setMnemonic] = useState('');
@@ -27,6 +27,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   // États pour la validation
   const [passwordValidation, setPasswordValidation] = useState<{ isValid: boolean; score: number; feedback: string[] }>({ isValid: false, score: 0, feedback: [] });
   const [savedWallets, setSavedWallets] = useState<string[]>([]);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showMnemonic, setShowMnemonic] = useState(false);
   const [generatedMnemonic, setGeneratedMnemonic] = useState('');
 
@@ -154,6 +155,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       const walletData = await secureWalletManager.loadSecureWallet(selectedAddress, password);
       const wallet = new ethers.Wallet(walletData.privateKey);
       
+      // Enregistrer l'activité pour le système de sessions
+      secureWalletManager.recordActivity();
+      
       onWalletConnected(wallet);
       setSuccess(t.loginSuccess);
       
@@ -171,9 +175,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const getPasswordStrengthColor = (score: number) => {
-    if (score <= 2) return 'text-[#fcd6c5]';
-    if (score <= 3) return 'text-[#eeddde]';
-    return 'text-[#d8d0f3]';
+    if (score <= 1) return 'text-red-500';
+    if (score <= 2) return 'text-orange-500';
+    if (score <= 3) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
   const getPasswordStrengthText = (score: number) => {
@@ -183,89 +188,231 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-2 sm:p-4 lg:p-8 bg-[#d8d0f3]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#eeddde]/20 overflow-x-hidden">
+    <div className="w-full max-w-md mx-auto p-2 sm:p-4 lg:p-8 rounded-2xl shadow-xl border overflow-x-hidden" 
+         style={{ 
+           backgroundColor: 'var(--theme-accent-2)', 
+           borderColor: 'var(--theme-accent-2)',
+           backdropFilter: 'blur(10px)'
+         }}>
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#59507b] to-[#d8d0f3] rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+             style={{ 
+               background: 'linear-gradient(135deg, var(--theme-secondary), var(--theme-primary))'
+             }}>
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#59507b] to-[#d8d0f3] bg-clip-text text-transparent">
+        <h2 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent"
+            style={{ 
+              backgroundImage: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+            }}>
           {t.secureWallet}
         </h2>
-        <p className="text-[#59507b] mt-2">{t.secureWalletDescription}</p>
+        <p className="mt-2" style={{ color: 'var(--theme-text)' }}>{t.secureWalletDescription}</p>
       </div>
       
-      {/* Navigation des modes */}
-      <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 mb-6 sm:mb-8 bg-[#eeddde] rounded-xl p-1">
-        <button
-          onClick={() => setMode('create')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'create' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.create}
-        </button>
-        <button
-          onClick={() => setMode('import')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'import' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.import}
-        </button>
-        <button
-          onClick={() => setMode('restore')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'restore' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.restore}
-        </button>
-        <button
-          onClick={() => setMode('login')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'login' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.login}
-        </button>
+      {/* Navigation des modes - Interface simplifiée */}
+      <div className="mb-6 sm:mb-8">
+        {/* Boutons principaux */}
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
+          {/* Bouton Connexion - Principal */}
+          <button
+            onClick={() => setMode('login')}
+            className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
+              mode === 'login' 
+                ? 'text-white shadow-lg transform scale-[1.02]' 
+                : 'hover:text-white hover:shadow-md border-2'
+            }`}
+            style={mode === 'login' 
+              ? { background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))' }
+              : { 
+                  color: 'var(--theme-secondary)', 
+                  borderColor: 'var(--theme-secondary)',
+                  background: 'transparent'
+                }
+            }
+            onMouseEnter={(e) => {
+              if (mode !== 'login') {
+                e.currentTarget.style.background = 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== 'login') {
+                e.currentTarget.style.background = 'transparent';
+              }
+            }}
+          >
+            🔑 {t.login}
+          </button>
+          
+          {/* Bouton Création - Secondaire */}
+          <button
+            onClick={() => setMode('create')}
+            className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
+              mode === 'create' 
+                ? 'shadow-md' 
+                : 'hover:border-2'
+            }`}
+            style={mode === 'create' 
+              ? { 
+                  background: 'linear-gradient(to right, var(--theme-accent), var(--theme-accent-2))',
+                  color: 'var(--theme-text)'
+                }
+              : { 
+                  color: 'var(--theme-text)', 
+                  borderColor: 'var(--theme-accent)',
+                  background: 'transparent'
+                }
+            }
+            onMouseEnter={(e) => {
+              if (mode !== 'create') {
+                e.currentTarget.style.background = 'var(--theme-accent)';
+                e.currentTarget.style.opacity = '0.7';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== 'create') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.opacity = '1';
+              }
+            }}
+          >
+            ✨ {t.create}
+          </button>
+        </div>
+        
+        {/* Bouton pour révéler les options avancées */}
+        <div className="text-center">
+          <button
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className="text-sm hover:underline transition-colors duration-200"
+            style={{ color: 'var(--theme-text)', opacity: 0.7 }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.7';
+            }}
+          >
+            {showAdvancedOptions ? 'Masquer les options avancées' : 'Options avancées (Import/Restore)'}
+          </button>
+        </div>
+        
+        {/* Options avancées - Masquées par défaut */}
+        {showAdvancedOptions && (
+          <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--theme-accent-2)', opacity: 0.5 }}>
+            <p className="text-xs mb-3 text-center" style={{ color: 'var(--theme-text)', opacity: 0.8 }}>
+              Ces options sont destinées aux utilisateurs expérimentés qui comprennent les concepts de clé privée et de phrase mnémonique.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setMode('import')}
+                className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
+                  mode === 'import' 
+                    ? '' 
+                    : 'hover:opacity-100'
+                }`}
+                style={mode === 'import' 
+                  ? { 
+                      backgroundColor: 'var(--theme-accent)', 
+                      color: 'var(--theme-text)',
+                      opacity: 0.5
+                    }
+                  : { 
+                      color: 'var(--theme-text)', 
+                      backgroundColor: 'transparent',
+                      opacity: 0.7
+                    }
+                }
+                onMouseEnter={(e) => {
+                  if (mode !== 'import') {
+                    e.currentTarget.style.backgroundColor = 'var(--theme-accent)';
+                    e.currentTarget.style.opacity = '0.3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (mode !== 'import') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.opacity = '0.7';
+                  }
+                }}
+              >
+                📥 {t.import}
+              </button>
+              <button
+                onClick={() => setMode('restore')}
+                className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
+                  mode === 'restore' 
+                    ? '' 
+                    : 'hover:opacity-100'
+                }`}
+                style={mode === 'restore' 
+                  ? { 
+                      backgroundColor: 'var(--theme-accent)', 
+                      color: 'var(--theme-text)',
+                      opacity: 0.5
+                    }
+                  : { 
+                      color: 'var(--theme-text)', 
+                      backgroundColor: 'transparent',
+                      opacity: 0.7
+                    }
+                }
+                onMouseEnter={(e) => {
+                  if (mode !== 'restore') {
+                    e.currentTarget.style.backgroundColor = 'var(--theme-accent)';
+                    e.currentTarget.style.opacity = '0.3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (mode !== 'restore') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.opacity = '0.7';
+                  }
+                }}
+              >
+                🔄 {t.restore}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages d'erreur et de succès */}
       {error && (
-        <div className="bg-[#fcd6c5] border-l-4 border-[#59507b] p-4 rounded-lg mb-6">
+        <div className="border-l-4 p-4 rounded-lg mb-6"
+             style={{
+               backgroundColor: 'var(--theme-accent)',
+               borderLeftColor: 'var(--theme-secondary)'
+             }}>
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-[#59507b]" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5" style={{ color: 'var(--theme-text)' }} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-[#59507b]">{error}</p>
+              <p className="text-sm" style={{ color: 'var(--theme-text)' }}>{error}</p>
             </div>
           </div>
         </div>
       )}
       
       {success && (
-        <div className="bg-[#d8d0f3] border-l-4 border-[#59507b] p-4 rounded-lg mb-6">
+        <div className="border-l-4 p-4 rounded-lg mb-6"
+             style={{
+               backgroundColor: 'var(--theme-primary)',
+               borderLeftColor: 'var(--theme-secondary)'
+             }}>
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-[#59507b]" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5" style={{ color: 'var(--theme-text)' }} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-[#59507b]">{success}</p>
+              <p className="text-sm" style={{ color: 'var(--theme-text)' }}>{success}</p>
             </div>
           </div>
         </div>
@@ -334,7 +481,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             <button
               onClick={handleCreateWallet}
               disabled={loading || !passwordValidation.isValid}
-              className="w-full bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-base"
+              className="w-full py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] text-base text-white"
+              style={{
+                background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+              }}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -523,7 +673,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-base"
+              className="w-full py-3 px-4 sm:px-6 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] text-base text-white"
+              style={{
+                background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+              }}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -560,7 +713,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               </div>
               <button
                 onClick={() => setShowMnemonic(false)}
-                className="mt-4 bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white px-4 sm:px-6 py-2 rounded-xl font-medium hover:from-[#59507b] hover:to-[#d8d0f3] transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base"
+                className="mt-4 px-4 sm:px-6 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] text-sm sm:text-base text-white"
+                style={{
+                  background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+                }}
               >
                 t.savePhraseSecurely
               </button>

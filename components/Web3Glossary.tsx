@@ -127,7 +127,10 @@ export default function Web3Glossary() {
     <div className="fixed bottom-4 right-4 z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+        className="px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 text-white"
+        style={{
+          background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
+        }}
       >
         📚 {language === 'fr' ? 'Glossaire Web3' : 'Web3 Glossary'}
         <svg 
@@ -141,24 +144,32 @@ export default function Web3Glossary() {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-80 max-h-96 bg-white rounded-lg shadow-2xl border border-[#eeddde] overflow-hidden">
-          <div className="p-4 border-b border-[#eeddde]">
+        <div className="absolute bottom-16 right-0 w-80 max-h-96 rounded-lg shadow-2xl border overflow-hidden"
+             style={{
+               backgroundColor: 'var(--theme-background)',
+               borderColor: 'var(--theme-accent-2)'
+             }}>
+          <div className="p-4 border-b" style={{ borderBottomColor: 'var(--theme-accent-2)' }}>
             <input
               type="text"
               placeholder={language === 'fr' ? 'Rechercher un terme...' : 'Search a term...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-[#eeddde] rounded-lg focus:ring-2 focus:ring-[#59507b] focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-sm"
+              style={{
+                borderColor: 'var(--theme-accent-2)',
+                color: 'var(--theme-text)'
+              }}
             />
           </div>
           
           <div className="max-h-80 overflow-y-auto">
             {filteredTerms.map((term, index) => (
-              <div key={index} className="p-3 border-b border-[#eeddde] last:border-b-0">
-                <h4 className="font-semibold text-[#59507b] text-sm">{term.term}</h4>
-                <p className="text-xs text-[#59507b] mt-1 leading-relaxed">{term.definition}</p>
+              <div key={index} className="p-3 border-b last:border-b-0" style={{ borderBottomColor: 'var(--theme-accent-2)' }}>
+                <h4 className="font-semibold text-sm" style={{ color: 'var(--theme-text)' }}>{term.term}</h4>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--theme-text)' }}>{term.definition}</p>
                 {term.example && (
-                  <p className="text-xs text-[#59507b] mt-1 italic opacity-70">
+                  <p className="text-xs mt-1 italic opacity-70" style={{ color: 'var(--theme-text)' }}>
                     💡 {term.example}
                   </p>
                 )}
