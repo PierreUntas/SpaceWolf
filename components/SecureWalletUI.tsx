@@ -14,7 +14,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   const { t } = useLanguage();
   
   // États pour l'interface
-  const [mode, setMode] = useState<'create' | 'import' | 'restore' | 'login'>('create');
+  const [mode, setMode] = useState<'create' | 'import' | 'restore' | 'login'>('login');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mnemonic, setMnemonic] = useState('');
@@ -27,6 +27,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   // États pour la validation
   const [passwordValidation, setPasswordValidation] = useState<{ isValid: boolean; score: number; feedback: string[] }>({ isValid: false, score: 0, feedback: [] });
   const [savedWallets, setSavedWallets] = useState<string[]>([]);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showMnemonic, setShowMnemonic] = useState(false);
   const [generatedMnemonic, setGeneratedMnemonic] = useState('');
 
@@ -183,7 +184,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-2 sm:p-4 lg:p-8 bg-[#d8d0f3]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#eeddde]/20 overflow-x-hidden">
+    <div className="w-full max-w-md mx-auto p-2 sm:p-4 lg:p-8 bg-[#d8d0f3]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#eeddde]/20 overflow-x-hidden">
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#59507b] to-[#d8d0f3] rounded-2xl mb-4">
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,48 +197,75 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
         <p className="text-[#59507b] mt-2">{t.secureWalletDescription}</p>
       </div>
       
-      {/* Navigation des modes */}
-      <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 mb-6 sm:mb-8 bg-[#eeddde] rounded-xl p-1">
-        <button
-          onClick={() => setMode('create')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'create' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.create}
-        </button>
-        <button
-          onClick={() => setMode('import')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'import' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.import}
-        </button>
-        <button
-          onClick={() => setMode('restore')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'restore' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.restore}
-        </button>
-        <button
-          onClick={() => setMode('login')}
-          className={`flex-1 px-3 sm:px-4 py-3 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-            mode === 'login' 
-              ? 'bg-[#fcd6c5] text-[#59507b] shadow-sm' 
-              : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/50'
-          }`}
-        >
-          {t.login}
-        </button>
+      {/* Navigation des modes - Interface simplifiée */}
+      <div className="mb-6 sm:mb-8">
+        {/* Boutons principaux */}
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
+          {/* Bouton Connexion - Principal */}
+          <button
+            onClick={() => setMode('login')}
+            className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
+              mode === 'login' 
+                ? 'bg-gradient-to-r from-[#59507b] to-[#d8d0f3] text-white shadow-lg transform scale-[1.02]' 
+                : 'text-[#59507b] hover:text-white hover:bg-gradient-to-r hover:from-[#59507b] hover:to-[#d8d0f3] hover:shadow-md border-2 border-[#59507b]'
+            }`}
+          >
+            🔑 {t.login}
+          </button>
+          
+          {/* Bouton Création - Secondaire */}
+          <button
+            onClick={() => setMode('create')}
+            className={`flex-1 min-w-[140px] px-4 sm:px-6 py-4 sm:py-4 rounded-xl font-semibold transition-all duration-200 text-base sm:text-lg ${
+              mode === 'create' 
+                ? 'bg-gradient-to-r from-[#fcd6c5] to-[#eeddde] text-[#59507b] shadow-md' 
+                : 'text-[#59507b] hover:text-[#59507b] hover:bg-[#fcd6c5]/70 border-2 border-[#fcd6c5]'
+            }`}
+          >
+            ✨ {t.create}
+          </button>
+        </div>
+        
+        {/* Bouton pour révéler les options avancées */}
+        <div className="text-center">
+          <button
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className="text-sm text-[#59507b]/70 hover:text-[#59507b] hover:underline transition-colors duration-200"
+          >
+            {showAdvancedOptions ? 'Masquer les options avancées' : 'Options avancées (Import/Restore)'}
+          </button>
+        </div>
+        
+        {/* Options avancées - Masquées par défaut */}
+        {showAdvancedOptions && (
+          <div className="mt-4 p-3 bg-[#eeddde]/50 rounded-lg">
+            <p className="text-xs text-[#59507b]/80 mb-3 text-center">
+              Ces options sont destinées aux utilisateurs expérimentés qui comprennent les concepts de clé privée et de phrase mnémonique.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setMode('import')}
+                className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
+                  mode === 'import' 
+                    ? 'bg-[#fcd6c5]/50 text-[#59507b]' 
+                    : 'text-[#59507b]/70 hover:text-[#59507b] hover:bg-[#fcd6c5]/30'
+                }`}
+              >
+                📥 {t.import}
+              </button>
+              <button
+                onClick={() => setMode('restore')}
+                className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm opacity-70 ${
+                  mode === 'restore' 
+                    ? 'bg-[#fcd6c5]/50 text-[#59507b]' 
+                    : 'text-[#59507b]/70 hover:text-[#59507b] hover:bg-[#fcd6c5]/30'
+                }`}
+              >
+                🔄 {t.restore}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages d'erreur et de succès */}
