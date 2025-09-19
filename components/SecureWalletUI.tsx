@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { secureWalletManager } from '../lib/secureWallet';
 import { ethers } from 'ethers';
 import { useLanguage } from '../lib/LanguageContext';
@@ -24,6 +24,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
+  // Références sécurisées pour les mots de passe
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement>(null);
+  
   // États pour la validation
   const [passwordValidation, setPasswordValidation] = useState<{ isValid: boolean; score: number; feedback: string[] }>({ isValid: false, score: 0, feedback: [] });
   const [savedWallets, setSavedWallets] = useState<string[]>([]);
@@ -36,10 +40,22 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
     initializeSecureWallet();
   }, []);
 
+  // Fonctions sécurisées pour gérer les mots de passe
+  const getPasswordValue = () => passwordRef.current?.value || '';
+  const getConfirmPasswordValue = () => confirmPasswordRef.current?.value || '';
+  
+  const clearPasswordFields = () => {
+    if (passwordRef.current) passwordRef.current.value = '';
+    if (confirmPasswordRef.current) confirmPasswordRef.current.value = '';
+    setPassword('');
+    setConfirmPassword('');
+  };
+
   // Valider le mot de passe en temps réel
   useEffect(() => {
-    if (password) {
-      const validation = secureWalletManager.validatePassword(password);
+    const currentPassword = getPasswordValue();
+    if (currentPassword) {
+      const validation = secureWalletManager.validatePassword(currentPassword);
       setPasswordValidation(validation);
     }
   }, [password]);
@@ -55,7 +71,10 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const handleCreateWallet = async () => {
-    if (!password || password !== confirmPassword) {
+    const currentPassword = getPasswordValue();
+    const currentConfirmPassword = getConfirmPasswordValue();
+    
+    if (!currentPassword || currentPassword !== currentConfirmPassword) {
       setError(t.passwordsDoNotMatch);
       return;
     }
@@ -69,7 +88,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
     setError(null);
 
     try {
-      const walletData = await secureWalletManager.createSecureWallet(password);
+      const walletData = await secureWalletManager.createSecureWallet(currentPassword);
       
       setGeneratedMnemonic(walletData.mnemonic || '');
       setShowMnemonic(true);
@@ -79,6 +98,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
       
+      // Effacer les champs de mot de passe après utilisation
+      clearPasswordFields();
+      
     } catch (err) {
       setError(t.creationError + ': ' + (err as Error).message);
     } finally {
@@ -87,7 +109,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const handleImportWallet = async () => {
-    if (!privateKey.trim() || !password) {
+    const currentPassword = getPasswordValue();
+    
+    if (!privateKey.trim() || !currentPassword) {
       setError(t.fillAllFields);
       return;
     }
@@ -103,13 +127,17 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       await secureWalletManager.saveSecureWallet({
         privateKey: wallet.privateKey,
         address: wallet.address
-      }, password);
+      }, currentPassword);
       
       setSuccess(t.walletImportedSuccess);
       
       // Charger la liste des wallets
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
+      
+      // Effacer les champs après utilisation
+      clearPasswordFields();
+      setPrivateKey('');
       
     } catch (err) {
       setError(t.importError + ': ' + (err as Error).message);
@@ -119,7 +147,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const handleRestoreWallet = async () => {
-    if (!mnemonic.trim() || !password) {
+    const currentPassword = getPasswordValue();
+    
+    if (!mnemonic.trim() || !currentPassword) {
       setError(t.fillAllFields);
       return;
     }
@@ -128,12 +158,16 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
     setError(null);
 
     try {
-      const walletData = await secureWalletManager.restoreFromMnemonic(mnemonic.trim(), password);
+      const walletData = await secureWalletManager.restoreFromMnemonic(mnemonic.trim(), currentPassword);
       setSuccess(t.walletRestoredSuccess);
       
       // Charger la liste des wallets
       const wallets = await secureWalletManager.listSavedWallets();
       setSavedWallets(wallets);
+      
+      // Effacer les champs après utilisation
+      clearPasswordFields();
+      setMnemonic('');
       
     } catch (err) {
       setError(t.restoreError + ': ' + (err as Error).message);
@@ -143,7 +177,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
   };
 
   const handleLogin = async () => {
-    if (!selectedAddress || !password) {
+    const currentPassword = getPasswordValue();
+    
+    if (!selectedAddress || !currentPassword) {
       setError(t.selectWalletAndPassword);
       return;
     }
@@ -152,7 +188,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
     setError(null);
 
     try {
-      const walletData = await secureWalletManager.loadSecureWallet(selectedAddress, password);
+      const walletData = await secureWalletManager.loadSecureWallet(selectedAddress, currentPassword);
       const wallet = new ethers.Wallet(walletData.privateKey);
       
       // Enregistrer l'activité pour le système de sessions
@@ -160,6 +196,9 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
       
       onWalletConnected(wallet);
       setSuccess(t.loginSuccess);
+      
+      // Effacer le champ de mot de passe après utilisation
+      clearPasswordFields();
       
     } catch (err) {
       setError(t.connectionError + ': ' + (err as Error).message);
@@ -431,11 +470,12 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               <label className="block text-sm font-medium text-[#59507b] mb-2">{t.password}</label>
               <div className="relative">
                 <input
+                  ref={passwordRef}
                   type="password"
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
                   placeholder={t.securePassword}
+                  autoComplete="new-password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,11 +504,12 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               <label className="block text-sm font-medium text-[#59507b] mb-2">{t.confirmPassword}</label>
               <div className="relative">
                 <input
+                  ref={confirmPasswordRef}
                   type="password"
-                  value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
                   placeholder={t.confirmSecurePassword}
+                  autoComplete="new-password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,11 +567,12 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               <label className="block text-sm font-medium text-[#59507b] mb-2">Mot de passe</label>
               <div className="relative">
                 <input
+                  ref={passwordRef}
                   type="password"
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
                   placeholder={t.passwordToEncrypt}
+                  autoComplete="current-password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -585,11 +627,12 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               <label className="block text-sm font-medium text-[#59507b] mb-2">Mot de passe</label>
               <div className="relative">
                 <input
+                  ref={passwordRef}
                   type="password"
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
                   placeholder={t.passwordToEncrypt}
+                  autoComplete="current-password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -656,11 +699,12 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
               <label className="block text-sm font-medium text-[#59507b] mb-2">Mot de passe</label>
               <div className="relative">
                 <input
+                  ref={passwordRef}
                   type="password"
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3 sm:px-4 py-3 border border-[#eeddde] rounded-xl focus:ring-2 focus:ring-[#59507b] focus:border-transparent transition-all duration-200 text-base"
                   placeholder={t.walletPassword}
+                  autoComplete="current-password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-[#59507b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
