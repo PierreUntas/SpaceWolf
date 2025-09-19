@@ -762,7 +762,7 @@ export default function SecureWalletUI({ onWalletConnected, onWalletDisconnected
                   background: 'linear-gradient(to right, var(--theme-secondary), var(--theme-primary))'
                 }}
               >
-                t.savePhraseSecurely
+                {t.savePhraseSecurely}
               </button>
             </div>
           </div>
