@@ -35,7 +35,7 @@ export default function SecurityTestPanel() {
     addResult('\n2. Test de validation des mots de passe:');
     const testPasswords = [
       { pwd: 'weak', desc: 'Trop faible' },
-      { pwd: 'Password123', desc: 'Moyen' },
+      { pwd: 'TestP@ssw0rd123', desc: 'Moyen' },
       { pwd: 'StrongP@ssw0rd2024!', desc: 'Fort' },
       { pwd: 'password', desc: 'Mot commun' },
     ];
